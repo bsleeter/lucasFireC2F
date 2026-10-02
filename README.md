@@ -47,6 +47,9 @@ git clone https://github.com/bsleeter/lucasFireC2F.git
 in place, and a `git pull` that keeps the same version number takes effect the next time a scenario runs. (Without git,
 GitHub's *Code > Download ZIP*, unzipped to a permanent folder, works the same way.)
 
+Both routes are also buttons in Studio: *File > Local Packages* has **Install from File...** (A) and **Install from
+Folder...** (B), shown in section 1.1 of the user guide.
+
 Either way, check the install with `SyncroSim.PackageManager.exe --installed`, which should list lucasFireC2F with status
 OK. Then, in Studio, create a library, add the lucasFireC2F package, turn SyncroSim multiprocessing off (the package
 parallelises fire growth itself) and point the library at your R installation. Chapter 1 of the user guide shows each step.

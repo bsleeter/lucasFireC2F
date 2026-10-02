@@ -14,7 +14,7 @@ It is for modelers who know SyncroSim's basics (libraries, projects, scenarios, 
 - **Scenario descriptions.** Every scenario gets a written description (Properties, Description) recording its purpose, dependencies, key settings and assumptions. Chapter 9 gives a template per scenario type; chapters 3 to 5 show the P18 versions.
 - **Names and folders.** A single-zone library needs no folders; a library holding several zones uses one folder per zone (Chapter 8). Scenarios are named `<zone> - <step>`, with the zone's full name, for example `P18 Southern Cascades - Prep`, `P18 Southern Cascades - Calibrate`, `P18 Southern Cascades - Run`. SyncroSim names results after their parent with a run time stamp.
 - **Result IDs.** Dependencies point at results, not at the scenarios that made them. Write down each result's ID as you go; later steps ask for them.
-- **Package version.** Written for lucasFireC2F 1.8.0 on SyncroSim 3.1.
+- **Package version.** Written for lucasFireC2F 2.3.0 on SyncroSim 3.1.
 
 **The workflow in one line.** Prep (P1-P5) → Calibrate (C1-C3, seed run, C5, C6) → Run (stages 1-8, C6, C7, optionally R) → optionally Merge (stage M) with neighbouring zones.
 
@@ -26,18 +26,37 @@ A lucasFireC2F model lives in a SyncroSim library (`.ssim` file) that uses the l
 
 - SyncroSim Studio 3.1 or later, installed in `C:\Program Files\SyncroSim`.
 - R 4.6 with the packages rsyncrosim, terra, sf, data.table, arrow, mgcv and jsonlite. SyncroSim runs every stage in R.
-- The lucasFireC2F package installed (File, Local Packages lists it with status OK).
+- The lucasFireC2F package installed (section 1.1).
 - The national data on a local drive (Chapter 2 lists each file).
 
-### 1.1 Open SyncroSim Studio
+### 1.1 Install the package
+
+SyncroSim keeps one list of installed packages for the whole computer. A package is installed once, then added to each library that uses it (1.5). Check the list first, from the **File** menu:
+
+1. Open the **File** menu.
+2. Click **Local Packages**. The Local Packages tab lists every installed package and its version.
+3. If **lucasFireC2F** is listed with the version you want (2.3.0 here), go on to 1.2.
+
+![File, Local Packages: every package installed on this computer, lucasFireC2F 2.3.0 among them. The install buttons are along the bottom.](figures/01-00-local-packages.png)
+
+Otherwise install it with one of the buttons along the bottom of the tab:
+
+- **Install from File...** installs a release file, `lucasFireC2F-<version>.ssimpkg`, from the repository's Releases page. SyncroSim copies the package into its own package folder, so the downloaded file can be deleted afterwards.
+- **Install from Folder...** installs a copy of the repository, https://github.com/bsleeter/lucasFireC2F, cloned with git or downloaded with *Code, Download ZIP* and unzipped. SyncroSim runs the package from that folder rather than copying it, so leave the folder where it is. Changes pulled into it take effect the next time a scenario runs.
+
+**Install from Server...** lists the packages in SyncroSim's online repository; lucasFireC2F is not published there. The repository's README gives the same two routes from the command line, and how to move a library to a new version.
+
+> **Several versions side by side.** SyncroSim can hold several versions of a package at once (the screenshot has two of burnP3Plus and of stsim), and each library uses the version it was given. Installing a new version of lucasFireC2F does not change existing libraries until they are upgraded.
+
+### 1.2 Open SyncroSim Studio
 
 Start SyncroSim Studio. If a library opened last time, it appears in the Explorer on the left; that does not matter here.
 
 ![SyncroSim Studio after start-up. The Multiprocessing control (outlined) must be off for lucasFireC2F runs.](figures/01-00-studio-window.png)
 
-> **Turn Multiprocessing off.** lucasFireC2F parallelises fire growth itself, across all cores but one. SyncroSim's own Multiprocessing splits a scenario into separate jobs, which this package cannot use; a run started with it on stops at once with a message saying so. The toolbar box (outlined) only shows the maximum number of jobs; whether multiprocessing is on is set in the library's System tab (step 1.6).
+> **Turn Multiprocessing off.** lucasFireC2F parallelises fire growth itself, across all cores but one. SyncroSim's own Multiprocessing splits a scenario into separate jobs, which this package cannot use; a run started with it on stops at once with a message saying so. The toolbar box (outlined) only shows the maximum number of jobs; whether multiprocessing is on is set in the library's System tab (step 1.7).
 
-### 1.2 Create an empty library
+### 1.3 Create an empty library
 
 1. Open the **File** menu.
 2. Point to **New**.
@@ -45,13 +64,13 @@ Start SyncroSim Studio. If a library opened last time, it appears in the Explore
 
 ![File, New, Empty Library.](figures/01-01-file-new-empty-library.png)
 
-### 1.3 Name and save the library
+### 1.4 Name and save the library
 
 Studio asks where to save the new library. This guide uses `lucasFireC2F-Demo.ssim`. SyncroSim writes the library file plus two folders beside it, `lucasFireC2F-Demo.ssim.data` (every map and table the runs produce, several GB per zone) and `lucasFireC2F-Demo.ssim.temp`, so pick a drive with room.
 
 The new library opens with one project, **Definitions**, and one empty scenario, **\[1\] New Scenario**.
 
-### 1.4 Add the lucasFireC2F package
+### 1.5 Add the lucasFireC2F package
 
 A new library has no packages. Add lucasFireC2F from the library's properties.
 
@@ -69,7 +88,7 @@ The Add Package dialog lists every package SyncroSim can see: installed ones (pa
 
 ![The Add Package dialog with lucasFireC2F ticked.](figures/01-04-add-package.png)
 
-### 1.5 Check the package
+### 1.6 Check the package
 
 The Packages list now shows lucasFireC2F with its version. Leave **Conda** unticked: lucasFireC2F uses the R installation SyncroSim finds, not a Conda environment.
 
@@ -79,7 +98,7 @@ The Packages list now shows lucasFireC2F with its version. Leave **Conda** untic
 
 Save the library (File, Save, or Ctrl+S) after adding the package. Studio then loads the package's datasheets, and the project and scenario gain the lucasFireC2F properties used from Chapter 2 on.
 
-### 1.6 Library system settings
+### 1.7 Library system settings
 
 Two library settings matter for lucasFireC2F: multiprocessing must be off, and SyncroSim must find the R installation that has the required packages. Both are on the library properties' **System** tab.
 
@@ -102,7 +121,7 @@ Two library settings matter for lucasFireC2F: multiprocessing must be off, and S
 
 Save the library.
 
-### 1.7 Rename and describe the project
+### 1.8 Rename and describe the project
 
 A library holds one or more projects; everything lucasFireC2F shares between scenarios (Data Sources, Fire and Weather Zones, fuel tables) is project data. Give the default project a real name and a description.
 
@@ -127,7 +146,7 @@ Save the library.
 
 > **Folders.** This library models one zone, so its scenarios sit directly under the project. A library that holds several zones (for example, several pyromes to be merged with stage M) keeps each zone's scenarios in their own folder: right-click the project, **New Folder**, name it after the zone. Chapter 8 covers that layout.
 
-### 1.8 The stage list
+### 1.9 The stage list
 
 The project properties' **General, Pipeline** page lists every stage the package defines: 22 in all since version 2.3.0 added **R - Report Figures (optional)** (the screenshot, taken earlier, shows 21). They are sorted by internal name (Stage Name) with the name you see in pipelines beside it (Stage Description). It is a catalog, not a run order, and it cannot be edited. Each scenario picks its own stages and their order in its own **Pipeline** sheet; a new scenario's pipeline is empty, and nothing runs until you fill it.
 
@@ -703,7 +722,7 @@ When the run finishes, open **Run Log** and read it from the top. Each stage rep
 | P4 | `2021: 2,351,260 burned 30 m pixels`, `2023: 0`, `2024: 0` | Which fire years the severity target rests on (below) |
 | P5 | `655,233 from 28 stations`, `overall median ratio 0.65` | Enough stations and hours; per-station medians listed |
 
-Two warnings at the top of the log are harmless: that the package was built for an undetermined SyncroSim version, and that conda is disabled (lucasFireC2F uses the R set in 1.6).
+Two warnings at the top of the log are harmless: that the package was built for an undetermined SyncroSim version, and that conda is disabled (lucasFireC2F uses the R set in 1.7).
 
 > **What this P18 log shows.** Two things are worth noting, neither of which stops the model. (1) The severity target is almost entirely 2021, the year of the Dixie Fire: 2,351,260 of 2,352,228 burned pixels. The 2023 and 2024 MTBS mosaics in this release have no burned pixels in P18. The class shares therefore describe one extreme fire year. (2) One RAWS station, Panther Springs, has a median ratio of 0.00: most of its afternoon hours that pass the quality flag read 0 mph, a sheltered or faulty anemometer. It contributes a few percent of the hours and slightly lowers the bottom of the wind table.
 
