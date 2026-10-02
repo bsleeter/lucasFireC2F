@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<update comment="1.8.0: active crown fire needs a closed canopy (EffectsOption.MinimumCanopyCoverActive, default 40%); below it a crown fire can only torch.">
+  <action code="Exec" condition="TableExists" criteria="lucasFireC2F_EffectsOption">
+    <item>ALTER TABLE lucasFireC2F_EffectsOption ADD COLUMN MinimumCanopyCoverActive DOUBLE</item>
+  </action>
+</update>

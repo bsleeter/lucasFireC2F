@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<update comment="1.2.0: zone merging (MergeSource sheet, M - Merge Zone Results stage; new tables are created automatically) and a per-zone Burning-Period Wind Ratio Table (FireZone column)">
+  <action code="Exec" condition="TableExists" criteria="lucasFireC2F_WindRatio">
+    <item>ALTER TABLE lucasFireC2F_WindRatio ADD COLUMN FireZone INTEGER</item>
+  </action>
+</update>

@@ -1,0 +1,7 @@
+grp,obs_n,obs_fires,obs_med_mh,obs_p75_mh,mod_steps,mod_med_mmin,obs_rel_grass,mod_rel_grass
+Grass,1209,19,123,405,604219,15.15,1,1
+Grass-Shrub,2001,24,45,110,537255,10,0.37,0.66
+Shrub,1706,23,108,371,443992,13.64,0.88,0.9
+Slash-Blowdown,,,,,48,11.54,,0.76
+Timber Litter,4444,26,38,87,87578,2.54,0.31,0.17
+Timber-Understory,19347,27,42,103,851486,5.17,0.34,0.34

@@ -1,0 +1,10 @@
+# Rerun an existing merge scenario (stage M + 5-8) after setting its description. Usage: Rscript rerun_merge.R "<library>" <scenario id> "<description file>"
+suppressPackageStartupMessages(library(rsyncrosim))
+a <- commandArgs(TRUE); L <- suppressWarnings(ssimLibrary(a[1])); S <- rsyncrosim::scenario(L, as.integer(a[2])); P <- rsyncrosim::project(L, 1)
+description(S) <- paste(readLines(a[3], warn = FALSE), collapse = "\n"); cat("description set (", nchar(description(S)), "chars )\n")
+cat("EffectsOption columns:", paste(names(datasheet(S, "lucasFireC2F_EffectsOption", optional = TRUE)), collapse = ", "), "\n")
+t0 <- Sys.time(); tryCatch(run(S), error = function(e) cat("run error:", conditionMessage(e), "\n"))
+R <- rsyncrosim::scenario(L, max(rsyncrosim::scenario(P)[, "ScenarioId"]))
+lg <- sub(" +$", "", strsplit(paste(unlist(runLog(R)), collapse = "\n"), "\n")[[1]])
+cat(unique(grep("source [0-9]|merged:|burn events|active crown|wind:|crown +[0-9]|risk|cRPS|severity|Failure|Error|error", lg, value = TRUE)), sep = "\n")
+cat(sprintf("\n%.1f min; RESULT_SCENARIO %d\n", as.numeric(difftime(Sys.time(), t0, units = "mins")), scenarioId(R)))

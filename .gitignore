@@ -1,0 +1,43 @@
+# SyncroSim libraries and run data
+*.ssim
+*.ssim.data/
+*.ssim.temp/
+*.ssim.input/
+*.ssim.output/
+# R / OS
+.Rhistory
+.RData
+.Rproj.user/
+Thumbs.db
+*.log
+
+# statewide input data (GBs; paths set in Data Sources)
+Data/
+
+# development outputs: keep the scripts, not what they write
+dev/**/*.tif
+dev/**/*.tif.aux.xml
+dev/**/*.rds
+dev/**/*.rds.bak
+dev/**/*.parquet
+dev/**/*.gpkg
+dev/**/*.png
+dev/**/*.pdf
+dev/**/out*/
+dev/conus/cov_test/
+dev/paper/figures*/
+dev/paper/tables*/
+dev/paper/logs*/
+# package.xml snapshots and backups from before version control
+dev/package.xml.v*
+dev/*.staged
+*.bak
+
+# user guide: screen captures and unused figures (the guide itself and the figures it links are kept)
+docs/user-guide/screens/
+docs/user-guide/figures/report2011/
+docs/user-guide/figures/01-02b-*
+docs/user-guide/figures/merge/report/Fig1_*
+docs/user-guide/figures/merge/report/Fig3_*
+docs/user-guide/figures/merge/report/Fig4_*
+docs/user-guide/figures/merge/report/Fig7_*

@@ -1,0 +1,7 @@
+"Name","ID","LowerFt","UpperFt","Description"
+"FIL1",1,0,2,"< 2 ft"
+"FIL2",2,2,4,"2-4 ft"
+"FIL3",3,4,6,"4-6 ft"
+"FIL4",4,6,8,"6-8 ft"
+"FIL5",5,8,12,"8-12 ft"
+"FIL6",6,12,,"> 12 ft"

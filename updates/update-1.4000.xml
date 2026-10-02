@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<update comment="1.4.0: P2 - Fit Ignition Surfaces (in-package ignition fit on LANDFIRE FBFM40 fuel groups; Ignition Surface Fit output). New tables and stages are registered by this update.">
+  <action code="Exec" condition="TableExists" criteria="lucasFireC2F_IgnitionGrid">
+    <item>UPDATE lucasFireC2F_IgnitionGrid SET FileName = FileName WHERE 0</item>
+  </action>
+</update>

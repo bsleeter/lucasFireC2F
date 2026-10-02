@@ -1,0 +1,5 @@
+"Name","ID","Moisture1h","Moisture10h","Moisture100h","MoistureLiveHerb","MoistureLiveWoody","Description"
+"D1L1",1,3,4,5,30,60,"Very dry dead FM, fully cured herb"
+"D2L2",2,6,7,8,60,90,"Dry dead FM, 2/3 cured herb"
+"D3L3",3,9,10,11,90,120,"Moderate dead FM 1/3 cured herb"
+"D4L4",4,12,13,14,120,150,"High dead FM, uncured herb"

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<update comment="2.3.0: stage R - Report Figures (optional, last in a Run pipeline): report figures of a run as PNG (Report Figures output, exported from the Export tab) and chart tables for the Charts tab (fires and area by size class, spread days, spatial skill by period). New tables and the stage are registered by this update.">
+  <action code="Exec" condition="TableExists" criteria="lucasFireC2F_OutputScore">
+    <item>UPDATE lucasFireC2F_OutputScore SET Test = Test WHERE 0</item>
+  </action>
+</update>

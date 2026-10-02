@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<update comment="1.9.0: stage P5 - Burning-Period Wind (RAWS) builds the zone wind ratio table from FEMS RAWS hourly records (replaces the Build Wind Table utility stub); Data Sources RawsCatalogueFile; Wind Table Options BufferKm and DownloadMissing.">
+  <action code="Exec" condition="TableExists" criteria="lucasFireC2F_DataSource">
+    <item>ALTER TABLE lucasFireC2F_DataSource ADD COLUMN RawsCatalogueFile TEXT</item>
+  </action>
+  <action code="Exec" condition="TableExists" criteria="lucasFireC2F_WindTableOption">
+    <item>ALTER TABLE lucasFireC2F_WindTableOption ADD COLUMN BufferKm DOUBLE</item>
+    <item>ALTER TABLE lucasFireC2F_WindTableOption ADD COLUMN DownloadMissing INTEGER</item>
+  </action>
+</update>

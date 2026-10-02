@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<update comment="1.6.0: spread days fitted by cause, origin vegetation or both (CalibrationOption.SpreadDaysBy; Vegetation on Spread-Day Distribution and the calibration outputs); Vegetation Classes (project); P1 writes a vegetation map from LANDFIRE BpS (Data Sources BpsFile; Landscape Maps VegetationFileName). New tables are created automatically.">
+  <action code="Exec" condition="TableExists" criteria="lucasFireC2F_CalibrationOption">
+    <item>ALTER TABLE lucasFireC2F_CalibrationOption ADD COLUMN SpreadDaysBy INTEGER</item>
+  </action>
+  <action code="Exec" condition="TableExists" criteria="lucasFireC2F_SpreadDays">
+    <item>ALTER TABLE lucasFireC2F_SpreadDays ADD COLUMN Vegetation INTEGER</item>
+  </action>
+  <action code="Exec" condition="TableExists" criteria="lucasFireC2F_OutputCalibrationFit">
+    <item>ALTER TABLE lucasFireC2F_OutputCalibrationFit ADD COLUMN Vegetation TEXT</item>
+  </action>
+  <action code="Exec" condition="TableExists" criteria="lucasFireC2F_OutputCalibrationSummary">
+    <item>ALTER TABLE lucasFireC2F_OutputCalibrationSummary ADD COLUMN Vegetation TEXT</item>
+  </action>
+  <action code="Exec" condition="TableExists" criteria="lucasFireC2F_LandscapeRasters">
+    <item>ALTER TABLE lucasFireC2F_LandscapeRasters ADD COLUMN VegetationFileName TEXT</item>
+  </action>
+  <action code="Exec" condition="TableExists" criteria="lucasFireC2F_DataSource">
+    <item>ALTER TABLE lucasFireC2F_DataSource ADD COLUMN BpsFile TEXT</item>
+  </action>
+</update>

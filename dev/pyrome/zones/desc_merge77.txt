@@ -1,0 +1,11 @@
+Merged Sierra Nevada & Foothills product (pyromes 26, 27, 28, 29), lucasFireC2F 1.8.0.
+Pipeline: M - Merge Zone Results, 5 Summarize Burn Probability, 6 Fire Effects, 7 Hazard and Risk, 8 Fire Detail. No fire is regrown.
+Merge Sources (this library): P26 result 54, P27 result 58, P28 result 76, P29 result 72; 2,500 seasons each; Fire ID offsets 0 / 1,000,000 / 2,000,000 / 3,000,000.
+Stage M pools each zone's KEPT fires season by season (each zone keeps its own resampling to its own FSim threshold), remaps cells to the union 150 m grid, and tags each fire's burning-period wind table by zone. Burn probability counts a cell once per season wherever the fire burned, so fire started in one zone counts in its neighbours (each zone ran over its zone plus a 25 km buffer).
+Zone models (all LANDFIRE 2020 fuels at 150 m, recent-fire rules 0-2 yr NB9 / 3-5 TL1 / 6-10 TL8, die-off fuel rule, TL/GS engine remaps, large-fire (>= 405 ha) ignition surfaces, within-stratum replacement, pool 1.25):
+- P26 (53 -> 54): spread days by cause x origin vegetation with the 1.7.0 vegetation-group fall-back (C5 refit 52 on seed run 34), 2 h/day, threshold 36.8 ha.
+- P27 (57 -> 58): cause x origin vegetation, vegetation-group fall-back (refit 56 on seed run 26), 2 h/day, threshold 56.7 ha.
+- P28 (75 -> 76): ONE pooled spread-day curve (refit 74 on seed run 42), 1 h/day, threshold 31.1 ha, wind table borrowed from P29.
+- P29 (71 -> 72): ONE pooled spread-day curve (refit 70 on seed run 66), 1 h/day, threshold 29.5 ha.
+Fire Effects Options left empty = package defaults: observed RAWS burning-period wind ratio, Cruz et al. 2005 active crown spread, canopy base height x 1.5, foliar moisture 85%, and (1.8.0) active crown fire only where canopy cover >= 40% - below it a crown fire can only torch.
+Rerun 2026-09-30 for the 1.8.0 canopy-cover rule; the 1.7.0 run of this scenario is result 78 (burn probability identical, effects without the rule).

@@ -1,0 +1,11 @@
+veg,cause,zone,fires,median_days,p75_days
+Conifer,Human,P26,37,14,22
+Conifer,Missing data/not specified/undetermined,P26,3,19,40.5
+Conifer,Natural,P26,31,41,70
+Hardwood,Human,P26,18,18.5,45.75
+Hardwood,Missing data/not specified/undetermined,P26,1,8,8
+Hardwood,Natural,P26,1,16,16
+Other,Natural,P26,1,58,58
+Shrub,Human,P26,4,5,7.5
+Shrub,Missing data/not specified/undetermined,P26,1,10,10
+Shrub,Natural,P26,6,12.5,14

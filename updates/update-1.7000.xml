@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<update comment="1.7.0: C5 spread-day fall-back through vegetation groups (VegetationClass.FallbackGroup: Forest = Conifer, Hardwood; Non-forest = Shrub, Grass, Other) and a settable minimum of recorded fires per curve (CalibrationOption.MinimumFiresPerCurve, default 25, was a fixed 30).">
+  <action code="Exec" condition="TableExists" criteria="lucasFireC2F_VegetationClass">
+    <item>ALTER TABLE lucasFireC2F_VegetationClass ADD COLUMN FallbackGroup TEXT</item>
+    <item>UPDATE lucasFireC2F_VegetationClass SET FallbackGroup = 'Forest' WHERE Name IN ('Conifer', 'Hardwood')</item>
+    <item>UPDATE lucasFireC2F_VegetationClass SET FallbackGroup = 'Non-forest' WHERE Name IN ('Shrub', 'Grass', 'Other')</item>
+  </action>
+  <action code="Exec" condition="TableExists" criteria="lucasFireC2F_CalibrationOption">
+    <item>ALTER TABLE lucasFireC2F_CalibrationOption ADD COLUMN MinimumFiresPerCurve INTEGER</item>
+  </action>
+</update>

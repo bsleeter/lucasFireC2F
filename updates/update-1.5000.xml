@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<update comment="1.5.0: spread days fitted per cause (Cause column on Spread-Day Distribution and on the two calibration outputs); Workers per Job may be 0 (all cores but one).">
+  <action code="Exec" condition="TableExists" criteria="lucasFireC2F_SpreadDays">
+    <item>ALTER TABLE lucasFireC2F_SpreadDays ADD COLUMN Cause INTEGER</item>
+  </action>
+  <action code="Exec" condition="TableExists" criteria="lucasFireC2F_OutputCalibrationFit">
+    <item>ALTER TABLE lucasFireC2F_OutputCalibrationFit ADD COLUMN Cause TEXT</item>
+  </action>
+  <action code="Exec" condition="TableExists" criteria="lucasFireC2F_OutputCalibrationSummary">
+    <item>ALTER TABLE lucasFireC2F_OutputCalibrationSummary ADD COLUMN Cause TEXT</item>
+  </action>
+</update>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<update comment="2.2.0: ignition covariates anywhere in CONUS. P2 builds its 10 covariates for the fit domain and zone grid (src/covariates.R) when there is no covariate folder. Data Sources RoadsFile, NlcdLandCoverFile, HousingDensityFile, PrismPrecipFile.">
+  <action code="Exec" condition="TableExists" criteria="lucasFireC2F_DataSource">
+    <item>ALTER TABLE lucasFireC2F_DataSource ADD COLUMN RoadsFile TEXT</item>
+    <item>ALTER TABLE lucasFireC2F_DataSource ADD COLUMN NlcdLandCoverFile TEXT</item>
+    <item>ALTER TABLE lucasFireC2F_DataSource ADD COLUMN HousingDensityFile TEXT</item>
+    <item>ALTER TABLE lucasFireC2F_DataSource ADD COLUMN PrismPrecipFile TEXT</item>
+  </action>
+</update>

@@ -1,0 +1,16 @@
+name: lucasFireC2F_env
+channels:
+  - conda-forge
+dependencies:
+  - r-base=4.4
+  - r-rsyncrosim
+  - r-data.table
+  - r-terra
+  - r-sf
+  - r-arrow
+  - r-dbi
+  - r-rsqlite
+  - r-cffdrs
+  - r-jsonlite
+  - r-mgcv
+# Phase A: versions float; pinned (explicit build strings) before the 1.0 release - see the plan's conda risk.

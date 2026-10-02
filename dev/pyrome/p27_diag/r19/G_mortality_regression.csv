@@ -1,0 +1,3 @@
+map,auc_map,auc_plus_mort,auc_plus_mort_hi,mort_coef,mort_odds_x_per_10pct,dAIC
+model,0.624,0.634,0.634,0.694,1.072,2851.333
+WRC,0.876,0.875,0.875,0.989,1.104,4462.177

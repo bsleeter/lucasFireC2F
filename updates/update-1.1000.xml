@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<update comment="1.1.0: metric lists get a Code (the short id the scripts use) and descriptive Names; burn probability maps lose the Season field (overall map only)">
+  <action code="Exec" condition="TableExists" criteria="lucasFireC2F_EffectsMetric">
+    <item>ALTER TABLE lucasFireC2F_EffectsMetric ADD COLUMN Code TEXT</item>
+    <item>UPDATE lucasFireC2F_EffectsMetric SET Code = Name</item>
+    <item>UPDATE lucasFireC2F_EffectsMetric SET Name = 'Flame length, conditional mean (ft)', Description = 'Mean flame length of the burns in the cell, when it burns (ft)' WHERE Code = 'CFL'</item>
+    <item>UPDATE lucasFireC2F_EffectsMetric SET Name = 'Flame length over 4 ft, probability when burning', Description = 'Share of the cell''s burns with flame length above 4 ft (0-1)' WHERE Code = 'FLEP4'</item>
+    <item>UPDATE lucasFireC2F_EffectsMetric SET Name = 'Flame length over 8 ft, probability when burning', Description = 'Share of the cell''s burns with flame length above 8 ft (0-1)' WHERE Code = 'FLEP8'</item>
+    <item>UPDATE lucasFireC2F_EffectsMetric SET Name = 'Flame length class 1 (under 2 ft), probability when burning', Description = 'FSim flame-length class 1: share of burns under 2 ft (0-1)' WHERE Code = 'FLP1'</item>
+    <item>UPDATE lucasFireC2F_EffectsMetric SET Name = 'Flame length class 2 (2-4 ft), probability when burning', Description = 'FSim flame-length class 2: share of burns 2-4 ft (0-1)' WHERE Code = 'FLP2'</item>
+    <item>UPDATE lucasFireC2F_EffectsMetric SET Name = 'Flame length class 3 (4-6 ft), probability when burning', Description = 'FSim flame-length class 3: share of burns 4-6 ft (0-1)' WHERE Code = 'FLP3'</item>
+    <item>UPDATE lucasFireC2F_EffectsMetric SET Name = 'Flame length class 4 (6-8 ft), probability when burning', Description = 'FSim flame-length class 4: share of burns 6-8 ft (0-1)' WHERE Code = 'FLP4'</item>
+    <item>UPDATE lucasFireC2F_EffectsMetric SET Name = 'Flame length class 5 (8-12 ft), probability when burning', Description = 'FSim flame-length class 5: share of burns 8-12 ft (0-1)' WHERE Code = 'FLP5'</item>
+    <item>UPDATE lucasFireC2F_EffectsMetric SET Name = 'Flame length class 6 (over 12 ft), probability when burning', Description = 'FSim flame-length class 6: share of burns above 12 ft (0-1)' WHERE Code = 'FLP6'</item>
+    <item>UPDATE lucasFireC2F_EffectsMetric SET Name = 'Crown fire (passive or active), probability when burning', Description = 'Share of the cell''s burns that crowned, passive or active (0-1)' WHERE Code = 'PCROWN'</item>
+    <item>UPDATE lucasFireC2F_EffectsMetric SET Name = 'Active crown fire, probability when burning', Description = 'Share of the cell''s burns that were active crown fire (0-1)' WHERE Code = 'PACTIVE'</item>
+    <item>UPDATE lucasFireC2F_EffectsMetric SET Name = 'Crown fire, annual probability', Description = 'Burn probability x probability of crown fire when burning (per year)' WHERE Code = 'CROWNBP'</item>
+    <item>UPDATE lucasFireC2F_EffectsMetric SET Name = 'Burn events, count over all seasons', Description = 'Number of times the cell burned over all simulated seasons' WHERE Code = 'BURNS'</item>
+  </action>
+  <action code="Exec" condition="TableExists" criteria="lucasFireC2F_RiskMetric">
+    <item>ALTER TABLE lucasFireC2F_RiskMetric ADD COLUMN Code TEXT</item>
+    <item>UPDATE lucasFireC2F_RiskMetric SET Code = Name</item>
+    <item>UPDATE lucasFireC2F_RiskMetric SET Name = 'High-intensity burn probability (flame length over 8 ft, per year)', Description = 'Burn probability x probability of flame length above 8 ft when burning' WHERE Code = 'HIBP'</item>
+    <item>UPDATE lucasFireC2F_RiskMetric SET Name = 'Risk to potential structures, conditional (% loss if burned)', Description = 'Expected % loss to a structure in the cell if the cell burns (WRC response functions)' WHERE Code = 'CRPS'</item>
+    <item>UPDATE lucasFireC2F_RiskMetric SET Name = 'Risk to potential structures, annual (% loss per year)', Description = 'Burn probability x conditional risk: expected annual % loss, no housing layer' WHERE Code = 'RPS'</item>
+    <item>UPDATE lucasFireC2F_RiskMetric SET Name = 'Risk to potential structures, relative class', Description = 'Percentile class of annual risk across the fire zone: 1 under 40th, 2 40-70th, 3 70-90th, 4 90-95th, 5 over 95th' WHERE Code = 'RPSCLASS'</item>
+  </action>
+  <action code="Exec" condition="TableExists" criteria="lucasFireC2F_SeverityMetric">
+    <item>ALTER TABLE lucasFireC2F_SeverityMetric ADD COLUMN Code TEXT</item>
+    <item>UPDATE lucasFireC2F_SeverityMetric SET Code = Name</item>
+    <item>UPDATE lucasFireC2F_SeverityMetric SET Name = 'Burn severity, MTBS-style class', Description = '0 unburned, 1 unburned-low, 2 low, 3 moderate, 4 high (most severe burn in the season)' WHERE Code = 'MTBS'</item>
+    <item>UPDATE lucasFireC2F_SeverityMetric SET Name = 'Fire type (surface, passive crown, active crown)', Description = '0 unburned, 1 surface fire, 2 passive crown fire, 3 active crown fire' WHERE Code = 'BEHAVIOUR'</item>
+    <item>UPDATE lucasFireC2F_SeverityMetric SET Name = 'Fire ID of the most severe burn', Description = 'Fire ID (within the season) of the burn that set the cell''s severity' WHERE Code = 'FIREID'</item>
+  </action>
+</update>
