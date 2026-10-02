@@ -1575,3 +1575,83 @@ Copy the template for the scenario type, replace the parts in angle brackets, an
 ```
 
 > **Keep descriptions current.** When you change a setting in a scenario that already has results, update its description before running it again: the new result copies the description as it is when the run starts.
+
+## 10. Troubleshooting
+
+Most problems show up as a failed stage, and lucasFireC2F's own messages name the sheet or file to fix. This chapter lists the messages you are most likely to see, what causes each, and the fix, grouped by where they turn up. The quoted messages are the package's own words; `<...>` stands for the part that changes.
+
+### 10.1 Reading a failed run
+
+When a run fails, the Run Monitor row turns red and the scenario gets a result marked as failed. Open its **Run Log** and read it from the bottom up: the last stage named is the one that failed, and its last message says why. The lines above show what that stage had already read and built, which often points at the cause (a Data Sources row, a missing file, an empty sheet).
+
+A failed result cannot be used as a dependency: Studio will not let you drag it onto another scenario. Fix the problem in the scenario, run it again, and delete the failed result once the new one is done.
+
+Two warnings appear at the top of every log and are harmless: the package was "built for an undetermined version" of SyncroSim (a package installed from a folder), and conda is disabled (lucasFireC2F uses the R set in 1.7).
+
+> **A transient read error.** Very occasionally SyncroSim fails to read a sheet, with "Object reference not set to an instance of an object". lucasFireC2F retries each read three times and logs "datasheet read failed (...); retrying". One such line followed by normal messages is harmless. If the stage still fails, run the scenario again.
+
+### 10.2 Setup and project data
+
+| Message | Cause | Fix |
+| --- | --- | --- |
+| SyncroSim multiprocessing is not supported by lucasFireC2F | Multiprocessing is on for the library | Turn it off (1.7). Stage 4 already runs fires on all cores but one. |
+| there is no package called '\<name>' | SyncroSim found an R without the package | Point the library at the right Rscript.exe (1.7), or install the package in that R. |
+| Data Sources (project) is empty - point it at the data on disk | A new project | Fill Data Sources (2.2). |
+| Data Sources: \<row> is not set / not found (\<path>) | A required row is blank, or the path is wrong | Fix the row. A path must point at the file itself, unzipped. |
+| LANDFIRE \<product> not found under \<folder> (expected an unzipped ... folder with one GeoTIFF in Tif ...) | A LANDFIRE product is still zipped, renamed, or from another release | Unzip it beside the others and keep LANDFIRE's folder names (2.1). |
+| Zone Prep Options: fire zone '\<name>' is not in this project's Fire Zones | The fire zone was typed, or the project's list was edited | Pick the zone from the list. A new project has all 128 pyromes (2.6). |
+| fuel map codes with no Fuel Type: \<codes> | The fuel map has codes the Fuel Types sheet lacks | Add rows for those codes (2.3). |
+| weather zone codes on the grid with no Weather Zone in this project: \<codes> | The project's Weather Zones list was edited | Restore the missing zones (2.7). |
+| Cannot find coordinate operations | Studio points PROJ at its own, older database | lucasFireC2F clears that setting before every stage. In your own R scripts run from Studio, clear it the same way: `Sys.unsetenv("PROJ_LIB")`. |
+
+### 10.3 Pipelines, dependencies and option sheets
+
+**A stage you did not ask for runs, or one is missing.** A scenario with a dependency inherits the dependency's pipeline. Calibrate then reruns P1-P5, and Run reruns Calibrate's stages. Untick Inherit on the pipeline, choose No Data and add the stages yourself (4.3).
+
+**Every fire burns a random 1 to 25 days.** The Run scenario inherited Fire Growth Options from Calibrate with Seed Run still on. Untick Inherit, choose Copy Data and set Seed Run to No (5.3). The opposite message, "C5 needs a seed run: set Fire Growth Options > Seed Run and run stages 1-5 before C5", means Seed Run is off in a Calibrate scenario (4.5).
+
+**A sheet holds the wrong values.** Where two dependencies carry the same sheet, the first one listed wins. A Run scenario lists Calibrate first and Prep second (5.1). Check the Inherit box on the sheet: it names the result the values came from.
+
+**An option sheet was never opened.** Empty option sheets are fine: the stage uses the package defaults and logs that it did. The exception is Zone Preparation Options, whose fire zone has no sensible default; a stage that needs a sheet like that stops with "\<sheet> is empty - fill it in the scenario before running this stage".
+
+**A sheet cannot be edited.** Sheets in a result scenario are read-only, and so is a sheet inherited from a dependency until you untick Inherit.
+
+**"Burning Hours by season is not supported yet - use one row with no season".** Burning Hours takes a single row with no season. Copying a scenario can leave an extra blank row. Since 2.3.0, identical rows are merged, so this message now means two different rows: delete all but one.
+
+### 10.4 Calibration and run results
+
+| Message or symptom | Cause | Fix |
+| --- | --- | --- |
+| no historical fires in \<years> | The calibration period has no fires in the zone at or above the size threshold | Widen the period (Calibration Period) or check the fire record source. |
+| \<cause>: only \<n> presences - lower Ignition Fit: Minimum Fire Size or widen the buffer | Too few fires to fit an ignition surface for that cause | Lower Ignition Fit: Minimum Fire Size or raise Ignition Fit: Buffer in Zone Preparation Options, then rerun Prep. |
+| no spread-day curve could be fitted (too few recorded fires >= \<ha> ha) | The curve's stratum has too few large fires | Fit one curve for all fires (Spread Days Fitted By), or use a longer record. |
+| Spread Days has no curve for cause \<c>, vegetation \<v> and no curve for all fires | Run was given curves fitted by stratum, and one stratum has none | Refit with a coarser stratification, or add an all-fires curve. |
+| The spread-day curve is spiky | Few large fires in the zone, or too few seed fires per curve | Normal for small zones. Size the seed run by seed fires per curve, not by seasons (4.4). |
+| The effects and risk maps cover a small part of the zone | Effects are mapped only where a cell burned at least 10 times (Minimum Burns for Conditional Maps) | Run more seasons. P18's coverage rose from 13.5% of burned cells at 2,500 seasons to 61% at 10,000 (6.2, 6.4). |
+
+### 10.5 Merging zones
+
+| Message | Cause | Fix |
+| --- | --- | --- |
+| merge source \<n> ran \<s> seasons; this scenario is set to \<t> | The sources and the merge differ in Fire Seasons | Every source must run the same number of seasons; set the merge's Run Control to match. |
+| merge source \<n>: library not found (\<path>) | Wrong library path in Merge Sources | Fix the path; the library may be another .ssim file. |
+| merge source \<n> (scenario \<id>) has no resampled fire statistics - run its stages 1-5 first | The source is a Prep or Calibrate result, or a failed run | Point the row at a finished Run result. |
+| Fire ID offsets <...> are closer than the largest Fire ID (\<n>) | The offsets let fire numbers from two sources collide | Leave Fire ID Offset empty in Merge Sources for the package defaults (0, 1,000,000, 2,000,000). |
+
+A merged result has no ignition maps, so the report's inputs figure leaves out the ignition panel. That is expected.
+
+### 10.6 Report figures and Studio charts
+
+**A chart draws nothing.** Studio plots chart tables against timestep, and a new chart's timestep range starts at 0-0. Set the **Timesteps** box in the chart's properties to cover the rows (6.6).
+
+**Stage R fails on an older result.** Stage R reads what the earlier stages wrote. Results from before 2.3.0 lack some of it. Run R in a Report scenario that depends on the result (9.5); if it still fails, rerun the result under 2.3.0.
+
+### 10.7 Installing and upgrading
+
+**Close Studio before installing from the command line.** The package manager cannot replace files Studio has open.
+
+**`--xinstall` reports FAILED.** Another version of lucasFireC2F is registered. Remove it (`--remove=lucasFireC2F --version=<old>`) and install again.
+
+**A library made with an older version.** Back up the library from Studio first. Then add the new version to it and run `SyncroSim.Console.exe --update --lib=<library>` (README). Patch versions (2.3.0 to 2.3.1) change only scripts and need no update; a new minor version (2.3 to 2.4) can change the library's tables.
+
+**Scripting against a library.** If you read or change a library with rsyncrosim, never do so while a run is active, and never from two R sessions at once: they share the library's temp folder. A read during a run can delete a file the run needs ("Could not find a part of the path"), and two reads at once can quietly return wrong results. Save or discard edits in Studio before writing to the library from a script, then refresh Studio afterwards; refreshing over unsaved edits writes the old state back.
