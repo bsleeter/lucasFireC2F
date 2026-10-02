@@ -24,14 +24,49 @@ Requirements: Windows; SyncroSim Studio 3.1; R 4.4 or later with `rsyncrosim`, `
 `RSQLite`, `cffdrs`, `jsonlite` and `mgcv` (also listed in `lucasFireC2F.yml`). The C2F-W executable and its DLLs ship in
 `bin/windows`.
 
-1. Clone this repository.
-2. Install it as a folder package, with SyncroSim Studio closed:
-   `"C:\Program Files\SyncroSim\SyncroSim.PackageManager.exe" --xinstall=<path to this folder>`
-3. In Studio, create a library, add the lucasFireC2F package, turn SyncroSim multiprocessing off (the package parallelises
-   fire growth itself) and point the library at your R installation. Chapter 1 of the user guide shows each step.
+There are two ways to install. Close SyncroSim Studio first in either case; the package manager is
+`C:\Program Files\SyncroSim\SyncroSim.PackageManager.exe`.
 
-To move an existing library to a new package version, back it up, add the new version to it, then run
-`SyncroSim.Console.exe --update --lib=<library>`.
+**A. From a release file (no git needed).** Download `lucasFireC2F-<version>.ssimpkg` from the repository's
+[Releases](https://github.com/bsleeter/lucasFireC2F/releases) page and install it:
+
+```
+"C:\Program Files\SyncroSim\SyncroSim.PackageManager.exe" --finstall="lucasFireC2F-2.3.0.ssimpkg"
+```
+
+The package is copied into SyncroSim's own package folder, so the downloaded file can be deleted afterwards.
+
+**B. From a clone of this repository.** This route suits anyone who wants to follow development or change the scripts:
+
+```
+git clone https://github.com/bsleeter/lucasFireC2F.git
+"C:\Program Files\SyncroSim\SyncroSim.PackageManager.exe" --xinstall="C:\path\to\lucasFireC2F"
+```
+
+`--xinstall` registers the folder instead of copying it: SyncroSim runs the scripts where they are, so the folder must stay
+in place, and a `git pull` that keeps the same version number takes effect the next time a scenario runs. (Without git,
+GitHub's *Code > Download ZIP*, unzipped to a permanent folder, works the same way.)
+
+Either way, check the install with `SyncroSim.PackageManager.exe --installed`, which should list lucasFireC2F with status
+OK. Then, in Studio, create a library, add the lucasFireC2F package, turn SyncroSim multiprocessing off (the package
+parallelises fire growth itself) and point the library at your R installation. Chapter 1 of the user guide shows each step.
+
+**Upgrading.** For a new version number, back up your libraries, then remove the old version and install the new one:
+
+```
+"C:\Program Files\SyncroSim\SyncroSim.PackageManager.exe" --remove=lucasFireC2F --version=<old version>
+```
+
+followed by `--finstall` (A) or `git pull` and `--xinstall` (B). Then move each existing library to the new version:
+
+```
+"C:\Program Files\SyncroSim\SyncroSim.Console.exe" --add --package --pkg=lucasFireC2F --ver=<new version> --lib=<library>
+"C:\Program Files\SyncroSim\SyncroSim.Console.exe" --update --lib=<library>
+```
+
+**Building a release file.** `tools/build_ssimpkg.ps1` builds `lucasFireC2F-<version>.ssimpkg` from the committed state
+of the repository, leaving out `dev/`, `docs/` and `tests/` (about 1 MB instead of 40). Attach it to a GitHub release
+named for the version in `package.xml`.
 
 ## Workflow and stages
 
@@ -62,7 +97,7 @@ never copied into the library. The data are not in this repository.
 | `updates/` | Schema updates applied when a library is upgraded |
 | `bin/windows/` | Cell2Fire-World v1.0.1 executable and DLLs (GPL-3.0) |
 | `docs/user-guide/` | The user guide and its figures |
-| `tools/` | Scripts that regenerate the defaults |
+| `tools/` | Scripts that regenerate the defaults and build the release package file |
 | `prep/`, `tests/` | Zone preparation helper and tests |
 | `dev/` | Development and analysis scripts (validation, calibration experiments, paper figures, comparisons); their outputs are not tracked |
 
