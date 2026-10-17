@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<update comment="2.4.0: C6 judges each score against the noise of a record as short as the real one (model range low/high and a verdict) and draws the calibration figure (Fig6) into Report Figures.">
+  <action code="Exec" condition="TableExists" criteria="lucasFireC2F_OutputScore">
+    <item>ALTER TABLE lucasFireC2F_OutputScore ADD COLUMN ModelLow DOUBLE</item>
+    <item>ALTER TABLE lucasFireC2F_OutputScore ADD COLUMN ModelHigh DOUBLE</item>
+    <item>ALTER TABLE lucasFireC2F_OutputScore ADD COLUMN Verdict TEXT</item>
+  </action>
+</update>

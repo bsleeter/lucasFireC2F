@@ -41,7 +41,8 @@ NS <- need("RunControl", "MaximumIteration")$MaximumIteration[1]
 
 # fire sizes as C6 counts them: kept fires at or above the resampling minimum; the record over the calibration years
 MINA <- read_ds("ResampleOption")$MinimumFireSize[1] %||% 0; cp <- read_ds("CalibrationPeriod")
-sim <- if (nrow(st)) st[ResampleStatus %in% c("Kept", "Reassigned") & Area >= MINA, Area] else numeric()
+ks <- if (nrow(st)) st[ResampleStatus %in% c("Kept", "Reassigned") & Area >= MINA] else data.table(Area = numeric(), Iteration = integer())
+sim <- ks$Area; NY <- if (nrow(cp)) length(cp$FireFirstYear[1]:cp$FireLastYear[1]) else NA_integer_
 H <- read_ds("HistoricalFire"); obs <- numeric()
 if (nrow(H) && nrow(cp)) {
   if (any(!is.na(H$FireZone)) && nrow(fzt)) H <- H[FireZone %in% fzt$Name]
@@ -64,7 +65,7 @@ sc <- read_ds("OutputScore"); va <- read_ds("OutputValidation"); es <- read_ds("
 I <- list(zone = zone, el = el, fuel = fuel, fuel_type = as.data.table(datasheet(prj, ds("FuelType"), lookupsAsFactors = FALSE)),
   cbd = { x <- first("CanopyRasters", "CanopyBulkDensityFileName"); if (is.na(x)) first("OutputEngineLandscape", "CanopyBulkDensityFileName") else x }, ignition = as.list(na.omit(read_ds("IgnitionGrid")$FileName)), bp = bp,
   effects = coded("OutputFireEffects", "EffectsMetric"), risk = coded("OutputRisk", "RiskMetric"), wrc = wrc, mtbs = mt,
-  score = sc, validation = va, effects_summary = es, spread_days = sd, obs = obs, sim = sim,
+  score = sc, validation = va, effects_summary = es, spread_days = sd, obs = obs, sim = sim, sim_season = as.integer(ks$Iteration), record_years = NY,
   label = if (!is.na(zname)) zname else rsyncrosim::name(scn), seasons = NS, vintage = VINT, mtbs_years = sprintf("%d-%d", VINT + 1L, LAST))
 say("report figures for %s: %s fire seasons; %d recorded and %s simulated fires >= %.1f ha; MTBS outlines %d; benchmark %s", I$label, format(NS, big.mark = ","),
     length(obs), format(length(sim), big.mark = ","), MINA, if (is.null(mt)) 0L else length(mt), if (is.na(wrc)) "none" else basename(wrc))

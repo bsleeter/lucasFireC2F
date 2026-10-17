@@ -1,6 +1,6 @@
 # lucasFireC2F User Guide
 
-For lucasFireC2F 2.3.0. Exported 2 October 2026 from the working copy of the guide.
+For lucasFireC2F 2.4.0. Exported 16 October 2026 from the working copy of the guide.
 
 ## About this guide
 
@@ -975,7 +975,7 @@ The fitted curve is written to this result's **Spread-Day Distribution** sheet. 
 | Calibration: Fit Summary | Burning Hours, Max CDF Gap (KS), Area Ratio and Mean Spread Days, one row per spread-day curve | 2 h, KS 0.069, area ratio 1.00 |
 | Calibration: Size Distribution Fit | Observed and fitted share of fires in each size class (the table above) |  |
 
-**Scores Against Fire Records stays empty here, by design.** C5's numbers come from reweighting the seed fires, so they show how well the curve can fit, not what the model does with it. The check is the Run scenario (chapter 5): it grows new fires with the fitted curve, and C6 scores them against the record (5.6). If those scores hold, the same Run scenario with more seasons is the finished model (6.4); the only differences are the number of seasons and the random draws.
+**Scores Against Fire Records stays empty here, by design.** C5's numbers come from reweighting the seed fires, so they show how well the curve can fit, not what the model does with it. Use them as a gate: if KS is well over 0.10, the area ratio far from 1 or a whole size class missed, the check run will not do better, so fix the fit first (4.4, 4.5). The check is the Run scenario (chapter 5): it grows new fires with the fitted curve, and C6 scores them against the record (5.6). If those scores hold, the same Run scenario with more seasons is the finished model (6.4); the only differences are the number of seasons and the random draws.
 
 ## 5. Run the model (Run)
 
@@ -1066,9 +1066,46 @@ C6 compares the simulated fires with the record, by size class, by cause and by 
 | 30,000 and over | 0.00 | 0.01 | 0 | 341 |
 | **Total** | **3.38** | **3.46 (1.02x)** | **3,727** | **3,519 (0.94x)** |
 
-The totals are what the calibration aimed at: fires per year within 2% and area within 6%. Classes are within about 20%, except the largest recorded class, which is short. With 29 years of record the largest classes rest on a handful of fires (three fires of 10,000-30,000 ha), so differences there are within chance.
+The totals are what the calibration aimed at: fires per year within 2% and area within 6%. Classes are within about 20%, except the largest recorded class, which is short. Whether such gaps matter is what the noise test below decides.
 
-**By cause**, simulated human fires burn 1.77 times their recorded area and lightning fires 0.59 times: recorded lightning fires average 1,652 ha against 652 ha for human fires, while one spread-day curve gives both causes the same days. This is the cost of fitting one curve. With enough large fires, a curve per cause (Spread Days Fitted By: Cause) would separate them. **By origin vegetation**, the shrub and hardwood rows rest on a few recorded fires; ratios of 2 to 70 there are noise.
+**Is the calibration acceptable?** Since version 2.4.0, C6 judges every test against the noise of a record as short as the real one. A 29-year record is one draw of 29 seasons. C6 draws 1,000 sets of 29 seasons from the run itself and scores each set as it scores the record. The middle 90% of those draws is the **model range**: where a 29-year record would fall by chance if the model were right. The sheet's last three columns give the range and a verdict:
+
+| Verdict | The record falls | What to do |
+| --- | --- | --- |
+| within noise | inside the 90% range | Nothing: the record cannot tell this apart from the model |
+| check | outside the 90% range, inside the 99% range | Look at it; about 1 test in 10 lands here by chance alone |
+| poor | outside the 99% range | The model and the record disagree; revisit the fit (chapter 4) |
+
+C6 also draws the figure below, **Fig6\_fire\_sizes.png**, so every scored run carries it without stage R. The whiskers on the model's bars and the band in panel (c) are the 90% model range; any class outside it is labelled. The title counts the verdicts.
+
+**Where to find it.** The figure belongs to the Run result, not the Run scenario:
+
+| Where | How |
+| --- | --- |
+| Studio | Open the Run result (double-click it in the Explorer), then on the **LUCAS Fire (C2F-W)** tab choose **Results**, **Report Figures**. The row named Fire sizes and calibration holds the PNG |
+| Export tab | Select the Run result, open the **Export** tab and export **Report Figures** to a folder of your choice (6.3) |
+| On disk | `<library>.ssim.data\Scenario-<result id>\lucasFireC2F_OutputReportFigure\Fig6_fire_sizes.png`. For the example below: `F:\lucas-master\Models\lucasFireC2F Dev\lucasFireC2F-Demo.ssim.data\Scenario-26\lucasFireC2F_OutputReportFigure\Fig6_fire_sizes.png` |
+
+The same numbers are in the result's **Scores Against Fire Records** sheet (columns Model Range: Low, Model Range: High and Record vs Model Range) and at the end of C6's lines in the Run Log. The sheet and the log also hold the by-cause and by-vegetation tests, which the figure does not draw.
+
+![P18's check run against the 1992-2020 record, with the noise of a 29-year record.](figures/05-05-check-run-fire-sizes.png)
+
+*P18's check run (result 26): 37 of 39 tests within noise. The two misses are shrub-origin fires: 170 ha a year simulated against 2 recorded (check), and a mean size of 1,187 ha against 35 (poor). The 10,000-30,000 ha area bar looks short, but a 29-year record of that class varies from 0 to 2,480 ha a year under this model, so the record's 1,506 ha is well inside. For contrast, the seed run scored the same way gets 19 of its 25 size and cause tests poor.*
+
+**Reading the P18 example.** The calibration passes:
+
+- **Title.** 37 of 39 tests within noise, 1 check, 1 poor. Both misses are in the sheet, not the figure: shrub-origin fires (below).
+- **(a) Fires by size class.** Every recorded bar sits inside the model's whisker, and the totals agree (3.38 fires a year recorded, 3.46 simulated). The fire count is what C3 fitted, so this panel mostly confirms the ignitions.
+- **(b) Area by size class.** The biggest gap is 10,000-30,000 ha: 1,506 ha a year recorded against 1,009 simulated. The whisker runs from 0 to 2,480 ha, because three fires in 29 years cannot pin that class down. The model also burns 341 ha a year in fires over 30,000 ha, which the 1992-2020 record lacks. It goes 29 years without one often enough for that to be within noise, and the 2021 Dixie Fire shows such fires happen here.
+- **(c) Fire size exceedance.** The recorded fires stay inside the band at every size. Above about 1,000 ha they run along its upper edge, so the record's large fires are a little bigger than the model's, though not beyond chance. The band drops to the axis past about 7,000 ha because many 29-year draws contain no fire that large.
+- **(d) Spread days.** The fitted curve (mean 2.43 days, 56% of fires burning one day) is the one read in 4.7; it is drawn here so the figure is a complete record of the calibration.
+- **What the sheet adds.** Shrub-origin fires average 1,187 ha in the model against 35 ha for the two recorded (poor), and burn 170 ha a year against 2 (check). With one curve for all fires, shrub-origin fires get the same spread days as timber fires. That is a known limit of this P18 setup (see By origin vegetation below), not a reason to reject the calibration.
+
+In a zone where several size classes or the exceedance points fall outside the range, go back to chapter 4: check the in-sample fit, the burning hours and how the spread days are stratified.
+
+Accept the calibration when the tests are within noise, with at most a scattered check. The verdicts say what the record can resolve, not that the model is right: in a small zone the ranges are wide, so a passing score is weak evidence.
+
+**By cause**, simulated human fires burn 1.77 times their recorded area and lightning fires 0.59 times: recorded lightning fires average 1,652 ha against 652 ha for human fires, while one spread-day curve gives both causes the same days. The noise test still marks both within noise: under this model a 29-year record of lightning area ranges from 560 to 2,610 ha a year, so the gap may be chance. It may also be the cost of fitting one curve. With enough large fires, a curve per cause (Spread Days Fitted By: Cause) would separate them. **By origin vegetation**, the shrub and hardwood rows rest on a few recorded fires; the noise test finds hardwood within noise but marks shrub poor: the model's shrub-origin fires average 1,187 ha against 35 recorded, too large even for so few fires.
 
 #### Fire behaviour (stage 6)
 
@@ -1245,7 +1282,7 @@ Studio's maps are for checking a run; the figures for a report come from stage *
 | Fig3 Fire intensity | Conditional flame length, FLEP4, FLEP8 | Stage 6 |
 | Fig4 Crown fire | Crown and active crown fire when burning, annual crown-fire probability | Stage 6 |
 | Fig5 Hazard and risk | High-intensity burn probability, conditional and annual risk to potential structures, risk class | Stage 7 |
-| Fig6 Fire sizes | Fires and area by size class against the record, size exceedance, spread-day distribution | C6 |
+| Fig6 Fire sizes | Fires and area by size class against the record with the noise of a record as long as the real one, size exceedance, spread-day distribution (C6 draws it too, 5.6) | C6 |
 | Fig7 Validation | AUC and hottest-decile capture against WRC by period, fire effects by fuel group | C7, stage 6 |
 
 A figure whose stage did not run is left out.

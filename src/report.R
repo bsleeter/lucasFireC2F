@@ -117,34 +117,8 @@ report_figures <- function(I, outdir) {
   # ---- 6 fire sizes and calibration (charts) ---------------------------------------------------------------------------------------
   sc <- I$score; f6 <- file.path(outdir, "Fig6_fire_sizes.png")
   if ((!is.null(sc) && nrow(sc)) || length(I$obs) || (!is.null(I$spread_days) && nrow(I$spread_days))) {   # a merged result has none of these: figure left out
-  png(f6, width = 2400, height = 1500, res = 200, bg = "white"); par(mfrow = c(2, 2), mar = c(5, 5, 3, 1), family = "sans")
-  if (!is.null(sc) && nrow(sc)) {
-    fc <- size_rows(sc, "Fires per year"); ac <- size_rows(sc, "Area per year (ha)")
-    barplot(rbind(fc$Observed, fc$Simulated), beside = TRUE, names.arg = fc$Group, col = c(OBS, SIM), las = 2, cex.names = .75, border = NA,
-            ylab = "Fires per year", main = "(a) Fires by size class (ha)")
-    legend("topright", c("Fire record", "lucasFireC2F"), fill = c(OBS, SIM), border = NA, bty = "n", cex = .8)
-    par(mar = c(5, 6.5, 3, 1))
-    barplot(rbind(ac$Observed, ac$Simulated), beside = TRUE, names.arg = ac$Group, col = c(OBS, SIM), las = 2, cex.names = .75, border = NA, yaxt = "n",
-            main = "(b) Area burned by size class (ha)")
-    axis(2, at = axTicks(2), labels = format(axTicks(2), big.mark = ",", scientific = FALSE), las = 1, cex.axis = .8); mtext("Area burned (ha per year)", 2, line = 4.8, cex = .8)
-    par(mar = c(5, 5, 3, 1))
-  } else { plot.new(); text(.5, .5, "no C6 scores in this result", col = MUTED); plot.new() }
-  if (length(I$obs) && length(I$sim)) {
-    ex <- function(x) { s <- sort(x, decreasing = TRUE); list(x = s, y = seq_along(s) / length(s)) }; eo <- ex(I$obs); es <- ex(I$sim)
-    plot(es$x, es$y, log = "xy", type = "l", col = SIM, lwd = 2, xlab = "Fire size (ha)", ylab = "Exceedance probability", main = "(c) Fire size exceedance",
-         xlim = range(c(eo$x, es$x)), ylim = range(c(eo$y, es$y)), xaxt = "n", yaxt = "n")
-    at <- c(30, 100, 300, 1000, 3000, 1e4, 3e4, 1e5, 3e5); axis(1, at = at, labels = format(at, big.mark = ",", scientific = FALSE, trim = TRUE), cex.axis = .7)
-    axis(2, at = 10^(-5:0), labels = c("0.00001", "0.0001", "0.001", "0.01", "0.1", "1"), las = 1, cex.axis = .7)
-    points(eo$x, eo$y, pch = 16, cex = .6, col = OBS)
-    legend("bottomleft", c(sprintf("Fire record (%d fires)", length(I$obs)), sprintf("lucasFireC2F (%s fires)", format(length(I$sim), big.mark = ","))),
-           col = c(OBS, SIM), pch = c(16, NA), lty = c(NA, 1), lwd = 2, bty = "n", cex = .8)
-  } else { plot.new(); text(.5, .5, "no fire sizes", col = MUTED) }
-  sd <- I$spread_days
-  if (!is.null(sd) && nrow(sd)) { s1 <- sd[, .(p = sum(RelativeFrequency)), by = Days][order(Days)]; s1[, p := p / sum(p)]
-    barplot(s1$p, names.arg = s1$Days, col = "#ef8f2a", border = NA, xlab = "Spread days", ylab = "Probability",
-            main = sprintf("(d) Spread-day distribution (mean %.2f days)", sum(s1$Days * s1$p)))
-  } else { plot.new(); text(.5, .5, "no spread-day distribution", col = MUTED) }
-  dev.off(); out[[length(out) + 1]] <- data.table(Figure = "Fire sizes and calibration", FileName = f6) }
+    fire_size_figure(f6, sc, I$obs, I$sim, I$sim_season, I$seasons, I$record_years, I$spread_days, I$label)
+    out[[length(out) + 1]] <- data.table(Figure = "Fire sizes and calibration", FileName = f6) }
 
   # ---- 7 validation and effects by fuel group (charts) ------------------------------------------------------------------------------
   f7 <- file.path(outdir, "Fig7_validation.png")
@@ -186,4 +160,100 @@ report_charts <- function(score, spread_days, validation) {
                      HottestDecile = validation$HottestDecile, HottestDecileBenchmark = validation$HottestDecileBenchmark)
   for (x in list(sz, sd, vd)) if (!is.null(x)) for (k in names(x)) if (is.numeric(x[[k]])) set(x, which(!is.finite(x[[k]])), k, NA)
   list(size = sz, spread = sd, validation = vd)
+}
+
+# ---- fire sizes against the record, with the noise of a short record (C6; also drawn by stage R) -----------------------------------
+# A fire record of NY years is one draw of NY seasons. If the model were right, a NY-year record would be any NY of its seasons: draw
+# B sets of NY seasons (with replacement from the run's NS seasons) and score each set as the record is scored. The 5-95% range of
+# those draws is how far a NY-year record strays by chance alone; the record inside it is "within noise", inside the 0.5-99.5% range
+# "check", outside "poor". Drawn from the model's seasons, not the record's years, so a size class the record never saw (no 30,000 ha
+# fire in 29 years) is judged by how often the model goes NY years without one. Seeded, so a result scores the same every time.
+SIZE_BREAKS <- function(mina) c(mina, 100, 405, 1000, 3000, 10000, 30000, Inf)
+SIZE_LABELS <- function(mina) c(sprintf("%.0f-100", mina), "100-405", "405-1,000", "1,000-3,000", "3,000-10,000", "10,000-30,000", "30,000+")
+season_draws <- function(NS, NY, B = 1000L, seed = 20261016L) { set.seed(seed); matrix(sample.int(NS, NY * B, replace = TRUE), NY, B) }
+
+# every C6 test on one set of fires: area (ha), cause and origin vegetation per fire, over NY years
+record_tests <- function(area, cause, veg, NY, mina, vegs = character()) {
+  lab <- SIZE_LABELS(mina); k <- cut(area, SIZE_BREAKS(mina), right = FALSE, labels = lab)
+  n <- tabulate(k, length(lab)); s <- vapply(split(area, k), sum, 0)
+  per <- function(prefix, g, x) data.table(Test = paste0(prefix, c("fires per year", "area per year (ha)", "mean size (ha)")), Group = g,
+                                           V = c(length(x) / NY, sum(x) / NY, if (length(x)) mean(x) else NA_real_))
+  rbindlist(c(list(
+    data.table(Test = "Fires per year", Group = c(lab, "TOTAL"), V = c(n, length(area)) / NY),
+    data.table(Test = "Area per year (ha)", Group = c(lab, "TOTAL"), V = c(s, sum(area)) / NY),
+    data.table(Test = "Size quantile (ha)", Group = c("p50", "p90", "p99"),
+               V = if (length(area)) quantile(area, c(.5, .9, .99), names = FALSE) else NA_real_)),
+    lapply(c("Human", "Lightning"), function(cz) per("By cause: ", cz, area[cause %in% cz])),
+    lapply(vegs, function(v) per("By origin vegetation: ", v, area[veg %in% v]))))
+}
+
+# the B draws' value of every test (rows in record_tests order) -> 0.5, 5, 95 and 99.5% points per test
+model_noise <- function(area, cause, veg, season, NS, NY, mina, vegs = character(), B = 1000L) {
+  D <- season_draws(NS, NY, B); by <- split(seq_along(area), factor(as.integer(season), levels = seq_len(NS)))
+  nt <- nrow(record_tests(numeric(), character(), character(), 1, mina, vegs))
+  M <- vapply(seq_len(B), function(b) { i <- unlist(by[D[, b]], use.names = FALSE)
+    record_tests(area[i], cause[i], veg[i], NY, mina, vegs)$V }, numeric(nt))
+  q <- t(apply(M, 1, quantile, c(.005, .05, .95, .995), na.rm = TRUE, names = FALSE))
+  data.table(Q005 = q[, 1], Q05 = q[, 2], Q95 = q[, 3], Q995 = q[, 4])
+}
+noise_verdict <- function(obs, q) fifelse(is.na(obs) | is.na(q$Q05), NA_character_,
+  fifelse(obs >= q$Q05 & obs <= q$Q95, "within noise", fifelse(obs >= q$Q005 & obs <= q$Q995, "check", "poor")))
+
+# exceedance band: for each draw of NY seasons, the share of its fires at or above each size; the 5-95% range per size
+exceedance_band <- function(area, season, NS, NY, grid, B = 1000L) {
+  D <- season_draws(NS, NY, B); by <- split(area, factor(as.integer(season), levels = seq_len(NS)))
+  E <- vapply(seq_len(B), function(b) { a <- sort(unlist(by[D[, b]], use.names = FALSE))
+    if (!length(a)) return(rep(NA_real_, length(grid))); (length(a) - findInterval(grid, a, left.open = TRUE)) / length(a) }, numeric(length(grid)))
+  data.table(x = grid, lo = apply(E, 1, quantile, .05, na.rm = TRUE, names = FALSE), hi = apply(E, 1, quantile, .95, na.rm = TRUE, names = FALSE))
+}
+
+# Fig6: (a) fires and (b) area by size class, record against model, the model bar's whisker = the 90% range of a NY-year record
+# and the size classes outside it marked; (c) size exceedance with the same range as a band; (d) the fitted spread days
+fire_size_figure <- function(file, sc, obs, sim, sim_season, NS, NY, spread_days, label = NULL) {
+  png(file, width = 2400, height = 1560, res = 200, bg = "white"); par(mfrow = c(2, 2), mar = c(5, 5, 3, 1), oma = c(0, 0, 2, 0), family = "sans")
+  hasQ <- !is.null(sc) && nrow(sc) && all(c("ModelLow", "ModelHigh", "Verdict") %in% names(sc)) && any(!is.na(sc$Verdict))
+  bars <- function(x, ylab, main, comma = FALSE) {
+    hi <- if (hasQ) x$ModelHigh else x$Simulated; top <- max(c(x$Observed, x$Simulated, hi), 0, na.rm = TRUE) * 1.15
+    b <- barplot(rbind(x$Observed, x$Simulated), beside = TRUE, names.arg = x$Group, col = c(OBS, SIM), las = 2, cex.names = .75, border = NA,
+                 ylim = c(0, top), ylab = if (comma) "" else ylab, main = main, yaxt = if (comma) "n" else "s")
+    if (comma) { axis(2, at = axTicks(2), labels = format(axTicks(2), big.mark = ",", scientific = FALSE), las = 1, cex.axis = .8); mtext(ylab, 2, line = 4.8, cex = .8) }
+    if (hasQ) { ok <- !is.na(x$ModelLow) & !is.na(x$ModelHigh) & x$ModelHigh > x$ModelLow
+      if (any(ok)) arrows(b[2, ok], x$ModelLow[ok], b[2, ok], x$ModelHigh[ok], angle = 90, code = 3, length = .03, col = INK, lwd = 1.2)
+      flag <- !is.na(x$Verdict) & x$Verdict != "within noise"
+      if (any(flag)) text(colMeans(b)[flag], pmax(x$Observed, x$ModelHigh, na.rm = TRUE)[flag] + top * .05, x$Verdict[flag],
+                          col = ifelse(x$Verdict[flag] == "poor", "#a81d1a", "#b06a00"), cex = .75, font = 2) }
+    b }
+  if (!is.null(sc) && nrow(sc)) {
+    bars(size_rows(sc, "Fires per year"), "Fires per year", "(a) Fires by size class (ha)")
+    legend("topright", c("Fire record", "lucasFireC2F", if (hasQ) sprintf("90%% range of a %d-year record", NY)), fill = c(OBS, SIM, if (hasQ) NA),
+           border = NA, lty = c(NA, NA, if (hasQ) 1), col = c(NA, NA, if (hasQ) INK), bty = "n", cex = .8)
+    par(mar = c(5, 6.5, 3, 1)); bars(size_rows(sc, "Area per year (ha)"), "Area burned (ha per year)", "(b) Area burned by size class (ha)", comma = TRUE); par(mar = c(5, 5, 3, 1))
+  } else { plot.new(); text(.5, .5, "no C6 scores in this result", col = MUTED); plot.new() }
+  if (length(obs) && length(sim)) {
+    ex <- function(x) { s <- sort(x, decreasing = TRUE); list(x = s, y = seq_along(s) / length(s)) }; eo <- ex(obs); es <- ex(sim)
+    yl <- range(c(eo$y, es$y))
+    plot(es$x, es$y, log = "xy", type = "n", xlab = "Fire size (ha)", ylab = "Exceedance probability", main = "(c) Fire size exceedance",
+         xlim = range(c(eo$x, es$x)), ylim = yl, xaxt = "n", yaxt = "n")
+    band <- length(sim_season) == length(sim) && length(NS) && !is.na(NS) && length(NY) && !is.na(NY)
+    if (band) { g <- exp(seq(log(min(sim)), log(max(sim)), length.out = 80)); eb <- exceedance_band(sim, sim_season, NS, NY, g)
+      eb <- eb[hi > 0]; eb[lo < yl[1], lo := yl[1]]
+      polygon(c(eb$x, rev(eb$x)), c(eb$lo, rev(eb$hi)), col = adjustcolor(SIM, .18), border = NA) }
+    lines(es$x, es$y, col = SIM, lwd = 2)
+    at <- c(30, 100, 300, 1000, 3000, 1e4, 3e4, 1e5, 3e5); axis(1, at = at, labels = format(at, big.mark = ",", scientific = FALSE, trim = TRUE), cex.axis = .7)
+    axis(2, at = 10^(-5:0), labels = c("0.00001", "0.0001", "0.001", "0.01", "0.1", "1"), las = 1, cex.axis = .7)
+    points(eo$x, eo$y, pch = 16, cex = .6, col = OBS)
+    legend("bottomleft", c(sprintf("Fire record (%d fires)", length(obs)), sprintf("lucasFireC2F (%s fires)", format(length(sim), big.mark = ",")),
+                           if (band) sprintf("90%% range of a %d-year record", NY)),
+           col = c(OBS, SIM, if (band) adjustcolor(SIM, .35)), pch = c(16, NA, if (band) 15), lty = c(NA, 1, if (band) NA), lwd = 2,
+           pt.cex = c(1, 1, if (band) 2), bty = "n", cex = .8)
+  } else { plot.new(); text(.5, .5, "no fire sizes", col = MUTED) }
+  sd <- spread_days
+  if (!is.null(sd) && nrow(sd)) { s1 <- sd[, .(p = sum(RelativeFrequency)), by = Days][order(Days)]; s1[, p := p / sum(p)]
+    barplot(s1$p, names.arg = s1$Days, col = "#ef8f2a", border = NA, xlab = "Spread days", ylab = "Probability",
+            main = sprintf("(d) Spread-day distribution (mean %.2f days)", sum(s1$Days * s1$p)))
+  } else { plot.new(); text(.5, .5, "no spread-day distribution", col = MUTED) }
+  if (hasQ) { v <- sc$Verdict[!is.na(sc$Verdict)]
+    mtext(sprintf("%s%d of %d tests within the noise of a %d-year record, %d check, %d poor", if (length(label) && !is.na(label)) paste0(label, ": ") else "",
+                  sum(v == "within noise"), length(v), NY, sum(v == "check"), sum(v == "poor")), outer = TRUE, cex = .95, font = 2, col = INK) }
+  dev.off(); invisible(file)
 }

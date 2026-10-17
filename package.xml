@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<package name="lucasFireC2F" displayName="LUCAS Fire (C2F-W)" description="Wildfire burn probability and fire effects and risk with Cell2Fire-World (Scott and Burgan fuels) for the LUCAS model family" version="2.3.0" url="https://github.com/bsleeter/lucasFireC2F" minSyncroSimVersion="3.1.0">
+<package name="lucasFireC2F" displayName="LUCAS Fire (C2F-W)" description="Wildfire burn probability and fire effects and risk with Cell2Fire-World (Scott and Burgan fuels) for the LUCAS model family" version="2.4.0" url="https://github.com/bsleeter/lucasFireC2F" minSyncroSimVersion="3.1.0">
 
 	<!-- =================================================================================================== -->
 	<!-- PROJECT DATASHEETS (definitions shared by all scenarios)                                           -->
@@ -4309,6 +4309,9 @@
 		<column name="Simulated" dataType="Double" format="0.000" isOptional="True"/>
 		<column name="Ratio" dataType="Double" format="0.00" isOptional="True"/>
 		<column name="Value" dataType="Double" format="0.000" isOptional="True"/>
+		<column name="ModelLow" displayName="Model Range: Low (5%)" dataType="Double" format="0.000" isOptional="True"/>
+		<column name="ModelHigh" displayName="Model Range: High (95%)" dataType="Double" format="0.000" isOptional="True"/>
+		<column name="Verdict" displayName="Record vs Model Range" dataType="String" isOptional="True"/>
 	</dataSheet>
 
 	<!-- stage R: report figures (PNG) and the tables behind the Charts tab (Studio charts a value against Timestep, so Timestep
@@ -4544,6 +4547,8 @@
 		<dataSheet name="OutputFireList" type="Input"/>
 		<dataSheet name="OutputBurnProbability" type="Input"/>
 		<dataSheet name="OutputScore" type="Output"/>
+		<dataSheet name="SpreadDays" type="Input"/>
+		<dataSheet name="OutputReportFigure" type="Output"/>
 	</transformer>
 
 	<transformer name="validateBurnProbability" displayName="C7 - Validate Burn Probability" isRunnable="True" programName="Rscript" programArguments="src/c7-validate.R" configurationSheet="lucasFireC2F_RunControl" condaEnv="lucasFireC2F.yml" condaEnvVersion="1">
