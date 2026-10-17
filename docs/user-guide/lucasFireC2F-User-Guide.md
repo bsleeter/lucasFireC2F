@@ -16,7 +16,7 @@ It is for modelers who know SyncroSim's basics (libraries, projects, scenarios, 
 - **Result IDs.** Dependencies point at results, not at the scenarios that made them. Write down each result's ID as you go; later steps ask for them.
 - **Package version.** Written for lucasFireC2F 2.3.0 on SyncroSim 3.1.
 
-**The workflow in one line.** Prep (P1-P5) → Calibrate (C1-C3, seed run, C5, C6) → Run (stages 1-8, C6, C7, optionally R) → optionally Merge (stage M) with neighbouring zones.
+**The workflow in one line.** Prep (P1-P5) → Calibrate (C1-C3, seed run, C5) → Run (stages 1-8, C6, C7, optionally R) → optionally Merge (stage M) with neighbouring zones.
 
 ## 1. Install and library setup
 
@@ -159,7 +159,7 @@ A zone is built with three scenarios, each running its own part of the catalog:
 | Scenario | Stages, in run order | Depends on |
 | --- | --- | --- |
 | Prep | P1 Prepare Zone Landscape, P2 Fit Ignition Surfaces, P3 Extract Zone Weather, P4 MTBS Severity Target, P5 Burning-Period Wind (RAWS) | nothing |
-| Calibrate | C1 Import Fire Record, C2 Build Weather Stream, C3 Fit Ignitions, 1 Prepare Landscape, 2 Sample Ignitions, 3 Sample Burning Conditions, 4 Grow Fires (C2F-W), 5 Summarize Burn Probability, C5 Fit Spread Days, C6 Score Against Fire Records | the Prep result |
+| Calibrate | C1 Import Fire Record, C2 Build Weather Stream, C3 Fit Ignitions, 1 Prepare Landscape, 2 Sample Ignitions, 3 Sample Burning Conditions, 4 Grow Fires (C2F-W), 5 Summarize Burn Probability, C5 Fit Spread Days | the Prep result |
 | Run | 1 Prepare Landscape, 2 Sample Ignitions, 3 Sample Burning Conditions, 4 Grow Fires (C2F-W), 5 Summarize Burn Probability, 6 Fire Effects, 7 Hazard and Risk, 8 Fire Detail (optional), C6 Score Against Fire Records, C7 Validate Burn Probability, R Report Figures (optional) | the Calibrate result, then the Prep result |
 
 In Calibrate, stages 1-5 are the seed run: fires grown for 1 to 25 days at random so C5 can fit the spread-day distribution. Run repeats stages 1-5 with the fitted distribution, then adds effects, risk and scoring. A library with several zones adds a fourth type, Merge (stage M, then 5-8; Chapter 8). Chapters 3 to 5 build each scenario in turn.
@@ -736,7 +736,7 @@ Chapter 4 makes this result a dependency of the Calibrate scenario.
 
 ## 4. Calibrate the zone (Calibrate)
 
-The Calibrate scenario fits the zone's fire regime to the fire record. It imports the zone's FPA-FOD fires (C1), builds the spread-day weather stream (C2), fits how many fires start each season and when (C3), runs a **seed run**: stages 1-5 with each fire burning a random 1 to 25 days, then fits the spread-day distribution that makes the simulated fire sizes match the record (C5), and ends with C6, which scores model runs against the record but skips a seed run, whose fire sizes are not yet calibrated. It runs on the Prep result, so it needs nothing rebuilt.
+The Calibrate scenario fits the zone's fire regime to the fire record. It imports the zone's FPA-FOD fires (C1), builds the spread-day weather stream (C2), fits how many fires start each season and when (C3), runs a **seed run**: stages 1-5 with each fire burning a random 1 to 25 days, then fits the spread-day distribution that makes the simulated fire sizes match the record (C5). It scores nothing against the record: the fitted curve is first used in the Run scenario, and C6 scores it there (chapter 5). It runs on the Prep result, so it needs nothing rebuilt.
 
 ### 4.1 Create the scenario
 
@@ -798,19 +798,18 @@ A dependency passes on **every** sheet of the result it points to, the pipeline 
 | 7 | 4 - Grow Fires (C2F-W) | Burns every fire with C2F-W |
 | 8 | 5 - Summarize Burn Probability | Fire sizes and the burn-probability map |
 | 9 | C5 - Fit Spread Days | Fits the spread-day distribution to the recorded fire sizes |
-| 10 | C6 - Score Against Fire Records | Compares the simulated fires with the record (skipped for a seed run; it scores the Run scenario) |
 
 5. Click outside the grid so the last row is committed, then save (Ctrl+S).
 
-![Calibrate's pipeline: the ten stages, C1 to C6.](figures/04-07-calibrate-pipeline.png)
+![Calibrate's pipeline: the nine stages, C1 to C5.](figures/04-07-calibrate-pipeline.png)
 
-*Calibrate's own pipeline: (1) the ten stages in run order; (2) Inherit values stays unticked.*
+*Calibrate's own pipeline: (1) the nine stages in run order; (2) Inherit values stays unticked.*
 
 > **Only the pipeline is unticked.** Leave every other sheet inheriting from the Prep result. Breaking inheritance on a data sheet such as Landscape Maps would leave Calibrate without the zone's maps. The same applies to the Run scenario in chapter 5.
 
 ### 4.4 Calibration settings
 
-On the Calibrate scenario's **LUCAS Fire (C2F-W)** tab the tree now shows the sheets of all ten stages. Most keep their defaults or come from the Prep result. Set these five, saving after each: Run Control, Calibration Period, Calibration Options (this section), Burning Hours per Spread Day and Fire Growth Options (4.5).
+On the Calibrate scenario's **LUCAS Fire (C2F-W)** tab the tree now shows the sheets of all nine stages. Most keep their defaults or come from the Prep result. Set these five, saving after each: Run Control, Calibration Period, Calibration Options (this section), Burning Hours per Spread Day and Fire Growth Options (4.5).
 
 #### Run Control
 
@@ -845,7 +844,7 @@ You do not know a new zone's fires per season before the first Calibrate run. St
 | --- | --- | --- |
 | Fire Record: First / Last Year | 1992 / 2020 | The FPA-FOD years the fit is matched to |
 | Weather: First / Last Year | 1992 / 2020 | The days the spread-day weather stream (C2) draws from, the same years as the fires |
-| Holdout: First / Last Year | 2021 / 2024 | Years kept out of the fit; C6 scores them as an out-of-sample test |
+| Holdout: First / Last Year | 2021 / 2024 | Years kept out of the fit. No stage reads them yet; they record which years were held back |
 | Fire Record Source | FPA-FOD | Which source in the Historical Fire Record to fit to (2.13) |
 | Minimum Size Rule | **FSim per-zone (mean fire size)** | Which fires count as "large" in the fit (below) |
 
@@ -912,14 +911,14 @@ Every other sheet on the tab either comes from the Prep result (Landscape Maps, 
 Now describe the scenario. Open **General**, **Summary** and paste into Description:
 
 ```
-P18 Southern Cascades - Calibrate: seed run and spread-day fit for pyrome 18. DEPENDS ON: [2] P18 Southern Cascades - Prep result. PIPELINE: C1 Import Fire Record, C2 Build Weather Stream, C3 Fit Ignitions, stages 1-5 (seed run), C5 Fit Spread Days, C6 Score Against Fire Records; pipeline not inherited. RECORD: FPA-FOD 1992-2020, weather 1992-2020, holdout 2021-2024; minimum size rule FSim per-zone (zone mean fire size, floor 29.5 ha). FIT: ignition count and season x cause fitted; spread days fitted as one curve for all fires (too few large fires in P18 to split by cause or vegetation); area weight 5; burning hours 2 per spread day (as P26, forest pyrome). SEED RUN: 500 seasons, spread days uniform 1-25, seed 20260925. GROWTH: crown fire on, foliar moisture 85%, all cores but one. RECENT-FIRE RULES: package defaults.
+P18 Southern Cascades - Calibrate: seed run and spread-day fit for pyrome 18. DEPENDS ON: [2] P18 Southern Cascades - Prep result. PIPELINE: C1 Import Fire Record, C2 Build Weather Stream, C3 Fit Ignitions, stages 1-5 (seed run), C5 Fit Spread Days; pipeline not inherited. RECORD: FPA-FOD 1992-2020, weather 1992-2020, holdout 2021-2024; minimum size rule FSim per-zone (zone mean fire size, floor 29.5 ha). FIT: ignition count and season x cause fitted; spread days fitted as one curve for all fires (too few large fires in P18 to split by cause or vegetation); area weight 5; burning hours 2 per spread day (as P26, forest pyrome). SEED RUN: 500 seasons, spread days uniform 1-25, seed 20260925. GROWTH: crown fire on, foliar moisture 85%, all cores but one. RECENT-FIRE RULES: package defaults.
 ```
 
 Save (Ctrl+S).
 
 ### 4.7 Run Calibrate and read the fit
 
-Run the Calibrate scenario as in 3.5: select it, click **Run**, answer **Yes** to the save prompt. P18's run took 11 minutes; the result appears as **\[4\] P18 Southern Cascades - Calibrate (\[3\] @ ...)**. Open its **Run Log** and check each stage.
+Run the Calibrate scenario as in 3.5: select it, click **Run**, answer **Yes** to the save prompt. P18's run took 11 minutes; the result appears as **\[4\] P18 Southern Cascades - Calibrate (\[3\] @ ...)**. Open its **Run Log** and check each stage. The fit itself is also kept in two of the result's sheets, under Results (below).
 
 ![The Calibrate result in the Explorer and the Run Monitor.](figures/04-13-calibrate-result.png)
 
@@ -938,7 +937,6 @@ Run the Calibrate scenario as in 3.5: select it, click **Run**, answer **Yes** t
 | 4 | `done in 3.7 min: 14,679,335 burned cells` | C2F-W's share of the run |
 | 5 | `kept 1,703 fires (3.41 per season); 2.4% of season fires below 29.5 ha replaced` | Fires that came out smaller than the threshold are replaced from a pool of extra ignitions or, in a seed run (no pool), dropped; only large fires are fitted |
 | C5 | `Any / Any: 98 recorded fires, mean 1103 ha; fitted KS 0.069, mean kept size / observed 1.00, mean spread days 2.43` | The fit (below) |
-| C6 | `seed run ...: sizes are not a calibrated population, so no score` | Expected: C6 scores the Run scenario instead |
 
 #### Reading the C5 fit
 
@@ -969,6 +967,15 @@ Every class is within a few points of the record. The model makes a few fires ov
 *The fitted curve: (1) result \[4\] opened in its own tab (double-click it in the Explorer); (2) Spread-Day Distribution under 3 - Burning Conditions; (3) the relative frequency of each spread-day value. The rows are greyed because a result's sheets are read-only.*
 
 The fitted curve is written to this result's **Spread-Day Distribution** sheet. The Run scenario takes it from there by depending on this result (chapter 5).
+
+**Where the fit is kept.** Open the Calibrate result and, under **Results**, two sheets hold what C5 found:
+
+| Sheet | What it holds | P18 result 4 |
+| --- | --- | --- |
+| Calibration: Fit Summary | Burning Hours, Max CDF Gap (KS), Area Ratio and Mean Spread Days, one row per spread-day curve | 2 h, KS 0.069, area ratio 1.00 |
+| Calibration: Size Distribution Fit | Observed and fitted share of fires in each size class (the table above) |  |
+
+**Scores Against Fire Records stays empty here, by design.** C5's numbers come from reweighting the seed fires, so they show how well the curve can fit, not what the model does with it. The check is the Run scenario (chapter 5): it grows new fires with the fitted curve, and C6 scores them against the record (5.6). If those scores hold, the same Run scenario with more seasons is the finished model (6.4); the only differences are the number of seasons and the random draws.
 
 ## 5. Run the model (Run)
 
@@ -1553,7 +1560,7 @@ Copy the template for the scenario type, replace the parts in angle brackets, an
 ### 9.2 Calibrate
 
 ```
-<Pyrome> - Calibrate<variant>: seed run and spread-day fit for pyrome <n>. DEPENDS ON: [<id>] <Prep result>. PIPELINE: C1 Import Fire Record, C2 Build Weather Stream, C3 Fit Ignitions, stages 1-5 (seed run), C5 Fit Spread Days, C6 Score Against Fire Records; pipeline not inherited. RECORD: <FPA-FOD> <1992-2020>, weather <1992-2020>, holdout <2021-2024>; minimum size rule <FSim per-zone (zone mean fire size, floor 29.5 ha) | fixed <ha>>. FIT: ignition count and season x cause fitted; spread days fitted <as one curve for all fires | by cause | by origin vegetation | by cause and origin vegetation> (<why>); area weight <5>; burning hours <2> per spread day (<why>). SEED RUN: <500> seasons, spread days uniform 1-<25>, seed <20260925>. GROWTH: crown fire <on>, foliar moisture <85>%, <all cores but one>. RECENT-FIRE RULES: <package defaults | custom>. RESULT: <threshold, large fires per season, KS, mean size ratio from the log>. MAJOR CHANGE: <for a copy: what differs from the scenario it was copied from>.
+<Pyrome> - Calibrate<variant>: seed run and spread-day fit for pyrome <n>. DEPENDS ON: [<id>] <Prep result>. PIPELINE: C1 Import Fire Record, C2 Build Weather Stream, C3 Fit Ignitions, stages 1-5 (seed run), C5 Fit Spread Days; pipeline not inherited. RECORD: <FPA-FOD> <1992-2020>, weather <1992-2020>, holdout <2021-2024>; minimum size rule <FSim per-zone (zone mean fire size, floor 29.5 ha) | fixed <ha>>. FIT: ignition count and season x cause fitted; spread days fitted <as one curve for all fires | by cause | by origin vegetation | by cause and origin vegetation> (<why>); area weight <5>; burning hours <2> per spread day (<why>). SEED RUN: <500> seasons, spread days uniform 1-<25>, seed <20260925>. GROWTH: crown fire <on>, foliar moisture <85>%, <all cores but one>. RECENT-FIRE RULES: <package defaults | custom>. RESULT: <threshold, large fires per season, KS, area ratio from Calibration: Fit Summary>. MAJOR CHANGE: <for a copy: what differs from the scenario it was copied from>.
 ```
 
 ### 9.3 Run

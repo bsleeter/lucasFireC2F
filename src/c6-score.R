@@ -4,7 +4,8 @@
 # Scores a model run's kept fires against the historical record (validated P26 script 176): for the fires at or above
 # ResampleOption.MinimumFireSize in CalibrationPeriod's fire-record years, fires per year and area per year by size class,
 # simulated / observed, plus the size quantiles. (Spatial skill against burned-area holdouts - AUC - is added with the MTBS
-# import.) A seed run is scored for completeness but its sizes are not a calibrated population.
+# import.) A seed run is not scored: its sizes are not a calibrated population. Score the check run (a Run that uses C5's
+# fitted spread days) instead.
 # =============================================================================
 suppressPackageStartupMessages(library(rsyncrosim))
 source(file.path(ssimEnvironment()$PackageDirectory, "src", "shared.R"))
