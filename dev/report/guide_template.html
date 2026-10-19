@@ -1,0 +1,152 @@
+<title>lucasFireC2F User Guide</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,500;7..72,650&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a technical manual. A fixed contents rail on the left (chapters, with the current chapter's sections opened), the
+   guide in a readable column on the right. On a phone the rail becomes a drawer behind a Contents button. */
+:root {
+  --paper: #fbfbf9;      /* page */
+  --rail: #f1f1ed;       /* contents rail */
+  --ink: #1f2124;        /* text */
+  --muted: #5c5f63;      /* captions, secondary */
+  --rule: #dcdcd5;       /* hairlines, table borders */
+  --ember: #c2401a;      /* accent: the model's colour in the report figures */
+  --ember-soft: #fbe9e1; /* current-section highlight */
+  --code-bg: #efefea;
+  --font-display: "Literata", Georgia, "Times New Roman", serif;
+  --font-body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", Consolas, "Courier New", monospace;
+  --rail-w: 300px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --paper: #17181a; --rail: #1e1f22; --ink: #e6e5e1; --muted: #a2a29c; --rule: #34353a;
+  --ember: #f07a52; --ember-soft: #3a2219; --code-bg: #25262a; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --paper: #17181a; --rail: #1e1f22; --ink: #e6e5e1; --muted: #a2a29c; --rule: #34353a;
+  --ember: #f07a52; --ember-soft: #3a2219; --code-bg: #25262a; color-scheme: dark }
+
+html { scroll-padding-top: calc(16px + env(safe-area-inset-top, 0px)); }
+body { background: var(--paper); color: var(--ink); font: 17px/1.6 var(--font-body); }
+a { color: var(--ember); text-underline-offset: 2px; }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--ember); outline-offset: 2px; border-radius: 3px; }
+
+/* contents rail */
+.rail { position: fixed; top: 0; bottom: 0; left: 0; width: var(--rail-w); background: var(--rail);
+  border-right: 1px solid var(--rule); overflow-y: auto; overscroll-behavior: contain;
+  padding: calc(20px + env(safe-area-inset-top, 0px)) 14px calc(24px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+.rail-title { font: 650 1.05rem/1.25 var(--font-display); margin: 0 0 2px 6px; }
+.rail-version { font-size: .8rem; color: var(--muted); margin: 0 0 14px 6px; }
+.rail input { width: 100%; box-sizing: border-box; font: inherit; font-size: .9rem; padding: 6px 9px; margin-bottom: 12px;
+  border: 1px solid var(--rule); border-radius: 6px; background: var(--paper); color: var(--ink); }
+.toc, .toc ul { list-style: none; margin: 0; padding: 0; }
+.toc a { display: block; text-decoration: none; color: var(--ink); border-radius: 5px; padding: 4px 8px; font-size: .92rem; line-height: 1.35; }
+.toc a:hover { background: var(--ember-soft); }
+.toc > li { margin: 1px 0; }
+.toc > li > a { font-weight: 600; }
+.toc ul { display: none; margin: 2px 0 6px 10px; border-left: 1px solid var(--rule); }
+.toc ul a { font-size: .86rem; color: var(--muted); padding: 3px 8px; }
+.toc li.open > ul, .toc.filtering ul { display: block; }
+.toc a.current { color: var(--ember); background: var(--ember-soft); }
+.toc .nomatch { display: none; }
+
+/* main column */
+main { margin-left: var(--rail-w); padding-block: 40px 96px;
+  padding-left: max(32px, env(safe-area-inset-left, 0px)); padding-right: max(32px, env(safe-area-inset-right, 0px)); }
+.doc { max-width: 46rem; margin: 0 auto; min-width: 0; }
+.doc h1 { font: 650 2.3rem/1.15 var(--font-display); margin: 0 0 6px; text-wrap: balance; letter-spacing: -.01em; }
+.doc h1 + p { color: var(--muted); font-size: .95rem; margin-top: 0; }
+.doc h2 { font: 650 1.65rem/1.2 var(--font-display); margin: 3.2rem 0 .9rem; padding-top: 1.4rem; border-top: 2px solid var(--ink); text-wrap: balance; }
+.doc h3 { font: 650 1.25rem/1.3 var(--font-display); margin: 2.2rem 0 .6rem; text-wrap: balance; }
+.doc h4 { font-size: .8rem; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin: 1.8rem 0 .5rem; }
+.doc p, .doc li { max-width: 68ch; }
+.doc img { display: block; max-width: 100%; height: auto; margin: 1.2rem 0 .4rem; border: 1px solid var(--rule); border-radius: 4px; background: #fff; }
+.doc p:has(> img) + p > em:only-child, .doc p > em:only-child { color: var(--muted); font-size: .92rem; }
+.doc code { font: .86em var(--font-mono); background: var(--code-bg); padding: .1em .35em; border-radius: 4px; overflow-wrap: anywhere; }
+.doc pre { background: var(--code-bg); padding: 12px 14px; border-radius: 6px; overflow-x: auto; font-size: .85rem; line-height: 1.5; }
+.doc pre code { background: none; padding: 0; overflow-wrap: normal; white-space: pre-wrap; }
+.doc blockquote { margin: 1.2rem 0; padding: .6rem 1rem; border-left: 3px solid var(--ember); background: var(--ember-soft); border-radius: 0 6px 6px 0; }
+.doc blockquote p { margin: .4rem 0; }
+.table-wrap { overflow-x: auto; margin: 1rem 0 1.4rem; }
+.doc table { border-collapse: collapse; font-size: .9rem; line-height: 1.45; font-variant-numeric: tabular-nums; min-width: 60%; }
+.doc th, .doc td { border-bottom: 1px solid var(--rule); padding: 7px 10px; text-align: left; vertical-align: top; }
+.doc th { font-weight: 600; border-bottom: 2px solid var(--ink); }
+.doc hr { border: 0; border-top: 1px solid var(--rule); margin: 2rem 0; }
+
+/* phone: the rail becomes a drawer */
+.menu { display: none; }
+@media (max-width: 900px) {
+  .rail { transform: translateX(-102%); transition: transform .2s ease; z-index: 20; width: min(86vw, 340px);
+    box-shadow: 0 0 40px rgba(0,0,0,.25); }
+  body.rail-open .rail { transform: none; }
+  main { margin-left: 0; padding-top: 72px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .menu { display: block; position: fixed; z-index: 21; top: calc(12px + env(safe-area-inset-top, 0px)); left: max(12px, env(safe-area-inset-left, 0px));
+    font: 600 .9rem var(--font-body); color: var(--paper); background: var(--ink); border: 0; border-radius: 6px; padding: 8px 14px; }
+  body.rail-open .menu { left: auto; right: max(12px, env(safe-area-inset-right, 0px)); }
+  .doc h1 { font-size: 1.8rem; }
+}
+@media (prefers-reduced-motion: reduce) { .rail { transition: none; } }
+</style>
+
+<button class="menu" id="menu" type="button" aria-controls="rail" aria-expanded="false">Contents</button>
+<nav class="rail" id="rail" aria-label="Contents">
+  <p class="rail-title">lucasFireC2F User Guide</p>
+  <p class="rail-version" id="version"></p>
+  <input id="filter" type="search" placeholder="Filter sections" aria-label="Filter sections">
+  <ul class="toc" id="toc"></ul>
+</nav>
+<main><article class="doc" id="doc"><p>Loading the guide...</p></article></main>
+
+<script type="text/markdown" id="guide-md">
+<!--GUIDE_MARKDOWN-->
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<script>
+(function () {
+  var src = document.getElementById("guide-md").textContent.replace(/<\\\/script/gi, "</script");
+  var doc = document.getElementById("doc");
+  doc.innerHTML = marked.parse(src, { gfm: true });
+  // tables scroll in their own box at narrow widths
+  doc.querySelectorAll("table").forEach(function (t) { var w = document.createElement("div"); w.className = "table-wrap"; t.parentNode.insertBefore(w, t); w.appendChild(t); });
+  doc.querySelectorAll("img").forEach(function (i) { i.loading = "lazy"; });
+  var v = doc.querySelector("h1 + p"), m = v && v.textContent.match(/lucasFireC2F (\d+(\.\d+)+)/); if (m) document.getElementById("version").textContent = "Version " + m[1];
+  // ids from heading text (stable across rebuilds), then the contents tree: chapters (h2) with their sections (h3)
+  var used = {}; function slug(s) { var b = s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "section", k = b, n = 2; while (used[k]) k = b + "-" + n++; used[k] = 1; return k; }
+  var toc = document.getElementById("toc"), heads = [], cur = null;
+  doc.querySelectorAll("h2, h3").forEach(function (h) {
+    h.id = slug(h.textContent);
+    var li = document.createElement("li"), a = document.createElement("a"); a.href = "#" + h.id; a.textContent = h.textContent; li.appendChild(a);
+    if (h.tagName === "H2") { toc.appendChild(li); cur = li; }
+    else if (cur) { var ul = cur.querySelector("ul") || cur.appendChild(document.createElement("ul")); ul.appendChild(li); }
+    heads.push({ h: h, a: a, li: li, top: cur });
+  });
+  // the current section: the last heading above the top quarter of the window
+  var last = null;
+  function spy() {
+    var y = window.innerHeight * 0.25, on = heads[0];
+    for (var i = 0; i < heads.length; i++) { if (heads[i].h.getBoundingClientRect().top <= y) on = heads[i]; else break; }
+    if (!on || on === last) return; last = on;
+    toc.querySelectorAll("a.current").forEach(function (x) { x.classList.remove("current"); });
+    toc.querySelectorAll("li.open").forEach(function (x) { x.classList.remove("open"); });
+    on.a.classList.add("current"); if (on.top) { on.top.classList.add("open"); on.top.firstChild.classList.add("current"); }
+    var r = on.a.getBoundingClientRect(), rail = document.getElementById("rail"), rr = rail.getBoundingClientRect();
+    if (r.top < rr.top + 80 || r.bottom > rr.bottom - 40) rail.scrollTop += r.top - rr.top - rr.height / 3;
+  }
+  var tick = false; window.addEventListener("scroll", function () { if (!tick) { tick = true; requestAnimationFrame(function () { tick = false; spy(); }); } }, { passive: true });
+  spy();
+  // filter the contents by words
+  var f = document.getElementById("filter");
+  f.addEventListener("input", function () {
+    var q = f.value.trim().toLowerCase(); toc.classList.toggle("filtering", !!q);
+    heads.forEach(function (x) { x.li.classList.toggle("nomatch", !!q && x.a.textContent.toLowerCase().indexOf(q) < 0 && !(x.li.querySelector("ul") && Array.prototype.some.call(x.li.querySelectorAll("ul a"), function (s) { return s.textContent.toLowerCase().indexOf(q) >= 0; }))); });
+  });
+  // phone drawer
+  var menu = document.getElementById("menu");
+  function setOpen(o) { document.body.classList.toggle("rail-open", o); menu.setAttribute("aria-expanded", o); menu.textContent = o ? "Close" : "Contents"; }
+  menu.addEventListener("click", function () { setOpen(!document.body.classList.contains("rail-open")); });
+  toc.addEventListener("click", function (e) { if (e.target.tagName === "A" && window.innerWidth <= 900) setOpen(false); });
+  if (location.hash) { var t = document.getElementById(location.hash.slice(1)); if (t) t.scrollIntoView(); }
+})();
+</script>

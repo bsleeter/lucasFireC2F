@@ -18,3 +18,16 @@ x[k] <- sprintf("![%s](figures/%s)", alt, map)
 x <- sub("^Sep 30, 2026 .*$", "For lucasFireC2F 2.4.0. Exported 16 October 2026 from the working copy of the guide.", x)
 writeLines(x, file.path(G, "lucasFireC2F-User-Guide.md"), useBytes = TRUE)
 for (i in c(1, 5, 26, 64, 71, 72, 73, 86)) cat(x[k[i]], "\n")
+
+# the HTML guide: the same markdown rendered in the page (dev/report/guide_template.html) with a fixed contents rail.
+# lucasFireC2F-User-Guide.html opens from the repo folder (figures/ beside it); a second copy without the document wrapper,
+# for publishing as a claude.ai Artifact (which adds its own), goes to the folder given as the second argument, if any.
+tpl <- paste(readLines("F:/lucasFireC2F/dev/report/guide_template.html", warn = FALSE, encoding = "UTF-8"), collapse = "\n")
+md <- gsub("</script", "<\\/script", paste(x, collapse = "\n"), ignore.case = TRUE)
+tp <- strsplit(tpl, "<!--GUIDE_MARKDOWN-->", fixed = TRUE)[[1]]; stopifnot(length(tp) == 2)
+page <- paste0(tp[1], md, tp[2])   # pasted, not sub(): the markdown's backslashes (Windows paths) must stay as they are
+writeLines(c("<!doctype html>", "<html lang=\"en\">", "<head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1, viewport-fit=cover\">",
+             "<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style></head>", "<body>", page, "</body>", "</html>"),
+           file.path(G, "lucasFireC2F-User-Guide.html"), useBytes = TRUE)
+if (length(commandArgs(TRUE)) >= 2) writeLines(page, file.path(commandArgs(TRUE)[2], "lucasFireC2F-User-Guide.html"), useBytes = TRUE)
+cat("wrote", file.path(G, "lucasFireC2F-User-Guide.html"), "\n")
