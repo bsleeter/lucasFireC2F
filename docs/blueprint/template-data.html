@@ -1,0 +1,152 @@
+<title>lucasFireC2F Data Blueprint</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;600;700&display=swap">
+<style>
+/* layout: the wide lineage drawing (scrolls sideways on a phone), dataset and stage pickers, then the selection's details */
+:root{ {{FONTS}} {{LIGHT}} }
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ {{DARK}} color-scheme:dark } }
+:root[data-theme="dark"]{ {{DARK}} color-scheme:dark }
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 var(--sans)}
+.links{display:flex;flex-wrap:wrap;gap:4px 18px;font-size:13px}
+.links a{color:var(--ink2);text-decoration:none;border-bottom:1px solid var(--line)}
+.links a:hover{color:var(--ink);border-bottom-color:var(--edge)}
+.links a[aria-current]{color:var(--ink);font-weight:600;border-bottom:2px solid var(--edge)}
+.links a:focus-visible{outline:2px solid var(--edge);outline-offset:2px}
+.wrap{max-width:1640px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:18px}
+.intro{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 24px}
+.intro h1{font:700 20px/1.2 var(--sans);margin:0;text-wrap:balance}
+.intro p{margin:0;color:var(--muted);max-width:72ch}
+.figure{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+.figure svg{display:block;width:100%;min-width:1120px;height:auto}
+{{RULES}}
+.ds,.stage{cursor:pointer}
+.ds:focus,.stage:focus{outline:none}
+.ds:focus-visible .dsbg{stroke:var(--edge);stroke-width:1.5}
+.stage:focus-visible .sb{stroke-width:3}
+svg .wire,svg .stage,svg .ds text{transition:opacity .15s}
+.ds:hover .dsbg,.ds.on .dsbg{fill:var(--prep-t)}
+svg.dim .wire{opacity:.08}
+svg.dim .wire.on{opacity:1;stroke-width:2.2}
+svg.dim .stage:not(.on){opacity:.35}
+svg.dim .ds:not(.on) text{opacity:.4}
+.stage.on .sb{stroke-width:2.6}
+.pickers{display:grid;gap:10px}
+.picker{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.picker h2{margin:0 6px 0 0;font:600 10.5px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);min-width:72px}
+.pick{display:inline-flex;align-items:center;gap:7px;padding:3px 10px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink2);font:500 12.5px var(--sans);cursor:pointer}
+.pick.st{padding-left:4px}
+.pick:hover{border-color:var(--edge)}
+.pick[aria-pressed="true"]{border-color:var(--edge);background:var(--prep-t);color:var(--ink)}
+.pick.st:hover,.pick.st[aria-pressed="true"]{border-color:var(--c)}
+.pick.st[aria-pressed="true"]{background:var(--t)}
+.pick:focus-visible,.chipb:focus-visible{outline:2px solid var(--edge);outline-offset:2px}
+.pick b,.chipb{display:inline-grid;place-items:center;min-width:24px;height:20px;padding:0 4px;border-radius:3px;background:var(--c);color:var(--on);font:600 11px var(--mono)}
+.chipb{border:0;cursor:pointer;height:19px;font-size:10.5px}
+.detail{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:20px 22px;display:grid;gap:12px}
+.d-head{display:flex;gap:14px;align-items:flex-start}
+.d-head .num{display:grid;place-items:center;min-width:40px;height:34px;padding:0 6px;border-radius:5px;background:var(--c);color:var(--on);font:600 15px var(--mono)}
+.d-head h2{margin:0;font:700 18px/1.25 var(--sans)}
+.d-meta{margin:2px 0 0;color:var(--muted);font:400 12px var(--mono);overflow-wrap:anywhere}
+.facts{display:grid;grid-template-columns:max-content 1fr;gap:4px 16px;margin:0;font-size:13px}
+.facts dt{color:var(--muted)}
+.facts dd{margin:0;min-width:0;overflow-wrap:anywhere;color:var(--ink2)}
+.facts code{font:400 12px var(--mono)}
+.detail h3{margin:6px 0 0;font:600 10.5px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.uses{list-style:none;margin:0;padding:0;display:grid}
+.uses li{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;padding:8px 0;border-top:1px solid var(--line);align-items:start}
+.uses li:first-child{border-top:0}
+.uses .what{min-width:0}
+.uses .what span{display:block;color:var(--ink);font-size:13.5px}
+.uses .what small{display:block;color:var(--muted);font-size:12px}
+.tag{display:inline-block;margin-left:6px;padding:0 6px;border-radius:3px;border:1px dashed var(--muted);color:var(--muted);font:500 10.5px var(--mono);vertical-align:1px}
+.dsbtn{border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--ink);font:600 12px var(--sans);padding:2px 8px;cursor:pointer;text-align:left}
+.note{margin:0;color:var(--muted);font-size:12.5px}
+@media (prefers-reduced-motion: reduce){svg .wire,svg .stage,svg .ds text{transition:none}}
+</style>
+
+<div class="wrap">
+  {{NAV}}
+  <div class="intro">
+    <h1>lucasFireC2F data blueprint</h1>
+    <p>Version {{VERSION}}: the {{N}} national datasets of the Data Sources sheet, the stages that read each one, what for, and the setting that switches it. Select a dataset or a stage, in the drawing or below.</p>
+  </div>
+  <div class="figure">
+{{SVG}}
+  </div>
+  <div class="pickers">
+    <div class="picker" id="pick-ds"><h2>Datasets</h2></div>
+    <div class="picker" id="pick-st"><h2>Stages</h2></div>
+  </div>
+  <article class="detail" id="detail" aria-live="polite"></article>
+  <p class="note">Built by docs/blueprint/build-data.R from package.xml; the companion drawing of stages and datasheets is built by build.R.</p>
+</div>
+
+<script type="application/json" id="data">{{DATA}}</script>
+<script>
+(function () {
+  const J = JSON.parse(document.getElementById('data').textContent);
+  const arr = v => v == null ? [] : Array.isArray(v) ? v : typeof v === 'object' ? [] : [v];
+  const DS = Object.fromEntries(arr(J.datasets).map(d => [d.col, d]));
+  const ST = J.stages;
+  const svg = document.querySelector('.figure svg');
+  const detail = document.getElementById('detail');
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const chip = id => `<button class="chipb f-${ST[id].family}" data-st="${id}" aria-label="Stage ${esc(ST[id].label)}, ${esc(ST[id].name)}">${esc(ST[id].label)}</button>`;
+  const when = z => (z.alt ? '<span class="tag">non-default option</span>' : '') + (z.note ? `<small>${z.alt ? 'Only when ' : 'Switch: '}${esc(z.note)}</small>` : '');
+
+  document.getElementById('pick-ds').insertAdjacentHTML('beforeend', arr(J.datasets).map(d => `<button class="pick" data-ds="${d.col}" aria-pressed="false">${esc(d.label)}</button>`).join(''));
+  document.getElementById('pick-st').insertAdjacentHTML('beforeend', Object.values(ST).map(s => `<button class="pick st f-${s.family}" data-st="${s.id}" aria-pressed="false"><b>${esc(s.label)}</b>${esc(s.name)}</button>`).join(''));
+
+  // sel: the one dataset or stage chosen; dsSet and stSet: everything it connects to
+  function mark(dsSet, stSet, wire, sel) {
+    svg.classList.add('dim');
+    svg.querySelectorAll('.wire').forEach(w => w.classList.toggle('on', wire(w)));
+    svg.querySelectorAll('.ds').forEach(g => g.classList.toggle('on', dsSet.has(g.dataset.ds)));
+    svg.querySelectorAll('.stage').forEach(g => g.classList.toggle('on', stSet.has(g.dataset.stage)));
+    document.querySelectorAll('.pick').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.ds ? b.dataset.ds === sel.ds : b.dataset.st === sel.st)));
+  }
+
+  function selectDs(col) {
+    const d = DS[col]; if (!d) return;
+    const uses = arr(d.uses);
+    mark(new Set([col]), new Set(uses.map(z => z.stage)), w => w.dataset.ds === col, { ds: col });
+    detail.className = 'detail';
+    detail.innerHTML = `
+      <div class="d-head"><div><h2>${esc(d.label)}</h2><p class="d-meta">${esc(d.group)} · ${esc(d.vintage)}</p></div></div>
+      <dl class="facts">
+        <dt>Data Sources row</dt><dd>${esc(d.display)}</dd>
+        <dt>Column</dt><dd><code>${esc(d.col)}</code></dd>
+        
+      </dl>
+      <h3>Read by</h3>
+      <ul class="uses">${uses.map(z => `<li>${chip(z.stage)}<div class="what"><span>${esc(z.role)}</span>${when(z)}</div></li>`).join('')}</ul>`;
+  }
+
+  function selectSt(id) {
+    const s = ST[id]; if (!s) return;
+    const reads = arr(s.reads);
+    mark(new Set(reads.map(r => r.col)), new Set([id]), w => w.dataset.stage === id, { st: id });
+    detail.className = `detail f-${s.family}`;
+    detail.innerHTML = `
+      <div class="d-head"><span class="num">${esc(s.label)}</span><div><h2>${esc(s.name)}</h2><p class="d-meta">Set by: ${esc(s.set)}</p></div></div>
+      <dl class="facts"><dt>Makes</dt><dd>${esc(s.makes)}</dd></dl>
+      <h3>Reads</h3>
+      <ul class="uses">${reads.map(r => `<li><button class="dsbtn" data-ds="${r.col}">${esc(r.label)}</button><div class="what"><span>${esc(r.role)}</span>${when(r)}</div></li>`).join('')}</ul>`;
+  }
+
+  document.addEventListener('click', e => {
+    const t = e.target.closest('[data-st], [data-ds], .stage, .ds');
+    if (!t || t.classList.contains('wire')) return;
+    if (t.dataset.st) selectSt(t.dataset.st);
+    else if (t.classList.contains('stage')) selectSt(t.dataset.stage);
+    else if (t.dataset.ds) selectDs(t.dataset.ds);
+  });
+  svg.querySelectorAll('.stage, .ds').forEach(g => g.addEventListener('keydown', e => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    e.preventDefault(); g.classList.contains('stage') ? selectSt(g.dataset.stage) : selectDs(g.dataset.ds);
+  }));
+  selectDs("LandfireFolder");
+})();
+</script>

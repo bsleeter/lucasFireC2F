@@ -37,7 +37,10 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--ember); outline
   border-right: 1px solid var(--rule); overflow-y: auto; overscroll-behavior: contain;
   padding: calc(20px + env(safe-area-inset-top, 0px)) 14px calc(24px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
 .rail-title { font: 650 1.05rem/1.25 var(--font-display); margin: 0 0 2px 6px; }
-.rail-version { font-size: .8rem; color: var(--muted); margin: 0 0 14px 6px; }
+.rail-version { font-size: .8rem; color: var(--muted); margin: 0 0 10px 6px; }
+.site { display: flex; flex-wrap: wrap; gap: 2px 12px; margin: 0 0 14px 6px; font-size: .82rem; }
+.site a { color: var(--muted); text-decoration: none; border-bottom: 1px solid var(--rule); }
+.site a:hover { color: var(--ember); border-bottom-color: var(--ember); }
 .rail input { width: 100%; box-sizing: border-box; font: inherit; font-size: .9rem; padding: 6px 9px; margin-bottom: 12px;
   border: 1px solid var(--rule); border-radius: 6px; background: var(--paper); color: var(--ink); }
 .toc, .toc ul { list-style: none; margin: 0; padding: 0; }
@@ -94,6 +97,7 @@ main { margin-left: var(--rail-w); padding-block: 40px 96px;
 <nav class="rail" id="rail" aria-label="Contents">
   <p class="rail-title">lucasFireC2F User Guide</p>
   <p class="rail-version" id="version"></p>
+  <p class="site"><a href="../blueprint/">Package blueprint</a><a href="../blueprint/data.html">Data blueprint</a><a href="https://github.com/bsleeter/lucasFireC2F">Source on GitHub</a></p>
   <input id="filter" type="search" placeholder="Filter sections" aria-label="Filter sections">
   <ul class="toc" id="toc"></ul>
 </nav>

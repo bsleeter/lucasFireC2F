@@ -1,0 +1,299 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000" role="img" aria-labelledby="bp-title">
+<title id="bp-title">lucasFireC2F data blueprint: national datasets and the stages that read them</title>
+<style><![CDATA[@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;600;700&display=swap');
+svg{--sans:'IBM Plex Sans',Arial,Helvetica,sans-serif;--mono:'IBM Plex Mono',Consolas,'Courier New',monospace;--bg:#f5f5f3;--surface:#ffffff;--line:#d6d5d0;--ink:#1f2124;--ink2:#3a3c40;--muted:#5f6166;--edge:#45474c;--on:#ffffff;
+--prep:#56666e;--prep-t:#eceff0;--cal:#2b679a;--cal-t:#e3edf6;--grow:#b4441c;--grow-t:#fbe9e1;--fx:#2d7650;--fx-t:#e4f1e9;--eval:#6a5293;--eval-t:#eee9f5;}
+.bg{fill:var(--bg)} .box{fill:var(--surface);stroke:var(--line);stroke-width:1}
+.h1{font:700 22px var(--sans);fill:var(--ink)} .sub{font:400 12px var(--sans);fill:var(--muted)}
+.eyebrow{font:500 9.5px var(--mono);letter-spacing:.08em;fill:var(--muted)} .sname{font:700 14px var(--sans);fill:var(--ink)}
+.ghead{font:600 9px var(--mono);letter-spacing:.08em;fill:var(--muted)} .gt{font:600 12px var(--sans);fill:var(--ink)}
+.item{font:400 10px var(--sans);fill:var(--ink2)} .txt{font:400 11px var(--sans);fill:var(--ink2)}
+.mono{font:400 10px var(--mono);fill:var(--muted)} .lbl{font:400 9.5px var(--mono);fill:var(--muted)}
+.foot{font:400 10.5px var(--sans);fill:var(--muted)} .lgt{font:400 11px var(--sans);fill:var(--ink2)}
+.f-prep{--c:var(--prep);--t:var(--prep-t)} .f-cal{--c:var(--cal);--t:var(--cal-t)} .f-grow{--c:var(--grow);--t:var(--grow-t)}
+.f-fx{--c:var(--fx);--t:var(--fx-t)} .f-eval{--c:var(--eval);--t:var(--eval-t)}
+.lg{fill:var(--c)} .stage .sb{fill:var(--t);stroke:var(--c);stroke-width:1.2} .stage.ghost .sb{stroke-dasharray:4 3}
+.badge{fill:var(--c)} .badge-t{font:600 11px var(--mono);fill:var(--on)} .sn{font:600 11.5px var(--sans);fill:var(--ink)}
+.ss{font:400 9px var(--mono);fill:var(--muted)} .chip rect{fill:var(--c)} .chip-t{font:600 8.5px var(--mono);fill:var(--on)}
+.pill rect{fill:var(--t);stroke:var(--c);stroke-width:1;stroke-dasharray:4 3} .pill-t{font:600 11px var(--sans);fill:var(--ink2)}
+.edge{fill:none;stroke:var(--edge);stroke-width:1.3} .dep{fill:none;stroke:var(--edge);stroke-width:1.2;stroke-dasharray:5 4}
+.ah{fill:var(--edge)} .rule{stroke:var(--line);stroke-width:1}
+.engine rect{fill:var(--ink)} .engine-t{font:600 9.5px var(--mono);fill:var(--surface)}
+.rowbg{fill:transparent} .rowt{font:400 10.5px var(--sans);fill:var(--ink2)}
+.dsbg{fill:transparent} .dsn{font:600 11.5px var(--sans);fill:var(--ink)} .dsv{font:400 9.5px var(--mono);fill:var(--muted)}
+.wire{fill:none;stroke:var(--c);stroke-width:1.3;opacity:.75} .wire.alt{stroke-dasharray:4 3}
+.sport{fill:var(--edge)} .port{fill:var(--c)}
+.sn2{font:600 13px var(--sans);fill:var(--ink)} .mk{font:400 11px var(--sans);fill:var(--ink2)} .ch{font:400 10px var(--sans);fill:var(--muted)}
+]]></style>
+<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs>
+<rect class="bg" width="1600" height="1000"/>
+<text x="24" y="44" class="h1">lucasFireC2F data blueprint</text>
+<text x="24" y="66" class="sub">The national datasets lucasFireC2F reads, the stages that read them, what for, and the option that switches each one · version 2.4.0</text>
+<rect class="lg f-prep" x="836.6" y="28" width="14" height="12" rx="2"/>
+<text x="858.6" y="38" class="lgt">Zone preparation</text>
+<rect class="lg f-cal" x="965.8" y="28" width="14" height="12" rx="2"/>
+<text x="987.8" y="38" class="lgt">Calibration</text>
+<rect class="lg f-grow" x="1064" y="28" width="14" height="12" rx="2"/>
+<text x="1086" y="38" class="lgt">Fire growth and merge</text>
+<rect class="lg f-fx" x="1224.2" y="28" width="14" height="12" rx="2"/>
+<text x="1246.2" y="38" class="lgt">Burn probability, effects, risk</text>
+<rect class="lg f-eval" x="1446.4" y="28" width="14" height="12" rx="2"/>
+<text x="1468.4" y="38" class="lgt">Scores and figures</text>
+<path d="M1100.2,58 h18" class="wire f-prep" style="opacity:1"/>
+<text x="1122.2" y="62" class="lgt">read with the default settings</text>
+<path d="M1316.2,58 h18" class="wire f-prep alt" style="opacity:1"/>
+<text x="1338.2" y="62" class="lgt">read only when a shortcut row is filled</text>
+<rect class="box" x="24" y="104" width="600" height="830" rx="7"/><text x="40" y="126" class="eyebrow">DATA SOURCES SHEET · PROJECT SCOPE</text><text x="40" y="146" class="sname">National datasets</text>
+<text x="312" y="146" class="ghead">VINTAGE · RESOLUTION</text>
+<text x="40" y="172" class="ghead">LANDSCAPE</text>
+<g class="ds" data-ds="LandfireFolder" tabindex="0" role="button" aria-label="LANDFIRE fuels and canopy"><rect class="dsbg" x="32" y="178" width="584" height="22" rx="3"/>
+<text x="40" y="193" class="dsn">LANDFIRE fuels and canopy</text>
+<text x="312" y="193" class="dsv">LF 2020 (2.2.0) · FBFM40, CBD, CBH, CC, CH · 30 m</text>
+</g>
+<g class="ds" data-ds="StatewideElevationFile" tabindex="0" role="button" aria-label="LANDFIRE elevation"><rect class="dsbg" x="32" y="201" width="584" height="22" rx="3"/>
+<text x="40" y="216" class="dsn">LANDFIRE elevation</text>
+<text x="312" y="216" class="dsv">LF 2020 · 30 m DEM</text>
+</g>
+<g class="ds" data-ds="BpsFile" tabindex="0" role="button" aria-label="LANDFIRE Biophysical Settings"><rect class="dsbg" x="32" y="224" width="584" height="22" rx="3"/>
+<text x="40" y="239" class="dsn">LANDFIRE Biophysical Settings</text>
+<text x="312" y="239" class="dsv">LF 2020 · 30 m · with attribute table</text>
+</g>
+<text x="40" y="274" class="ghead">ZONES</text>
+<g class="ds" data-ds="FireZoneBoundaryFile" tabindex="0" role="button" aria-label="Pyromes (fire zones)"><rect class="dsbg" x="32" y="280" width="584" height="22" rx="3"/>
+<text x="40" y="295" class="dsn">Pyromes (fire zones)</text>
+<text x="312" y="295" class="dsv">RDS-2020-0020 · field PYROME</text>
+</g>
+<g class="ds" data-ds="FireZoneGridFile" tabindex="0" role="button" aria-label="Fire-zone grid (prebuilt)"><rect class="dsbg" x="32" y="303" width="584" height="22" rx="3"/>
+<text x="40" y="318" class="dsn">Fire-zone grid (prebuilt)</text>
+<text x="312" y="318" class="dsv">150 m · optional shortcut</text>
+</g>
+<g class="ds" data-ds="WeatherZoneBoundaryFile" tabindex="0" role="button" aria-label="NWS fire weather zones"><rect class="dsbg" x="32" y="326" width="584" height="22" rx="3"/>
+<text x="40" y="341" class="dsn">NWS fire weather zones</text>
+<text x="312" y="341" class="dsv">fz03mr26</text>
+</g>
+<g class="ds" data-ds="WeatherZoneGridFile" tabindex="0" role="button" aria-label="Weather-zone grid (prebuilt)"><rect class="dsbg" x="32" y="349" width="584" height="22" rx="3"/>
+<text x="40" y="364" class="dsn">Weather-zone grid (prebuilt)</text>
+<text x="312" y="364" class="dsv">150 m · optional shortcut</text>
+</g>
+<text x="40" y="399" class="ghead">FIRE RECORD</text>
+<g class="ds" data-ds="FpaFodFile" tabindex="0" role="button" aria-label="FPA-FOD fire occurrence"><rect class="dsbg" x="32" y="405" width="584" height="22" rx="3"/>
+<text x="40" y="420" class="dsn">FPA-FOD fire occurrence</text>
+<text x="312" y="420" class="dsv">6th edition · 1992-2020 · GeoPackage</text>
+</g>
+<g class="ds" data-ds="MtbsPerimeterFile" tabindex="0" role="button" aria-label="MTBS burned area boundaries"><rect class="dsbg" x="32" y="428" width="584" height="22" rx="3"/>
+<text x="40" y="443" class="dsn">MTBS burned area boundaries</text>
+<text x="312" y="443" class="dsv">August 2026 release · 1984-2026</text>
+</g>
+<g class="ds" data-ds="MtbsSeverityFolder" tabindex="0" role="button" aria-label="MTBS burn severity mosaics"><rect class="dsbg" x="32" y="451" width="584" height="22" rx="3"/>
+<text x="40" y="466" class="dsn">MTBS burn severity mosaics</text>
+<text x="312" y="466" class="dsv">mtbs_CONUS_1984 to 2024 · 30 m</text>
+</g>
+<g class="ds" data-ds="InteragencyPerimeterFile" tabindex="0" role="button" aria-label="Interagency fire perimeters"><rect class="dsbg" x="32" y="474" width="584" height="22" rx="3"/>
+<text x="40" y="489" class="dsn">Interagency fire perimeters</text>
+<text x="312" y="489" class="dsv">NIFC · all years</text>
+</g>
+<g class="ds" data-ds="FireAgeFile" tabindex="0" role="button" aria-label="Fire-age classes (prebuilt)"><rect class="dsbg" x="32" y="497" width="584" height="22" rx="3"/>
+<text x="40" y="512" class="dsn">Fire-age classes (prebuilt)</text>
+<text x="312" y="512" class="dsv">150 m · optional shortcut</text>
+</g>
+<text x="40" y="547" class="ghead">WEATHER</text>
+<g class="ds" data-ds="GridMetFolder" tabindex="0" role="button" aria-label="gridMET daily meteorology"><rect class="dsbg" x="32" y="553" width="584" height="22" rx="3"/>
+<text x="40" y="568" class="dsn">gridMET daily meteorology</text>
+<text x="312" y="568" class="dsv">4 km · 1979-2024</text>
+</g>
+<g class="ds" data-ds="ZoneDailyWeatherFile" tabindex="0" role="button" aria-label="Zone-daily weather table (prebuilt)"><rect class="dsbg" x="32" y="576" width="584" height="22" rx="3"/>
+<text x="40" y="591" class="dsn">Zone-daily weather table (prebuilt)</text>
+<text x="312" y="591" class="dsv">CSV · optional shortcut</text>
+</g>
+<g class="ds" data-ds="RawsHourlyFolder" tabindex="0" role="button" aria-label="RAWS hourly observations"><rect class="dsbg" x="32" y="599" width="584" height="22" rx="3"/>
+<text x="40" y="614" class="dsn">RAWS hourly observations</text>
+<text x="312" y="614" class="dsv">FEMS · 2006-2024</text>
+</g>
+<g class="ds" data-ds="RawsCatalogueFile" tabindex="0" role="button" aria-label="RAWS station catalogue"><rect class="dsbg" x="32" y="622" width="584" height="22" rx="3"/>
+<text x="40" y="637" class="dsn">RAWS station catalogue</text>
+<text x="312" y="637" class="dsv">FEMS JSON · optional</text>
+</g>
+<text x="40" y="672" class="ghead">IGNITION COVARIATES</text>
+<g class="ds" data-ds="IgnitionCovariateFolder" tabindex="0" role="button" aria-label="Ignition covariates (prebuilt)"><rect class="dsbg" x="32" y="678" width="584" height="22" rx="3"/>
+<text x="40" y="693" class="dsn">Ignition covariates (prebuilt)</text>
+<text x="312" y="693" class="dsv">30 m · optional shortcut</text>
+</g>
+<g class="ds" data-ds="RoadsFile" tabindex="0" role="button" aria-label="LANDFIRE roads"><rect class="dsbg" x="32" y="701" width="584" height="22" rx="3"/>
+<text x="40" y="716" class="dsn">LANDFIRE roads</text>
+<text x="312" y="716" class="dsv">LF 2023 · 30 m</text>
+</g>
+<g class="ds" data-ds="NlcdLandCoverFile" tabindex="0" role="button" aria-label="Annual NLCD land cover"><rect class="dsbg" x="32" y="724" width="584" height="22" rx="3"/>
+<text x="40" y="739" class="dsn">Annual NLCD land cover</text>
+<text x="312" y="739" class="dsv">Collection 1 · 2010 · 30 m</text>
+</g>
+<g class="ds" data-ds="HousingDensityFile" tabindex="0" role="button" aria-label="SILVIS housing density"><rect class="dsbg" x="32" y="747" width="584" height="22" rx="3"/>
+<text x="40" y="762" class="dsn">SILVIS housing density</text>
+<text x="312" y="762" class="dsv">WUI v4 · HUDEN2010</text>
+</g>
+<g class="ds" data-ds="PrismPrecipFile" tabindex="0" role="button" aria-label="PRISM precipitation normal"><rect class="dsbg" x="32" y="770" width="584" height="22" rx="3"/>
+<text x="40" y="785" class="dsn">PRISM precipitation normal</text>
+<text x="312" y="785" class="dsv">1991-2020 · 4 km</text>
+</g>
+<text x="40" y="820" class="ghead">BENCHMARK</text>
+<g class="ds" data-ds="WrcBurnProbabilityFile" tabindex="0" role="button" aria-label="WRC burn probability"><rect class="dsbg" x="32" y="826" width="584" height="22" rx="3"/>
+<text x="40" y="841" class="dsn">WRC burn probability</text>
+<text x="312" y="841" class="dsv">2nd edition · RDS-2020-0016-2 · 270 m</text>
+</g>
+<path class="wire f-prep" data-ds="LandfireFolder" data-stage="P1" d="M616,189 C808,189 808,113.0 998,113.0"/>
+<path class="wire f-prep" data-ds="LandfireFolder" data-stage="P2" d="M616,189 C808,189 808,221.3 998,221.3"/>
+<path class="wire f-prep" data-ds="LandfireFolder" data-stage="P4" d="M616,189 C808,189 808,449.9 998,449.9"/>
+<path class="wire f-prep" data-ds="StatewideElevationFile" data-stage="P1" d="M616,212 C808,212 808,119.0 998,119.0"/>
+<path class="wire f-prep" data-ds="StatewideElevationFile" data-stage="P2" d="M616,212 C808,212 808,227.3 998,227.3"/>
+<path class="wire f-prep" data-ds="BpsFile" data-stage="P1" d="M616,235 C808,235 808,125.0 998,125.0"/>
+<path class="wire f-prep" data-ds="FireZoneBoundaryFile" data-stage="P1" d="M616,291 C808,291 808,131.0 998,131.0"/>
+<path class="wire f-prep" data-ds="FireZoneBoundaryFile" data-stage="P2" d="M616,291 C808,291 808,233.3 998,233.3"/>
+<path class="wire f-prep alt" data-ds="FireZoneGridFile" data-stage="P1" d="M616,314 C808,314 808,137.0 998,137.0"/>
+<path class="wire f-prep" data-ds="WeatherZoneBoundaryFile" data-stage="P1" d="M616,337 C808,337 808,143.0 998,143.0"/>
+<path class="wire f-prep" data-ds="WeatherZoneBoundaryFile" data-stage="P3" d="M616,337 C808,337 808,334.1 998,334.1"/>
+<path class="wire f-prep" data-ds="WeatherZoneBoundaryFile" data-stage="P5" d="M616,337 C808,337 808,553.1 998,553.1"/>
+<path class="wire f-prep alt" data-ds="WeatherZoneGridFile" data-stage="P1" d="M616,360 C808,360 808,149.0 998,149.0"/>
+<path class="wire f-prep" data-ds="FpaFodFile" data-stage="P2" d="M616,416 C808,416 808,239.3 998,239.3"/>
+<path class="wire f-cal" data-ds="FpaFodFile" data-stage="C1" d="M616,416 C808,416 808,681.4 998,681.4"/>
+<path class="wire f-prep" data-ds="MtbsPerimeterFile" data-stage="P3" d="M616,439 C808,439 808,349.1 998,349.1"/>
+<path class="wire f-eval" data-ds="MtbsPerimeterFile" data-stage="C7" d="M616,439 C808,439 808,774.7 998,774.7"/>
+<path class="wire f-eval" data-ds="MtbsPerimeterFile" data-stage="R" d="M616,439 C808,439 808,883.0 998,883.0"/>
+<path class="wire f-prep" data-ds="MtbsSeverityFolder" data-stage="P1" d="M616,462 C808,462 808,155.0 998,155.0"/>
+<path class="wire f-prep" data-ds="MtbsSeverityFolder" data-stage="P4" d="M616,462 C808,462 808,479.9 998,479.9"/>
+<path class="wire f-prep" data-ds="InteragencyPerimeterFile" data-stage="P1" d="M616,485 C808,485 808,161.0 998,161.0"/>
+<path class="wire f-prep alt" data-ds="FireAgeFile" data-stage="P1" d="M616,508 C808,508 808,167.0 998,167.0"/>
+<path class="wire f-prep" data-ds="GridMetFolder" data-stage="P2" d="M616,564 C808,564 808,245.3 998,245.3"/>
+<path class="wire f-prep" data-ds="GridMetFolder" data-stage="P3" d="M616,564 C808,564 808,364.1 998,364.1"/>
+<path class="wire f-prep alt" data-ds="ZoneDailyWeatherFile" data-stage="P3" d="M616,587 C808,587 808,379.1 998,379.1"/>
+<path class="wire f-prep" data-ds="RawsHourlyFolder" data-stage="P5" d="M616,610 C808,610 808,573.1 998,573.1"/>
+<path class="wire f-prep" data-ds="RawsCatalogueFile" data-stage="P5" d="M616,633 C808,633 808,593.1 998,593.1"/>
+<path class="wire f-prep alt" data-ds="IgnitionCovariateFolder" data-stage="P2" d="M616,689 C808,689 808,251.3 998,251.3"/>
+<path class="wire f-prep" data-ds="RoadsFile" data-stage="P2" d="M616,712 C808,712 808,257.3 998,257.3"/>
+<path class="wire f-prep" data-ds="NlcdLandCoverFile" data-stage="P2" d="M616,735 C808,735 808,263.3 998,263.3"/>
+<path class="wire f-prep" data-ds="HousingDensityFile" data-stage="P2" d="M616,758 C808,758 808,269.3 998,269.3"/>
+<path class="wire f-prep" data-ds="PrismPrecipFile" data-stage="P2" d="M616,781 C808,781 808,275.3 998,275.3"/>
+<path class="wire f-eval" data-ds="WrcBurnProbabilityFile" data-stage="C7" d="M616,837 C808,837 808,804.7 998,804.7"/>
+<path class="wire f-eval" data-ds="WrcBurnProbabilityFile" data-stage="R" d="M616,837 C808,837 808,913.0 998,913.0"/>
+<circle class="sport" cx="616" cy="189" r="3"/>
+<circle class="sport" cx="616" cy="212" r="3"/>
+<circle class="sport" cx="616" cy="235" r="3"/>
+<circle class="sport" cx="616" cy="291" r="3"/>
+<circle class="sport" cx="616" cy="314" r="3"/>
+<circle class="sport" cx="616" cy="337" r="3"/>
+<circle class="sport" cx="616" cy="360" r="3"/>
+<circle class="sport" cx="616" cy="416" r="3"/>
+<circle class="sport" cx="616" cy="439" r="3"/>
+<circle class="sport" cx="616" cy="462" r="3"/>
+<circle class="sport" cx="616" cy="485" r="3"/>
+<circle class="sport" cx="616" cy="508" r="3"/>
+<circle class="sport" cx="616" cy="564" r="3"/>
+<circle class="sport" cx="616" cy="587" r="3"/>
+<circle class="sport" cx="616" cy="610" r="3"/>
+<circle class="sport" cx="616" cy="633" r="3"/>
+<circle class="sport" cx="616" cy="689" r="3"/>
+<circle class="sport" cx="616" cy="712" r="3"/>
+<circle class="sport" cx="616" cy="735" r="3"/>
+<circle class="sport" cx="616" cy="758" r="3"/>
+<circle class="sport" cx="616" cy="781" r="3"/>
+<circle class="sport" cx="616" cy="837" r="3"/>
+<g class="stage f-prep" data-stage="P1" tabindex="0" role="button" aria-label="Stage P1, Prepare Zone Landscape">
+<rect class="sb" x="1000" y="104" width="576" height="72" rx="5"/>
+<rect class="badge" x="1010" y="114" width="24" height="20" rx="3"/>
+<text x="1022" y="128" class="badge-t" text-anchor="middle">P1</text>
+<text x="1044" y="129" class="sn2">Prepare Zone Landscape</text>
+<text x="1012" y="151" class="mk">The zone's 150 m fuel, canopy, elevation, zone, fire-age and vegetation maps, and its boundary</text>
+<text x="1012" y="166" class="ch">Set by: Zone Preparation Options (zone, buffer, vintages)</text>
+</g>
+<circle class="port f-prep" cx="1000" cy="113.0" r="2.4"/>
+<circle class="port f-prep" cx="1000" cy="119.0" r="2.4"/>
+<circle class="port f-prep" cx="1000" cy="125.0" r="2.4"/>
+<circle class="port f-prep" cx="1000" cy="131.0" r="2.4"/>
+<circle class="port f-prep" cx="1000" cy="137.0" r="2.4"/>
+<circle class="port f-prep" cx="1000" cy="143.0" r="2.4"/>
+<circle class="port f-prep" cx="1000" cy="149.0" r="2.4"/>
+<circle class="port f-prep" cx="1000" cy="155.0" r="2.4"/>
+<circle class="port f-prep" cx="1000" cy="161.0" r="2.4"/>
+<circle class="port f-prep" cx="1000" cy="167.0" r="2.4"/>
+<g class="stage f-prep" data-stage="P2" tabindex="0" role="button" aria-label="Stage P2, Fit Ignition Surfaces">
+<rect class="sb" x="1000" y="212" width="576" height="72" rx="5"/>
+<rect class="badge" x="1010" y="222" width="24" height="20" rx="3"/>
+<text x="1022" y="236" class="badge-t" text-anchor="middle">P2</text>
+<text x="1044" y="237" class="sn2">Fit Ignition Surfaces</text>
+<text x="1012" y="259" class="mk">Ignition probability maps per cause, from a GAM on ten 30 m covariates</text>
+<text x="1012" y="274" class="ch">Set by: Zone Preparation Options (ignition fire size, years, buffer)</text>
+</g>
+<circle class="port f-prep" cx="1000" cy="221.3" r="2.4"/>
+<circle class="port f-prep" cx="1000" cy="227.3" r="2.4"/>
+<circle class="port f-prep" cx="1000" cy="233.3" r="2.4"/>
+<circle class="port f-prep" cx="1000" cy="239.3" r="2.4"/>
+<circle class="port f-prep" cx="1000" cy="245.3" r="2.4"/>
+<circle class="port f-prep" cx="1000" cy="251.3" r="2.4"/>
+<circle class="port f-prep" cx="1000" cy="257.3" r="2.4"/>
+<circle class="port f-prep" cx="1000" cy="263.3" r="2.4"/>
+<circle class="port f-prep" cx="1000" cy="269.3" r="2.4"/>
+<circle class="port f-prep" cx="1000" cy="275.3" r="2.4"/>
+<g class="stage f-prep" data-stage="P3" tabindex="0" role="button" aria-label="Stage P3, Extract Zone Weather">
+<rect class="sb" x="1000" y="321" width="576" height="72" rx="5"/>
+<rect class="badge" x="1010" y="331" width="24" height="20" rx="3"/>
+<text x="1022" y="345" class="badge-t" text-anchor="middle">P3</text>
+<text x="1044" y="346" class="sn2">Extract Zone Weather</text>
+<text x="1012" y="368" class="mk">Daily weather of each weather zone on the grid</text>
+<text x="1012" y="383" class="ch">Set by: Data Sources (gridMET build, or a prebuilt table)</text>
+</g>
+<circle class="port f-prep" cx="1000" cy="334.1" r="2.4"/>
+<circle class="port f-prep" cx="1000" cy="349.1" r="2.4"/>
+<circle class="port f-prep" cx="1000" cy="364.1" r="2.4"/>
+<circle class="port f-prep" cx="1000" cy="379.1" r="2.4"/>
+<g class="stage f-prep" data-stage="P4" tabindex="0" role="button" aria-label="Stage P4, MTBS Severity Target">
+<rect class="sb" x="1000" y="429" width="576" height="72" rx="5"/>
+<rect class="badge" x="1010" y="439" width="24" height="20" rx="3"/>
+<text x="1022" y="453" class="badge-t" text-anchor="middle">P4</text>
+<text x="1044" y="454" class="sn2">MTBS Severity Target</text>
+<text x="1012" y="476" class="mk">Severity class shares by fuel group, the target stage 8 fits to</text>
+<text x="1012" y="491" class="ch">Set by: Zone Preparation Options (severity years)</text>
+</g>
+<circle class="port f-prep" cx="1000" cy="449.9" r="2.4"/>
+<circle class="port f-prep" cx="1000" cy="479.9" r="2.4"/>
+<g class="stage f-prep" data-stage="P5" tabindex="0" role="button" aria-label="Stage P5, Burning-Period Wind (RAWS)">
+<rect class="sb" x="1000" y="537" width="576" height="72" rx="5"/>
+<rect class="badge" x="1010" y="547" width="24" height="20" rx="3"/>
+<text x="1022" y="561" class="badge-t" text-anchor="middle">P5</text>
+<text x="1044" y="562" class="sn2">Burning-Period Wind (RAWS)</text>
+<text x="1012" y="584" class="mk">Burning-period wind ratio table for stages 6 and 8</text>
+<text x="1012" y="599" class="ch">Set by: Wind Table Options (months, years, hours, distance)</text>
+</g>
+<circle class="port f-prep" cx="1000" cy="553.1" r="2.4"/>
+<circle class="port f-prep" cx="1000" cy="573.1" r="2.4"/>
+<circle class="port f-prep" cx="1000" cy="593.1" r="2.4"/>
+<g class="stage f-cal" data-stage="C1" tabindex="0" role="button" aria-label="Stage C1, Import Fire Record">
+<rect class="sb" x="1000" y="645" width="576" height="72" rx="5"/>
+<rect class="badge" x="1010" y="655" width="24" height="20" rx="3"/>
+<text x="1022" y="669" class="badge-t" text-anchor="middle">C1</text>
+<text x="1044" y="670" class="sn2">Import Fire Record</text>
+<text x="1012" y="692" class="mk">The zone's recorded fires (Historical Fires): date, size, cause, location</text>
+<text x="1012" y="707" class="ch">Set by: Fire Record Import; Fire Record Sources</text>
+</g>
+<circle class="port f-cal" cx="1000" cy="681.4" r="2.4"/>
+<g class="stage f-eval" data-stage="C7" tabindex="0" role="button" aria-label="Stage C7, Validate Burn Probability">
+<rect class="sb" x="1000" y="754" width="576" height="72" rx="5"/>
+<rect class="badge" x="1010" y="764" width="24" height="20" rx="3"/>
+<text x="1022" y="778" class="badge-t" text-anchor="middle">C7</text>
+<text x="1044" y="779" class="sn2">Validate Burn Probability</text>
+<text x="1012" y="801" class="mk">AUC of burn probability against large MTBS fires, and against the benchmark</text>
+<text x="1012" y="816" class="ch">Set by: Validation Options; Validation Period</text>
+</g>
+<circle class="port f-eval" cx="1000" cy="774.7" r="2.4"/>
+<circle class="port f-eval" cx="1000" cy="804.7" r="2.4"/>
+<g class="stage f-eval" data-stage="R" tabindex="0" role="button" aria-label="Stage R, Report Figures">
+<rect class="sb" x="1000" y="862" width="576" height="72" rx="5"/>
+<rect class="badge" x="1010" y="872" width="24" height="20" rx="3"/>
+<text x="1022" y="886" class="badge-t" text-anchor="middle">R</text>
+<text x="1044" y="887" class="sn2">Report Figures</text>
+<text x="1012" y="909" class="mk">Report figures and the tables behind the Charts tab</text>
+<text x="1012" y="924" class="ch">Set by: Run Control; the results of the stages that ran</text>
+</g>
+<circle class="port f-eval" cx="1000" cy="883.0" r="2.4"/>
+<circle class="port f-eval" cx="1000" cy="913.0" r="2.4"/>
+<text x="24" y="962" class="foot">Wires run from a dataset to each stage that reads it, coloured by the stage. Vintages are those the user guide lists (section 2.1). Every dataset is national, so one project's rows serve any pyrome in CONUS.</text>
+<text x="24" y="978" class="foot">The other stages read only datasheets. Generated by docs/blueprint/build-data.R from package.xml (lucasFireC2F 2.4.0), 2026-10-30.</text>
+</svg>
+

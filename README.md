@@ -12,11 +12,21 @@ zones so that fire crossing their shared boundaries is counted.
 
 Package version **2.4.0**. Runs anywhere in CONUS; developed and tested on California pyromes.
 
-## User guide
+## Documentation
 
-[docs/user-guide/lucasFireC2F-User-Guide.md](docs/user-guide/lucasFireC2F-User-Guide.md) builds, calibrates, runs and
-merges a zone entirely in SyncroSim Studio, with screen captures at each step. Its worked example is P18 Southern
-Cascades. Section 2.1 lists every input dataset and where to download it.
+Published with GitHub Pages at [bsleeter.github.io/lucasFireC2F](https://bsleeter.github.io/lucasFireC2F/):
+
+- [User Guide](https://bsleeter.github.io/lucasFireC2F/user-guide/lucasFireC2F-User-Guide.html) builds, calibrates, runs and
+  merges a zone entirely in SyncroSim Studio, with screen captures at each step. Its worked example is P18 Southern
+  Cascades. Section 2.1 lists every input dataset and where to download it. The Markdown copy is
+  [docs/user-guide/lucasFireC2F-User-Guide.md](docs/user-guide/lucasFireC2F-User-Guide.md).
+- [Package blueprint](https://bsleeter.github.io/lucasFireC2F/blueprint/): the scenarios, the 22 stages and the datasheets
+  they pass on; select a stage for every sheet it reads and writes.
+- [Data blueprint](https://bsleeter.github.io/lucasFireC2F/blueprint/data.html): the national datasets of the Data Sources
+  sheet, the stages that read each one, and what for.
+
+The blueprints are generated from `package.xml` by `docs/blueprint/build.R` and `build-data.R` (rerun after changing
+stages, datasheets or Data Sources); each also writes a print SVG and PNG beside the page.
 
 ## Installing
 
@@ -76,7 +86,7 @@ named for the version in `package.xml`.
 | Scenario | Stages | Does |
 |---|---|---|
 | Prep | P1 Prepare Zone Landscape, P2 Fit Ignition Surfaces, P3 Extract Zone Weather, P4 MTBS Severity Target, P5 Burning-Period Wind (RAWS) | Builds the zone's 150 m landscape, ignition-probability surfaces, daily weather, severity target and wind table from national data |
-| Calibrate | C1 Import Fire Record, C2 Build Weather Stream, C3 Fit Ignitions, stages 1-5 as a seed run, C5 Fit Spread Days, C6 Score Against Fire Records | Fits fires per season, their season and cause, and the spread-day distribution that reproduces the recorded fire sizes |
+| Calibrate | C1 Import Fire Record, C2 Build Weather Stream, C3 Fit Ignitions, stages 1-5 as a seed run, C5 Fit Spread Days | Fits fires per season, their season and cause, and the spread-day distribution that reproduces the recorded fire sizes |
 | Run | 1 Prepare Landscape, 2 Sample Ignitions, 3 Sample Burning Conditions, 4 Grow Fires (C2F-W), 5 Summarize Burn Probability, 6 Fire Effects, 7 Hazard and Risk, 8 Fire Detail, C6, C7 Validate Burn Probability, R Report Figures | Burn probability, effects and risk maps, per-fire detail, scores against the record and WRC, report figures |
 | Merge | M Merge Zone Results, then 5-8, C7, R | Combines zone runs, from one library or several, into one landscape without growing any fire again |
 

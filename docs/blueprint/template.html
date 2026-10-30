@@ -1,0 +1,135 @@
+<title>lucasFireC2F Blueprint</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;600;700&display=swap">
+<style>
+/* layout: one wide schematic (scrolls sideways on a phone), stage picker, then the selected stage's datasheets in three columns */
+:root{ {{FONTS}} {{LIGHT}} }
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ {{DARK}} color-scheme:dark } }
+:root[data-theme="dark"]{ {{DARK}} color-scheme:dark }
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 var(--sans)}
+.links{display:flex;flex-wrap:wrap;gap:4px 18px;font-size:13px}
+.links a{color:var(--ink2);text-decoration:none;border-bottom:1px solid var(--line)}
+.links a:hover{color:var(--ink);border-bottom-color:var(--edge)}
+.links a[aria-current]{color:var(--ink);font-weight:600;border-bottom:2px solid var(--edge)}
+.links a:focus-visible{outline:2px solid var(--edge);outline-offset:2px}
+.wrap{max-width:1640px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:18px}
+.intro{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 24px}
+.intro h1{font:700 20px/1.2 var(--sans);margin:0;text-wrap:balance}
+.intro p{margin:0;color:var(--muted);max-width:72ch}
+.figure{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+.figure svg{display:block;width:100%;min-width:1120px;height:auto}
+{{RULES}}
+.stage,.chip{cursor:pointer}
+.stage:focus{outline:none}
+.stage:focus-visible .sb{stroke-width:3}
+svg .stage{transition:opacity .15s}
+svg.dim .stage{opacity:.3}
+svg.dim .stage.sel,svg.dim .stage.rel{opacity:1}
+.stage.sel .sb{stroke-width:2.8}
+.row.hit .rowbg{fill:var(--prep-t)}
+.picker{display:flex;flex-wrap:wrap;gap:6px}
+.pick{display:inline-flex;align-items:center;gap:7px;padding:4px 10px 4px 4px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink2);font:500 12.5px var(--sans);cursor:pointer}
+.pick:hover{border-color:var(--c)}
+.pick[aria-pressed="true"]{border-color:var(--c);background:var(--t);color:var(--ink)}
+.pick:focus-visible,.chipb:focus-visible{outline:2px solid var(--c);outline-offset:2px}
+.pick b,.chipb{display:inline-grid;place-items:center;min-width:24px;height:20px;padding:0 4px;border-radius:3px;background:var(--c);color:var(--on);font:600 11px var(--mono)}
+.chipb{border:0;cursor:pointer;min-width:22px;height:18px;font-size:10.5px}
+.detail{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:20px 22px;display:grid;gap:14px}
+.d-head{display:flex;gap:14px;align-items:flex-start}
+.d-head .num{display:grid;place-items:center;min-width:40px;height:34px;border-radius:5px;background:var(--c);color:var(--on);font:600 17px var(--mono)}
+.d-head h2{margin:0;font:700 18px/1.25 var(--sans)}
+.d-meta{margin:2px 0 0;color:var(--muted);font:400 12px var(--mono)}
+.d-desc{margin:0;max-width:80ch;color:var(--ink2)}
+.d-where{margin:0;color:var(--muted);font-size:13px}
+.d-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}
+.d-cols section{min-width:0}
+.d-cols h3{margin:0 0 6px;font:600 10.5px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.d-cols ul{list-style:none;margin:0;padding:0;display:grid;gap:1px}
+.d-cols li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:5px 0;border-top:1px solid var(--line)}
+.d-cols li:first-child{border-top:0}
+.sh{min-width:0}
+.sh span{display:block;color:var(--ink);font-size:13px;line-height:1.3}
+.sh code{display:block;color:var(--muted);font:400 10.5px var(--mono);overflow-wrap:anywhere}
+.via{display:flex;flex-wrap:wrap;gap:3px;justify-content:flex-end;align-items:center;flex:none;max-width:45%}
+.via em{font:400 10.5px var(--mono);color:var(--muted);font-style:normal;margin-right:2px}
+.none{color:var(--muted);font-size:13px}
+.note{margin:0;color:var(--muted);font-size:12.5px}
+@media (prefers-reduced-motion: reduce){svg .stage{transition:none}}
+</style>
+
+<div class="wrap">
+  {{NAV}}
+  <div class="intro">
+    <h1>lucasFireC2F blueprint</h1>
+    <p>Version {{VERSION}}: the {{N}} stages, the scenarios they run in, and the datasheets they hand on to each other. Select a stage, in the drawing or below, to list every sheet it reads and writes.</p>
+  </div>
+  <div class="figure">
+{{SVG}}
+  </div>
+  <div class="picker" id="picker" aria-label="Stages"></div>
+  <article class="detail" id="detail" aria-live="polite"></article>
+  <p class="note">Built by docs/blueprint/build.R from package.xml. Every stage also reads Run Control, its configuration sheet.</p>
+</div>
+
+<script type="application/json" id="stage-data">{{DATA}}</script>
+<script>
+(function () {
+  const J = JSON.parse(document.getElementById('stage-data').textContent), S = J.stages;
+  const ids = J.order;
+  const arr = v => v == null ? [] : Array.isArray(v) ? v : typeof v === 'object' ? [] : [v];
+  const svg = document.querySelector('.figure svg');
+  const picker = document.getElementById('picker');
+  const detail = document.getElementById('detail');
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const chip = id => `<button class="chipb f-${S[id].family}" data-go="${id}" aria-label="Stage ${id}, ${esc(S[id].name)}">${id}</button>`;
+
+  picker.innerHTML = ids.map(id => `<button class="pick f-${S[id].family}" data-go="${id}" aria-pressed="false"><b>${id}</b>${esc(S[id].name)}</button>`).join('');
+
+  function list(title, items, mode) {
+    const li = arr(items).map(it => {
+      const from = arr(it.from), to = arr(it.to);
+      let via = '';
+      if (mode !== 'out') via += from.length ? `<em>from</em>${from.map(chip).join('')}` : (mode === 'in' ? '<em>user or package input</em>' : '');
+      if (mode !== 'in') via += to.length ? `<em>${mode === 'both' && from.length ? '· to' : 'read by'}</em>${to.map(chip).join('')}` : '';
+      return `<li><div class="sh"><span>${esc(it.label)}</span><code>${esc(it.sheet)}</code></div><div class="via">${via}</div></li>`;
+    }).join('');
+    return `<section><h3>${title}</h3>${li ? `<ul>${li}</ul>` : '<p class="none">None</p>'}</section>`;
+  }
+
+  function related(s) {
+    const r = new Set();
+    for (const k of ['reads', 'writes', 'both']) for (const it of arr(s[k])) { arr(it.from).forEach(i => r.add(String(i))); arr(it.to).forEach(i => r.add(String(i))); }
+    r.delete(String(s.id)); return r;
+  }
+
+  function select(id) {
+    const s = S[id]; if (!s) return;
+    const rel = related(s);
+    svg.classList.add('dim');
+    svg.querySelectorAll('.stage').forEach(g => {
+      const n = g.dataset.stage;
+      g.classList.toggle('sel', n === String(s.id)); g.classList.toggle('rel', rel.has(n));
+    });
+    svg.querySelectorAll('.row').forEach(r => r.classList.toggle('hit', r.dataset.stages.split(' ').includes(String(s.id))));
+    picker.querySelectorAll('.pick').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.go === String(s.id))));
+    detail.className = `detail f-${s.family}`;
+    detail.innerHTML = `
+      <div class="d-head"><span class="num">${s.id}</span><div><h2>${esc(s.name)}</h2><p class="d-meta">${esc(s.script)}</p></div></div>
+      <p class="d-desc">${esc(s.desc)}</p>
+      <p class="d-where"><strong>Runs in:</strong> ${esc(s.where)}</p>
+      <div class="d-cols">${list('Reads', s.reads, 'in')}${list('Writes', s.writes, 'out')}${list('Reads and updates', s.both, 'both')}</div>`;
+  }
+
+  document.addEventListener('click', e => {
+    const t = e.target.closest('[data-go], .stage, .chip');
+    if (!t) return;
+    select(t.dataset.go ?? t.dataset.stage);
+  });
+  svg.querySelectorAll('.stage').forEach(g => g.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); select(g.dataset.stage); }
+  }));
+  select('4');
+})();
+</script>
