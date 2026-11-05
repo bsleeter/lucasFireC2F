@@ -10,7 +10,7 @@ The unit of work is a **fire zone**: one of the 128 pyromes of the conterminous 
 A zone is prepared from national data, calibrated to its own fire record, run, and optionally merged with neighbouring
 zones so that fire crossing their shared boundaries is counted.
 
-Package version **2.5.0**. Runs anywhere in CONUS; developed and tested on California pyromes.
+Package version **2.5.1**. Runs anywhere in CONUS; developed and tested on California pyromes.
 
 ## Documentation
 
@@ -45,7 +45,7 @@ There are two ways to install. Close SyncroSim Studio first in either case; the 
 [Releases](https://github.com/bsleeter/lucasFireC2F/releases) page and install it:
 
 ```
-"C:\Program Files\SyncroSim\SyncroSim.PackageManager.exe" --finstall="lucasFireC2F-2.5.0.ssimpkg"
+"C:\Program Files\SyncroSim\SyncroSim.PackageManager.exe" --finstall="lucasFireC2F-2.5.1.ssimpkg"
 ```
 
 The package is copied into SyncroSim's own package folder, so the downloaded file can be deleted afterwards.

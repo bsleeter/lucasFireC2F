@@ -111,7 +111,7 @@ main { margin-left: var(--rail-w); padding-block: 40px 96px;
 <script type="text/markdown" id="guide-md">
 # lucasFireC2F User Guide
 
-For lucasFireC2F 2.5.0. Exported 4 November 2026 from the working copy of the guide.
+For lucasFireC2F 2.5.1. Exported 4 November 2026 from the working copy of the guide.
 
 ## About this guide
 
@@ -125,7 +125,7 @@ It is for modelers who know SyncroSim's basics (libraries, projects, scenarios, 
 - **Scenario descriptions.** Every scenario gets a written description (Properties, Description) recording its purpose, dependencies, key settings and assumptions. Chapter 9 gives a template per scenario type; chapters 3 to 5 show the P18 versions.
 - **Names and folders.** A single-zone library needs no folders; a library holding several zones uses one folder per zone (Chapter 8). Scenarios are named `<zone> - <step>`, with the zone's full name, for example `P18 Southern Cascades - Prep`, `P18 Southern Cascades - Calibrate`, `P18 Southern Cascades - Run`. SyncroSim names results after their parent with a run time stamp.
 - **Result IDs.** Dependencies point at results, not at the scenarios that made them. Write down each result's ID as you go; later steps ask for them.
-- **Package version.** Written for lucasFireC2F 2.5.0 on SyncroSim 3.1. Some screen captures come from earlier versions.
+- **Package version.** Written for lucasFireC2F 2.5.1 on SyncroSim 3.1. Some screen captures come from earlier versions.
 
 **The workflow in one line.** Data Download (D) → Prep (P1-P5) → Calibrate (C1-C3, seed run, C5) → Run (stages 1-8, C6, C7, optionally R) → optionally Merge (stage M) with neighbouring zones.
 
@@ -138,7 +138,7 @@ Every stage runs in R on your own computer, so install these in order before Cha
 | SyncroSim Studio | 3.1 or later; tested with 3.1.29 | [syncrosim.com](https://syncrosim.com) | Install in `C:\Program Files\SyncroSim` |
 | R | 4.6; tested with 4.6.1 | [CRAN for Windows](https://cran.r-project.org/bin/windows/base/) | Install it before the R packages. Older versions of R are untested |
 | R packages, including rsyncrosim | The table below | CRAN, with the line below | Install into the R you just installed |
-| lucasFireC2F | 2.5.0 | [Releases page](https://github.com/bsleeter/lucasFireC2F/releases) | Section 1.1. The C2F-W program and its DLLs come with the package, so there is nothing else to install |
+| lucasFireC2F | 2.5.1 | [Releases page](https://github.com/bsleeter/lucasFireC2F/releases) | Section 1.1. The C2F-W program and its DLLs come with the package, so there is nothing else to install |
 
 **R packages**
 
@@ -1406,7 +1406,7 @@ C6 also draws the figure below, **Fig6\_fire\_sizes.png**, so every scored run c
 
 | Where | How |
 | --- | --- |
-| Studio | Open the Run result (double-click it in the Explorer), then on the **LUCAS Fire (C2F-W)** tab choose **Results**, **Report Figures**. The row named Fire sizes and calibration holds the PNG |
+| Studio | Open the Run result (double-click it in the Explorer), then on the **LUCAS Fire (C2F-W)** tab choose **Results**, **Report Figures**. Choose Fire sizes and calibration from the drop-down |
 | Export tab | Select the Run result, open the **Export** tab and export **Report Figures** to a folder of your choice (6.3) |
 | On disk | `<library>.ssim.data\Scenario-<result id>\lucasFireC2F_OutputReportFigure\Fig6_fire_sizes.png`. For the example below: `F:\lucas-master\Models\lucasFireC2F Dev\lucasFireC2F-Demo.ssim.data\Scenario-26\lucasFireC2F_OutputReportFigure\Fig6_fire_sizes.png` |
 
@@ -1621,7 +1621,7 @@ A figure whose stage did not run is left out.
 
 **For a result that already exists**, there is no need to rerun it: create a scenario (for example `P18 Southern Cascades - Report`), make the Run result its only dependency, give it a pipeline of stage R alone (untick Inherit, No Data, add the stage) and run it. It reads everything from the Run result.
 
-The figures appear in the result under **Results**, **Report Figures**, where each opens in your image viewer, and on the **Export** tab under **Report Figures**, which writes them all to a folder.
+The figures appear in the result under **Results**, **Report Figures**, a page that shows them as pictures: choose a figure from the drop-down or step with Previous, Next or the arrow keys, double-click it to open it full size, or use Save as and Save all. They are also on the **Export** tab under **Report Figures**, which writes them all to a folder.
 
 Stage R also writes three small tables for Studio's **Charts** tab (fires and area by size class, the spread-day distribution, AUC by period). Studio charts against the timestep, so to see them set the chart's Timesteps box to the range of the data (1 to 7 for size classes). They are a quick look only; use the PNG figures for anything you show.
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<package name="lucasFireC2F" displayName="LUCAS Fire (C2F-W)" description="Wildfire burn probability and fire effects and risk with Cell2Fire-World (Scott and Burgan fuels) for the LUCAS model family" version="2.5.0" url="https://github.com/bsleeter/lucasFireC2F" minSyncroSimVersion="3.1.0">
+<package name="lucasFireC2F" displayName="LUCAS Fire (C2F-W)" description="Wildfire burn probability and fire effects and risk with Cell2Fire-World (Scott and Burgan fuels) for the LUCAS model family" version="2.5.1" url="https://github.com/bsleeter/lucasFireC2F" minSyncroSimVersion="3.1.0">
 
 	<!-- =================================================================================================== -->
 	<!-- PROJECT DATASHEETS (definitions shared by all scenarios)                                           -->
@@ -4367,7 +4367,7 @@
 
 	<!-- stage R: report figures (PNG) and the tables behind the Charts tab (Studio charts a value against Timestep, so Timestep
 	     carries the x position: size class 1-7, spread days, validation period) -->
-	<dataSheet name="OutputReportFigure" displayName="Report Figures">
+	<dataSheet name="OutputReportFigure" displayName="Report Figures" viewClassName="lucasFireUI.ReportFigureView" viewClassAssembly="lucasFireUI">
 		<column name="Figure" dataType="String"/>
 		<column name="FileName" displayName="Figure (PNG)" dataType="String" allowDbNull="False" isExternalFile="True" isRaster="False" externalFileFilter="PNG image (*.png)|*.png"/>
 	</dataSheet>

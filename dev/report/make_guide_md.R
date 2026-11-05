@@ -15,7 +15,7 @@ k <- grep("^&#91;image: ", x); cat(length(k), "image placeholders,", length(map)
 miss <- map[!file.exists(file.path(G, "figures", map))]; if (length(miss)) stop("missing: ", paste(miss, collapse = ", "))
 alt <- gsub("[][\\\\]", "", sub("^&#91;image: ", "", x[k]))
 x[k] <- sprintf("![%s](figures/%s)", alt, map)
-x <- sub("^Sep 30, 2026 .*$", "For lucasFireC2F 2.5.0. Exported 4 November 2026 from the working copy of the guide.", x)
+x <- sub("^Sep 30, 2026 .*$", "For lucasFireC2F 2.5.1. Exported 4 November 2026 from the working copy of the guide.", x)
 # a numbered caption is a bold label and italic words; the export writes "**" or "* *" wherever the italic words were edited: one italic run again
 cap <- grep("^[*][*]Figure [0-9.-]+[.][*][*] ", x)
 x[cap] <- vapply(x[cap], function(l) { lab <- regmatches(l, regexpr("^[*][*]Figure [0-9.-]+[.][*][*]", l)); w <- trimws(gsub("*", "", substring(l, nchar(lab) + 1), fixed = TRUE)); paste0(lab, " *", w, "*") }, "", USE.NAMES = FALSE)
