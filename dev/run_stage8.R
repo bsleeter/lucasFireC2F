@@ -2,7 +2,7 @@
 # Usage: Rscript dev/run_stage8.R <result scenario id> [fit=1] [severity seasons=10]
 suppressPackageStartupMessages({ library(rsyncrosim); library(data.table); library(terra); library(arrow); library(sf) })
 a <- commandArgs(TRUE); src <- as.integer(a[1]); FIT <- if (length(a) > 1) a[2] == "1" else TRUE; NSEV <- if (length(a) > 2) as.integer(a[3]) else 10L
-L <- suppressWarnings(ssimLibrary("F:/lucas-master/Models/lucasFireC2F Dev/lucasFireC2F P26.ssim")); P <- rsyncrosim::project(L, "P26 Northern Sierra Nevada")
+L <- suppressWarnings(ssimLibrary("F:/lucasFireC2F/dev/libs/lucasFireC2F P26.ssim")); P <- rsyncrosim::project(L, "P26 Northern Sierra Nevada")
 S <- rsyncrosim::scenario(P, sprintf("dev: stage 6+8 from [%d]", src), sourceScenario = rsyncrosim::scenario(L, src))
 saveDatasheet(S, data.frame(StageNameId = c("6 - Fire Effects", "8 - Fire Detail (optional)"), RunOrder = 1:2), "core_Pipeline")
 saveDatasheet(S, data.frame(BurnEffectsTable = TRUE, Perimeters = TRUE, SeverityMapSeasons = NSEV, FitSeverityClasses = FIT), "lucasFireC2F_FireDetailOption")

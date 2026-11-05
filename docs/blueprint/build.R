@@ -37,14 +37,15 @@ by_order <- function(ids) order_ids[order_ids %in% ids]
 writers <- function(sheets) by_order(unlist(lapply(st, function(s) if (any(s$sheet %in% sheets & s$type %in% c("Output", "Both"))) s$id)))
 readers <- function(sheets) by_order(unlist(lapply(st, function(s) if (any(s$sheet %in% sheets & s$type %in% c("Input", "Both"))) s$id)))
 
-where <- c(P1 = "Prep", P2 = "Prep", P3 = "Prep", P4 = "Prep", P5 = "Prep",
+where <- c(D = "Data Download, a scenario of its own, once per region", P1 = "Prep", P2 = "Prep", P3 = "Prep", P4 = "Prep", P5 = "Prep",
   C1 = "Calibrate", C2 = "Calibrate", C3 = "Calibrate", C5 = "Calibrate (after the seed run of stages 1 to 5)",
   `1` = "Run; also Calibrate, as the seed run", `2` = "Run; also Calibrate, as the seed run", `3` = "Run; also Calibrate, as the seed run (spread days uniform)",
   `4` = "Run; also Calibrate, as the seed run", M = "Merge (first in its pipeline, in place of stages 1 to 4)",
   `5` = "Run and Merge; also Calibrate, as the last stage of the seed run", `6` = "Run and Merge", `7` = "Run and Merge", `8` = "Run and Merge (optional)",
   C6 = "Run, after stage 8 (a seed run is not scored)", C7 = "Run and Merge (last stages)",
   R = "Run and Merge (optional, last), or alone in a Report scenario on any result", U = "A scenario of its own (optional tool; not part of a standard zone build)")
-desc <- c(P1 = "Builds the zone's 150 m landscape on the national lattice from LANDFIRE and the zone data: fuel, canopy, elevation, fire-zone, weather-zone, fire-age and vegetation maps, and the zone boundary.",
+desc <- c(D = "Fetches the national datasets into one Data Sources Home folder, clipped to the fire zones plus a buffer, and records each in the home's manifest; five LANDFIRE 2020 zips are supplied by hand. A rerun fetches only what is missing, and no file in the home is ever replaced.",
+  P1 = "Builds the zone's 150 m landscape on the national lattice from LANDFIRE and the zone data: fuel, canopy, elevation, fire-zone, weather-zone, fire-age and vegetation maps, and the zone boundary.",
   P2 = "Fits where large fires start, per cause (Human, Lightning): a GAM of FPA-FOD origins against background points, on ten 30 m covariates; writes the ignition probability maps.",
   P3 = "Extracts the daily weather of every weather zone on the grid from gridMET (weighted toward cells where MTBS fires burned), or reads a prebuilt zone-daily table.",
   P4 = "Builds the severity target stage 8 fits to: MTBS severity class shares by fuel group for the fires after the fuel vintage.",
@@ -86,7 +87,7 @@ engine <- function(xr, y, label = "C2F-W") { w <- 9 + 6.2 * nchar(label)
 slot <- function(i) 284 + (i - 1) * (BW + 17)              # the five block columns of the middle region
 run_arrows <- function(xs, y) for (k in seq_along(xs)[-1]) add(PATH(sprintf("M%d,%d H%d", xs[k - 1] + BW + 1, y + BH / 2, xs[k] - 1)))
 pipeline <- function(xr, y, s) add(TX(xr, y, "PIPELINE", "eyebrow", "end"), TX(xr, y + 18, s, "mono", "end"))
-W <- 1600; H <- 1000
+W <- 1600; DY <- 162; H <- 1000 + DY   # DY: the Data Download band above the drawing, which is shifted down by it
 g <- character()
 add <- function(...) g <<- c(g, ...)
 
@@ -97,6 +98,14 @@ add(sprintf('<rect class="bg" width="%d" height="%d"/>', W, H),
 add(fam_legend(38))
 add(legend(list(list(kind = "edge", label = "run order in the pipeline"), list(kind = "dep", label = "scenario dependency")), 62))
 
+# ---- Data Download (a band across the top) ------------------------------------
+add(box(24, 104, 1552, 142, "Scenario · once per region", "Data Download"))
+add(block("D", slot(1), 162))
+add(TX(slot(2), 180, "Fetches the national datasets below into one folder, Data Sources Home, clipped to the fire zones + 60 km. Datasets kept whole are shared by every region.", "txt"),
+    TX(slot(2), 197, "Five LANDFIRE 2020 zips sit behind a CAPTCHA and are put in the home's supplied folder by hand; the other datasets need no login (LANDFIRE jobs need an email).", "txt"),
+    TX(slot(2), 214, "With every Data Sources path blank, the stages read the home and pick the smallest region holding their zone. A path set by hand wins over the home.", "txt"))
+add(PATH("M132,246 V264", "dep"), TX(140, 258, "fills Data Sources Home", "lbl"))
+add(sprintf('<g transform="translate(0,%d)">', DY))
 # ---- national data (left) ---------------------------------------------------
 grp <- unique(vapply(D, `[[`, "", 1))
 add(box(24, 104, 216, 830, "Data Sources sheet", "National data"))
@@ -155,6 +164,7 @@ add(box(986, 724, 242, 210, "Scenario · optional tool", "Utility"), block("U", 
 
 # ---- datasheets passed on (right) -------------------------------------------
 sheets <- list(
+  "Data Download" = list("Download Results" = "OutputDataDownload", "Data Sources Used" = "OutputDataSources"),
   "Zone inputs (Prep)" = list("Landscape and Canopy Maps" = c("LandscapeRasters", "CanopyRasters"), "Zone Boundary" = "OutputZoneBoundary",
     "Ignition Probability Maps, fit" = c("IgnitionGrid", "OutputIgnitionFit"), "Daily Weather" = "DailyWeather", "Severity Target" = "SeverityTarget",
     "Wind Ratios, RAWS Stations" = c("WindRatio", "RAWSStation")),
@@ -180,10 +190,11 @@ for (gname in names(sheets)) { add(TX(1272, y, toupper(gname), "ghead")); y <- y
   for (lab in names(sheets[[gname]])) { row(lab, sheets[[gname]][[lab]], y); y <- y + 19 }
   y <- y + 14 }
 add(TX(1272, y + 4, "Chips: the stages that write (or update)", "lbl"), TX(1272, y + 17, "each sheet. Select a stage for its readers.", "lbl"))
-if (y > 900) stop("the datasheet column runs past its box (y = ", y, ")")
+if (y > 925) stop("the datasheet column runs past its box (y = ", y, ")")
 
-add(TX(24, 962, "Solid arrows: the order stages run in a scenario's pipeline. Dashed: a scenario dependency (the dependency supplies its datasheets; a scenario's own rows win). Chips: the stages that read a data group, or write a sheet.", "foot"),
-    TX(24, 978, sprintf("Run settings (fire seasons, seed) are in Run Control. Generated by docs/blueprint/build.R from package.xml (lucasFireC2F %s), %s.", version, format(Sys.Date())), "foot"))
+add("</g>")
+add(TX(24, 962 + DY, "Solid arrows: the order stages run in a scenario's pipeline. Dashed: a scenario dependency (the dependency supplies its datasheets; a scenario's own rows win). Chips: the stages that read a data group, or write a sheet.", "foot"),
+    TX(24, 978 + DY, sprintf("Run settings (fire seasons, seed) are in Run Control. Generated by docs/blueprint/build.R from package.xml (lucasFireC2F %s), %s.", version, format(Sys.Date())), "foot"))
 body <- paste(c(defs, g), collapse = "\n")
 head <- svg_head(W, H, "lucasFireC2F blueprint: scenarios, stages and datasheets")
 writeLines(standalone_svg(head, body), file.path(out, "lucasfirec2f-blueprint.svg"), useBytes = TRUE)

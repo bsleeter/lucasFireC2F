@@ -1,7 +1,7 @@
 # Builds docs/user-guide/lucasFireC2F-User-Guide.md for the repo from a Markdown export of the user guide (Claude Doc).
 # The export marks each image as "&#91;image: <alt>\]"; this replaces them, in order, with links to the local figure files.
-# Usage: Rscript make_guide_md.R <exported guide.md>
-G <- "F:/lucasFireC2F/docs/user-guide"
+# Usage: Rscript dev/report/make_guide_md.R <exported guide.md> (from the repository root)
+G <- "docs/user-guide"
 x <- readLines(commandArgs(TRUE)[1], warn = FALSE, encoding = "UTF-8")
 f <- sort(list.files(file.path(G, "figures"), "[.]png$")); f <- f[!startsWith(f, "01-02b")]
 seq1 <- f[!grepl("^0[78]-", f)]                                   # chapters 1-6, in guide order
@@ -15,14 +15,17 @@ k <- grep("^&#91;image: ", x); cat(length(k), "image placeholders,", length(map)
 miss <- map[!file.exists(file.path(G, "figures", map))]; if (length(miss)) stop("missing: ", paste(miss, collapse = ", "))
 alt <- gsub("[][\\\\]", "", sub("^&#91;image: ", "", x[k]))
 x[k] <- sprintf("![%s](figures/%s)", alt, map)
-x <- sub("^Sep 30, 2026 .*$", "For lucasFireC2F 2.4.0. Exported 16 October 2026 from the working copy of the guide.", x)
+x <- sub("^Sep 30, 2026 .*$", "For lucasFireC2F 2.5.0. Exported 4 November 2026 from the working copy of the guide.", x)
+# a numbered caption is a bold label and italic words; the export writes "**" or "* *" wherever the italic words were edited: one italic run again
+cap <- grep("^[*][*]Figure [0-9.-]+[.][*][*] ", x)
+x[cap] <- vapply(x[cap], function(l) { lab <- regmatches(l, regexpr("^[*][*]Figure [0-9.-]+[.][*][*]", l)); w <- trimws(gsub("*", "", substring(l, nchar(lab) + 1), fixed = TRUE)); paste0(lab, " *", w, "*") }, "", USE.NAMES = FALSE)
 writeLines(x, file.path(G, "lucasFireC2F-User-Guide.md"), useBytes = TRUE)
 for (i in c(1, 5, 26, 64, 71, 72, 73, 86)) cat(x[k[i]], "\n")
 
 # the HTML guide: the same markdown rendered in the page (dev/report/guide_template.html) with a fixed contents rail.
 # lucasFireC2F-User-Guide.html opens from the repo folder (figures/ beside it); a second copy without the document wrapper,
 # for publishing as a claude.ai Artifact (which adds its own), goes to the folder given as the second argument, if any.
-tpl <- paste(readLines("F:/lucasFireC2F/dev/report/guide_template.html", warn = FALSE, encoding = "UTF-8"), collapse = "\n")
+tpl <- paste(readLines("dev/report/guide_template.html", warn = FALSE, encoding = "UTF-8"), collapse = "\n")
 md <- gsub("</script", "<\\/script", paste(x, collapse = "\n"), ignore.case = TRUE)
 tp <- strsplit(tpl, "<!--GUIDE_MARKDOWN-->", fixed = TRUE)[[1]]; stopifnot(length(tp) == 2)
 page <- paste0(tp[1], md, tp[2])   # pasted, not sub(): the markdown's backslashes (Windows paths) must stay as they are

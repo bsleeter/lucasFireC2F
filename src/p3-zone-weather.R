@@ -66,4 +66,5 @@ if (has("ZoneDailyWeatherFile")) {
 progressBar()
 write_ds(dw, "DailyWeather")
 say("daily weather: %s rows, %d weather zones, %s to %s", format(nrow(dw), big.mark = ","), uniqueN(dw$WeatherZone), min(dw$Date), max(dw$Date))
+record_data_sources()
 progressBar(); progressBar(type = "end")

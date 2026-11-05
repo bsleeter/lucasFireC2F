@@ -1,6 +1,6 @@
 # Checks prep_zone_landscape.R output for P26 against the validated own-draw run's C2F-W inputs (script 200 + scar rule)
 suppressMessages(library(terra))
-I <- "F:/lucas-master/Models/lucasFireC2F Dev/P26/inputs"; O <- "F:/lucas-master/Models/California 30m BurnP3/data/c2fw/p026_LF2020_own/landscape"
+I <- "F:/lucasFireC2F/dev/libs/P26/inputs"; O <- "F:/lucas-master/Models/California 30m BurnP3/data/c2fw/p026_LF2020_own/landscape"
 fb <- rast(file.path(I, "fuel_type.tif")); yr <- rast(file.path(I, "years_since_fire.tif")); ref <- rast(file.path(O, "fuels.tif"))
 ext(ref) <- ext(fb)
 REMAP <- c(`109` = 108, `141` = 142, `184` = 183, `187` = 188, `201` = 186, `202` = 145, `203` = 145, `204` = 145)

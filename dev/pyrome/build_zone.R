@@ -10,7 +10,7 @@
 # Usage: Rscript build_zone.R "<zone name>" <tag> <burning hours> "<wind library>" <wind scenario id>
 suppressPackageStartupMessages({ library(rsyncrosim); library(data.table); library(terra) })
 a <- commandArgs(TRUE); ZN <- a[1]; TAG <- a[2]; BH <- as.integer(a[3]); WLIB <- a[4]; WSID <- as.integer(a[5])
-D <- "F:/lucas-master/Models/lucasFireC2F Dev"; LIB <- file.path(D, "lucasFireC2F Sierra Nevada & Foothills.ssim"); DD <- "F:/lucas-master/Data Sources/Landfire Disturbance"
+D <- "F:/lucasFireC2F/dev/libs"; LIB <- file.path(D, "lucasFireC2F Sierra Nevada & Foothills.ssim"); DD <- "F:/lucas-master/Data Sources/Landfire Disturbance"
 L <- suppressWarnings(ssimLibrary(LIB)); P <- rsyncrosim::project(L, 1)
 newest <- function() rsyncrosim::scenario(L, max(rsyncrosim::scenario(P)[, "ScenarioId"]))
 logs <- function(R, pat) { lg <- unlist(strsplit(paste(unlist(runLog(R)), collapse = "\n"), "\n")); lg <- sub(" +$", "", lg); cat(unique(lg[grepl(pat, lg)]), sep = "\n") }

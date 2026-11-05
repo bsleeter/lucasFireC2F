@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<package name="lucasFireC2F" displayName="LUCAS Fire (C2F-W)" description="Wildfire burn probability and fire effects and risk with Cell2Fire-World (Scott and Burgan fuels) for the LUCAS model family" version="2.4.0" url="https://github.com/bsleeter/lucasFireC2F" minSyncroSimVersion="3.1.0">
+<package name="lucasFireC2F" displayName="LUCAS Fire (C2F-W)" description="Wildfire burn probability and fire effects and risk with Cell2Fire-World (Scott and Burgan fuels) for the LUCAS model family" version="2.5.0" url="https://github.com/bsleeter/lucasFireC2F" minSyncroSimVersion="3.1.0">
 
 	<!-- =================================================================================================== -->
 	<!-- PROJECT DATASHEETS (definitions shared by all scenarios)                                           -->
@@ -333,8 +333,9 @@
 		<!--@end FireZone-->
 	</dataSheet>
 
-	<dataSheet name="DataSource" displayName="Data Sources (statewide and national data on disk)" dataScope="Project" isSingleRow="True">
-		<!-- plain paths: these files are GBs and are read, never copied into the library -->
+	<dataSheet name="DataSource" displayName="Data Sources" dataScope="Project" isSingleRow="True" viewClassName="lucasFireUI.DataSourcesView" viewClassAssembly="lucasFireUI">
+		<!-- plain paths: these files are GBs and are read, never copied into the library. A blank path reads its place in Data Sources Home (src/datahome.R) -->
+		<column name="DataSourcesHome" displayName="Data Sources Home (one folder holding every dataset at its standard place)" dataType="String" isOptional="True"/>
 		<column name="LandfireFolder" displayName="LANDFIRE Folder (LFvintage_product_CONUS folders)" dataType="String" isOptional="True"/>
 		<column name="StatewideElevationFile" displayName="Elevation: LANDFIRE 30 m DEM (CONUS) or a 150 m grid (sets the model lattice)" dataType="String" isOptional="True"/>
 		<column name="FireZoneGridFile" displayName="Fire Zone Grid, 150 m (optional: blank = rasterized from the boundaries)" dataType="String" isOptional="True"/>
@@ -357,6 +358,12 @@
 		<column name="GridMetFolder" displayName="gridMET Folder (var/var_year.nc: tmmx, rmin, vs, th, pr)" dataType="String" isOptional="True"/>
 		<column name="WrcBurnProbabilityFile" displayName="WRC Burn Probability (benchmark; 270 m or 30 m)" dataType="String" isOptional="True"/>
 		<column name="BpsFile" displayName="LANDFIRE Biophysical Settings (BpS) GeoTIFF, for vegetation strata" dataType="String" isOptional="True"/>
+	</dataSheet>
+
+	<dataSheet name="DataSourceEdition" displayName="Data Source Editions" dataScope="Project">
+		<!-- which edition of a Data Sources Home dataset this library reads (src/datahome.R; set on the Data Sources page): no row = the first edition -->
+		<column name="DataSource" displayName="Dataset" dataType="String"/>
+		<column name="Edition" displayName="Edition (the folder under editions/; blank = the first)" dataType="String" isOptional="True"/>
 	</dataSheet>
 
 	<dataSheet name="WeatherZone" displayName="Weather Zones" displayMember="Name" dataScope="Project">
@@ -4016,6 +4023,50 @@
 
 	<!-- fire detail (stage 8) inputs -->
 
+	<dataSheet name="DataDownloadZone" displayName="Fire Zones to Download">
+		<!-- stage D: the region is these zones polygons plus the Data Download buffer -->
+		<column name="FireZone" displayName="Fire Zone" dataType="Integer" validationType="Datasheet" formula1="FireZone"/>
+	</dataSheet>
+
+	<dataSheet name="DataDownloadOptions" displayName="Data Download" isSingleRow="True" viewClassName="lucasFireUI.DataDownloadView" viewClassAssembly="lucasFireUI">
+		<!-- stage D (src/d-data-download.R, src/download.R): fetch the Data Sources into Data Sources Home -->
+		<column name="BufferKm" displayName="Buffer around the fire zones (km; blank = 60)" dataType="Double" isOptional="True"/>
+		<column name="HomeLayout" displayName="Home layout" dataType="Integer" validationType="List" formula1="1:National (every dataset whole at the top of the home; any zone reads it)|2:By region (the region clips in regions/name; national datasets shared at the top)" defaultValue="2" isOptional="True"/>
+		<column name="RegionName" displayName="Region name (By region: the folder under regions/; blank = from the fire zones)" dataType="String" isOptional="True"/>
+		<column name="LandfireVintages" displayName="LANDFIRE vintages (comma separated; blank = 2020)" dataType="String" isOptional="True"/>
+		<column name="CanopyHeightVintage" displayName="Canopy height vintage (blank = the vintages above)" dataType="Integer" isOptional="True"/>
+		<column name="YearFrom" displayName="First year of the annual datasets (blank = each source from 1979)" dataType="Integer" isOptional="True"/>
+		<column name="YearTo" displayName="Last year of the annual datasets (blank = the latest each source has)" dataType="Integer" isOptional="True"/>
+		<column name="Datasets" displayName="Datasets (comma separated; blank = every one)" dataType="String" isOptional="True"/>
+		<column name="KeepNational" displayName="Keep national copies (else each is clipped to the region)" dataType="Boolean" defaultValue="0" isOptional="True"/>
+		<column name="FetchNewEditions" displayName="Fetch new editions (a dataset the home holds at an older version: the new one beside it, in editions/)" dataType="Boolean" defaultValue="0" isOptional="True"/>
+		<column name="CheckOnly" displayName="Check only: list what would download, and how big, without fetching" dataType="Boolean" defaultValue="0" isOptional="True"/>
+		<column name="Connections" displayName="Downloads at once (blank = 4)" dataType="Integer" isOptional="True"/>
+	</dataSheet>
+
+	<dataSheet name="OutputDataDownload" displayName="Download Results">
+		<!-- stage D: one row per dataset -->
+		<column name="DataSource" displayName="Dataset column" dataType="String"/>
+		<column name="Dataset" dataType="String"/>
+		<column name="Status" displayName="Status (done, skipped, would download, manual, failed)" dataType="String"/>
+		<column name="Files" dataType="Integer" isOptional="True"/>
+		<column name="SizeMb" displayName="Size (MB)" dataType="Double" isOptional="True"/>
+		<column name="Minutes" dataType="Double" isOptional="True"/>
+		<column name="Next" displayName="What to do next" dataType="String" isOptional="True"/>
+	</dataSheet>
+
+	<dataSheet name="OutputDataSources" displayName="Data Sources Used">
+		<!-- every stage that reads Data Sources (shared.R, record_data_sources): what it read, where from, and the checksums files.csv records -->
+		<column name="Stage" dataType="String"/>
+		<column name="DataSource" displayName="Data Sources column" dataType="String"/>
+		<column name="Origin" displayName="From (a home folder: the top or regions/name; else set)" dataType="String"/>
+		<column name="Path" dataType="String"/>
+		<column name="Files" dataType="Integer" isOptional="True"/>
+		<column name="Bytes" dataType="Double" isOptional="True"/>
+		<column name="Sha256" displayName="SHA-256 (one file; a folder: of its sorted file checksums)" dataType="String" isOptional="True"/>
+		<column name="Note" dataType="String" isOptional="True"/>
+	</dataSheet>
+
 	<dataSheet name="ZonePrepOption" displayName="Zone Preparation Options" isSingleRow="True">
 		<column name="FireZone" displayName="Fire Zone" dataType="Integer" validationType="Datasheet" formula1="FireZone"/>
 		<column name="BufferKm" displayName="Buffer Around the Zone (km)" dataType="Double" defaultValue="25"/>
@@ -4351,32 +4402,42 @@
 
 	<!-- zone preparation (from the project's Data Sources) -->
 
-	<transformer name="prepareZone" displayName="P1 - Prepare Zone Landscape" isRunnable="True" programName="Rscript" programArguments="src/p1-prepare-zone.R" configurationSheet="lucasFireC2F_RunControl" condaEnv="lucasFireC2F.yml" condaEnvVersion="1">
+	<transformer name="dataDownload" displayName="D - Data Download" isRunnable="True" programName="Rscript" programArguments="src/d-data-download.R">
+		<dataSheet name="DataDownloadZone" type="Input"/>
+		<dataSheet name="DataDownloadOptions" type="Input"/>
+		<dataSheet name="OutputDataDownload" type="Output"/>
+	</transformer>
+
+	<transformer name="prepareZone" displayName="P1 - Prepare Zone Landscape" isRunnable="True" programName="Rscript" programArguments="src/p1-prepare-zone.R" configurationSheet="lucasFireC2F_RunControl">
+		<dataSheet name="OutputDataSources" type="Output"/>
 		<dataSheet name="ZonePrepOption" type="Input"/>
 		<dataSheet name="LandscapeRasters" type="Both"/>
 		<dataSheet name="CanopyRasters" type="Both"/>
 		<dataSheet name="OutputZoneBoundary" type="Output"/>
 	</transformer>
 
-	<transformer name="fitIgnitionSurfaces" displayName="P2 - Fit Ignition Surfaces" isRunnable="True" programName="Rscript" programArguments="src/p2-fit-ignitions.R" configurationSheet="lucasFireC2F_RunControl" condaEnv="lucasFireC2F.yml" condaEnvVersion="1">
+	<transformer name="fitIgnitionSurfaces" displayName="P2 - Fit Ignition Surfaces" isRunnable="True" programName="Rscript" programArguments="src/p2-fit-ignitions.R" configurationSheet="lucasFireC2F_RunControl">
+		<dataSheet name="OutputDataSources" type="Output"/>
 		<dataSheet name="ZonePrepOption" type="Input"/>
 		<dataSheet name="LandscapeRasters" type="Input"/>
 		<dataSheet name="IgnitionGrid" type="Both"/>
 		<dataSheet name="OutputIgnitionFit" type="Output"/>
 	</transformer>
 
-	<transformer name="extractZoneWeather" displayName="P3 - Extract Zone Weather" isRunnable="True" programName="Rscript" programArguments="src/p3-zone-weather.R" configurationSheet="lucasFireC2F_RunControl" condaEnv="lucasFireC2F.yml" condaEnvVersion="1">
+	<transformer name="extractZoneWeather" displayName="P3 - Extract Zone Weather" isRunnable="True" programName="Rscript" programArguments="src/p3-zone-weather.R" configurationSheet="lucasFireC2F_RunControl">
+		<dataSheet name="OutputDataSources" type="Output"/>
 		<dataSheet name="LandscapeRasters" type="Input"/>
 		<dataSheet name="DailyWeather" type="Both"/>
 	</transformer>
 
-	<transformer name="severityTarget" displayName="P4 - MTBS Severity Target" isRunnable="True" programName="Rscript" programArguments="src/p4-severity-target.R" configurationSheet="lucasFireC2F_RunControl" condaEnv="lucasFireC2F.yml" condaEnvVersion="1">
+	<transformer name="severityTarget" displayName="P4 - MTBS Severity Target" isRunnable="True" programName="Rscript" programArguments="src/p4-severity-target.R" configurationSheet="lucasFireC2F_RunControl">
+		<dataSheet name="OutputDataSources" type="Output"/>
 		<dataSheet name="ZonePrepOption" type="Input"/>
 		<dataSheet name="OutputZoneBoundary" type="Input"/>
 		<dataSheet name="SeverityTarget" type="Both"/>
 	</transformer>
 
-	<transformer name="prepareLandscape" displayName="1 - Prepare Landscape" isRunnable="True" programName="Rscript" programArguments="src/1-prepare-landscape.R" configurationSheet="lucasFireC2F_RunControl" condaEnv="lucasFireC2F.yml" condaEnvVersion="1">
+	<transformer name="prepareLandscape" displayName="1 - Prepare Landscape" isRunnable="True" programName="Rscript" programArguments="src/1-prepare-landscape.R" configurationSheet="lucasFireC2F_RunControl">
 		<dataSheet name="RunControl" type="Input"/>
 		<dataSheet name="LandscapeRasters" type="Input"/>
 		<dataSheet name="CanopyRasters" type="Input"/>
@@ -4384,7 +4445,7 @@
 		<dataSheet name="OutputEngineLandscape" type="Output"/>
 	</transformer>
 
-	<transformer name="sampleIgnitions" displayName="2 - Sample Ignitions" isRunnable="True" programName="Rscript" programArguments="src/2-sample-ignitions.R" configurationSheet="lucasFireC2F_RunControl" condaEnv="lucasFireC2F.yml" condaEnvVersion="1">
+	<transformer name="sampleIgnitions" displayName="2 - Sample Ignitions" isRunnable="True" programName="Rscript" programArguments="src/2-sample-ignitions.R" configurationSheet="lucasFireC2F_RunControl">
 		<dataSheet name="RunControl" type="Input"/>
 		<dataSheet name="LandscapeRasters" type="Input"/>
 		<dataSheet name="IgnitionCount" type="Input"/>
@@ -4394,7 +4455,7 @@
 		<dataSheet name="OutputFireList" type="Output"/>
 	</transformer>
 
-	<transformer name="sampleBurningConditions" displayName="3 - Sample Burning Conditions" isRunnable="True" programName="Rscript" programArguments="src/3-sample-conditions.R" configurationSheet="lucasFireC2F_RunControl" condaEnv="lucasFireC2F.yml" condaEnvVersion="1">
+	<transformer name="sampleBurningConditions" displayName="3 - Sample Burning Conditions" isRunnable="True" programName="Rscript" programArguments="src/3-sample-conditions.R" configurationSheet="lucasFireC2F_RunControl">
 		<dataSheet name="RunControl" type="Input"/>
 		<dataSheet name="SpreadDays" type="Input"/>
 		<dataSheet name="BurningHours" type="Input"/>
@@ -4407,7 +4468,7 @@
 		<dataSheet name="OutputFireWeather" type="Output"/>
 	</transformer>
 
-	<transformer name="growFires" displayName="4 - Grow Fires (C2F-W)" isRunnable="True" programName="Rscript" programArguments="src/4-grow-fires.R" configurationSheet="lucasFireC2F_RunControl" condaEnv="lucasFireC2F.yml" condaEnvVersion="1" isStochasticTime="True">
+	<transformer name="growFires" displayName="4 - Grow Fires (C2F-W)" isRunnable="True" programName="Rscript" programArguments="src/4-grow-fires.R" configurationSheet="lucasFireC2F_RunControl" isStochasticTime="True">
 		<dataSheet name="RunControl" type="Input"/>
 		<dataSheet name="LandscapeRasters" type="Input"/>
 		<dataSheet name="CanopyRasters" type="Input"/>
@@ -4420,7 +4481,7 @@
 		<dataSheet name="OutputFireStatistic" type="Output"/>
 	</transformer>
 
-	<transformer name="mergeZones" displayName="M - Merge Zone Results" isRunnable="True" programName="Rscript" programArguments="src/m-merge-zones.R" configurationSheet="lucasFireC2F_RunControl" condaEnv="lucasFireC2F.yml" condaEnvVersion="1">
+	<transformer name="mergeZones" displayName="M - Merge Zone Results" isRunnable="True" programName="Rscript" programArguments="src/m-merge-zones.R" configurationSheet="lucasFireC2F_RunControl">
 		<dataSheet name="RunControl" type="Input"/>
 		<dataSheet name="MergeSource" type="Input"/>
 		<dataSheet name="EffectsOption" type="Both"/>
@@ -4438,7 +4499,7 @@
 		<dataSheet name="OutputBurnTable" type="Output"/>
 	</transformer>
 
-	<transformer name="summarizeBurnProbability" displayName="5 - Summarize Burn Probability" isRunnable="True" programName="Rscript" programArguments="src/5-burn-probability.R" configurationSheet="lucasFireC2F_RunControl" condaEnv="lucasFireC2F.yml" condaEnvVersion="1">
+	<transformer name="summarizeBurnProbability" displayName="5 - Summarize Burn Probability" isRunnable="True" programName="Rscript" programArguments="src/5-burn-probability.R" configurationSheet="lucasFireC2F_RunControl">
 		<dataSheet name="RunControl" type="Input"/>
 		<dataSheet name="ResampleOption" type="Input"/>
 		<dataSheet name="OutputOption" type="Input"/>
@@ -4450,7 +4511,7 @@
 		<dataSheet name="OutputBurnCount" type="Output"/>
 	</transformer>
 
-	<transformer name="fireEffects" displayName="6 - Fire Effects" isRunnable="True" programName="Rscript" programArguments="src/6-fire-effects.R" configurationSheet="lucasFireC2F_RunControl" condaEnv="lucasFireC2F.yml" condaEnvVersion="1">
+	<transformer name="fireEffects" displayName="6 - Fire Effects" isRunnable="True" programName="Rscript" programArguments="src/6-fire-effects.R" configurationSheet="lucasFireC2F_RunControl">
 		<dataSheet name="RunControl" type="Input"/>
 		<dataSheet name="LandscapeRasters" type="Input"/>
 		<dataSheet name="CanopyRasters" type="Input"/>
@@ -4467,7 +4528,7 @@
 		<dataSheet name="OutputEffectsSummary" type="Output"/>
 	</transformer>
 
-	<transformer name="hazardRisk" displayName="7 - Hazard and Risk" isRunnable="True" programName="Rscript" programArguments="src/7-hazard-risk.R" configurationSheet="lucasFireC2F_RunControl" condaEnv="lucasFireC2F.yml" condaEnvVersion="1">
+	<transformer name="hazardRisk" displayName="7 - Hazard and Risk" isRunnable="True" programName="Rscript" programArguments="src/7-hazard-risk.R" configurationSheet="lucasFireC2F_RunControl">
 		<dataSheet name="LandscapeRasters" type="Input"/>
 		<dataSheet name="RiskOption" type="Input"/>
 		<dataSheet name="OutputEngineLandscape" type="Input"/>
@@ -4478,7 +4539,7 @@
 
 	<!-- calibration -->
 
-	<transformer name="fireDetail" displayName="8 - Fire Detail (optional)" isRunnable="True" programName="Rscript" programArguments="src/8-fire-detail.R" configurationSheet="lucasFireC2F_RunControl" condaEnv="lucasFireC2F.yml" condaEnvVersion="1">
+	<transformer name="fireDetail" displayName="8 - Fire Detail (optional)" isRunnable="True" programName="Rscript" programArguments="src/8-fire-detail.R" configurationSheet="lucasFireC2F_RunControl">
 		<dataSheet name="RunControl" type="Input"/>
 		<dataSheet name="EffectsOption" type="Input"/>
 		<dataSheet name="WindRatio" type="Input"/>
@@ -4497,14 +4558,15 @@
 		<dataSheet name="OutputSeverityFit" type="Output"/>
 	</transformer>
 
-	<transformer name="importFireRecord" displayName="C1 - Import Fire Record" isRunnable="True" programName="Rscript" programArguments="src/c1-import-fire-record.R" configurationSheet="lucasFireC2F_RunControl" condaEnv="lucasFireC2F.yml" condaEnvVersion="1">
+	<transformer name="importFireRecord" displayName="C1 - Import Fire Record" isRunnable="True" programName="Rscript" programArguments="src/c1-import-fire-record.R" configurationSheet="lucasFireC2F_RunControl">
+		<dataSheet name="OutputDataSources" type="Output"/>
 		<dataSheet name="FireRecordImport" type="Input"/>
 		<dataSheet name="OutputZoneBoundary" type="Input"/>
 		<dataSheet name="LandscapeRasters" type="Input"/>
 		<dataSheet name="HistoricalFire" type="Both"/>
 	</transformer>
 
-	<transformer name="buildWeatherStream" displayName="C2 - Build Weather Stream" isRunnable="True" programName="Rscript" programArguments="src/c2-build-weather-stream.R" configurationSheet="lucasFireC2F_RunControl" condaEnv="lucasFireC2F.yml" condaEnvVersion="1">
+	<transformer name="buildWeatherStream" displayName="C2 - Build Weather Stream" isRunnable="True" programName="Rscript" programArguments="src/c2-build-weather-stream.R" configurationSheet="lucasFireC2F_RunControl">
 		<dataSheet name="DailyWeather" type="Input"/>
 		<dataSheet name="CalibrationPeriod" type="Input"/>
 		<dataSheet name="WeatherOption" type="Input"/>
@@ -4512,7 +4574,7 @@
 		<dataSheet name="WeatherStream" type="Both"/>
 	</transformer>
 
-	<transformer name="fitIgnitions" displayName="C3 - Fit Ignitions" isRunnable="True" programName="Rscript" programArguments="src/c3-fit-ignitions.R" configurationSheet="lucasFireC2F_RunControl" condaEnv="lucasFireC2F.yml" condaEnvVersion="1">
+	<transformer name="fitIgnitions" displayName="C3 - Fit Ignitions" isRunnable="True" programName="Rscript" programArguments="src/c3-fit-ignitions.R" configurationSheet="lucasFireC2F_RunControl">
 		<dataSheet name="HistoricalFire" type="Input"/>
 		<dataSheet name="CalibrationPeriod" type="Input"/>
 		<dataSheet name="CalibrationOption" type="Input"/>
@@ -4521,7 +4583,7 @@
 		<dataSheet name="IgnitionDistribution" type="Output"/>
 	</transformer>
 
-	<transformer name="fitSpreadDays" displayName="C5 - Fit Spread Days" isRunnable="True" programName="Rscript" programArguments="src/c5-fit-spread-days.R" configurationSheet="lucasFireC2F_RunControl" condaEnv="lucasFireC2F.yml" condaEnvVersion="1">
+	<transformer name="fitSpreadDays" displayName="C5 - Fit Spread Days" isRunnable="True" programName="Rscript" programArguments="src/c5-fit-spread-days.R" configurationSheet="lucasFireC2F_RunControl">
 		<dataSheet name="HistoricalFire" type="Input"/>
 		<dataSheet name="LandscapeRasters" type="Input"/>
 		<dataSheet name="CalibrationPeriod" type="Input"/>
@@ -4536,7 +4598,7 @@
 		<dataSheet name="OutputCalibrationSummary" type="Output"/>
 	</transformer>
 
-	<transformer name="scoreAgainstRecord" displayName="C6 - Score Against Fire Records" isRunnable="True" programName="Rscript" programArguments="src/c6-score.R" configurationSheet="lucasFireC2F_RunControl" condaEnv="lucasFireC2F.yml" condaEnvVersion="1">
+	<transformer name="scoreAgainstRecord" displayName="C6 - Score Against Fire Records" isRunnable="True" programName="Rscript" programArguments="src/c6-score.R" configurationSheet="lucasFireC2F_RunControl">
 		<dataSheet name="HistoricalFire" type="Input"/>
 		<dataSheet name="CalibrationPeriod" type="Input"/>
 		<dataSheet name="LandscapeRasters" type="Input"/>
@@ -4551,7 +4613,8 @@
 		<dataSheet name="OutputReportFigure" type="Output"/>
 	</transformer>
 
-	<transformer name="validateBurnProbability" displayName="C7 - Validate Burn Probability" isRunnable="True" programName="Rscript" programArguments="src/c7-validate.R" configurationSheet="lucasFireC2F_RunControl" condaEnv="lucasFireC2F.yml" condaEnvVersion="1">
+	<transformer name="validateBurnProbability" displayName="C7 - Validate Burn Probability" isRunnable="True" programName="Rscript" programArguments="src/c7-validate.R" configurationSheet="lucasFireC2F_RunControl">
+		<dataSheet name="OutputDataSources" type="Output"/>
 		<dataSheet name="ValidationOption" type="Input"/>
 		<dataSheet name="ValidationPeriod" type="Input"/>
 		<dataSheet name="LandscapeRasters" type="Input"/>
@@ -4561,7 +4624,8 @@
 		<dataSheet name="OutputSelection" type="Output"/>
 	</transformer>
 
-	<transformer name="reportFigures" displayName="R - Report Figures (optional)" isRunnable="True" programName="Rscript" programArguments="src/r-report-figures.R" configurationSheet="lucasFireC2F_RunControl" condaEnv="lucasFireC2F.yml" condaEnvVersion="1">
+	<transformer name="reportFigures" displayName="R - Report Figures (optional)" isRunnable="True" programName="Rscript" programArguments="src/r-report-figures.R" configurationSheet="lucasFireC2F_RunControl">
+		<dataSheet name="OutputDataSources" type="Output"/>
 		<dataSheet name="RunControl" type="Input"/>
 		<dataSheet name="ZonePrepOption" type="Input"/>
 		<dataSheet name="OutputZoneBoundary" type="Input"/>
@@ -4589,7 +4653,8 @@
 
 	<!-- utilities -->
 
-	<transformer name="buildWindTable" displayName="P5 - Burning-Period Wind (RAWS)" isRunnable="True" programName="Rscript" programArguments="src/p5-burning-period-wind.R" configurationSheet="lucasFireC2F_RunControl" condaEnv="lucasFireC2F.yml" condaEnvVersion="1">
+	<transformer name="buildWindTable" displayName="P5 - Burning-Period Wind (RAWS)" isRunnable="True" programName="Rscript" programArguments="src/p5-burning-period-wind.R" configurationSheet="lucasFireC2F_RunControl">
+		<dataSheet name="OutputDataSources" type="Output"/>
 		<dataSheet name="OutputZoneBoundary" type="Input"/>
 		<dataSheet name="LandscapeRasters" type="Input"/>
 		<dataSheet name="DailyWeather" type="Input"/>
@@ -4598,7 +4663,7 @@
 		<dataSheet name="WindRatio" type="Output"/>
 	</transformer>
 
-	<transformer name="eventWeather" displayName="Utility - Offshore Wind Event Weather" isRunnable="True" programName="Rscript" programArguments="src/u-event-weather.R" configurationSheet="lucasFireC2F_RunControl" condaEnv="lucasFireC2F.yml" condaEnvVersion="1">
+	<transformer name="eventWeather" displayName="Utility - Offshore Wind Event Weather" isRunnable="True" programName="Rscript" programArguments="src/u-event-weather.R" configurationSheet="lucasFireC2F_RunControl">
 		<dataSheet name="RAWSStation" type="Input"/>
 		<dataSheet name="EventOption" type="Input"/>
 		<dataSheet name="DailyWeather" type="Input"/>
@@ -4617,6 +4682,10 @@
 	<!-- =================================================================================================== -->
 
 	<layout type="Project">
+		<group name="Data" displayName="Data Sources">
+			<item name="DataSource"/>
+			<item name="DataSourceEdition"/>
+		</group>
 		<group name="Fuels" displayName="Fuels">
 			<item name="FuelType"/>
 			<item name="FuelModel"/>
@@ -4636,9 +4705,6 @@
 			<item name="EffectsMetric"/>
 			<item name="RiskMetric"/>
 		</group>
-		<group name="Data" displayName="Data Sources">
-			<item name="DataSource"/>
-		</group>
 		<group name="Advanced" displayName="Advanced">
 			<item name="FireRecordSource"/>
 		</group>
@@ -4646,10 +4712,16 @@
 
 	<layout type="Scenario">
 		<item name="RunControl"/>
+		<group name="DataDownload" displayName="Data Download">
+			<item name="DataDownloadZone"/>
+			<item name="DataDownloadOptions"/>
+			<item name="OutputDataDownload"/>
+		</group>
 		<group name="ZonePreparation" displayName="Zone Preparation">
 			<item name="ZonePrepOption"/>
 			<item name="OutputZoneBoundary"/>
 			<item name="OutputIgnitionFit"/>
+			<item name="OutputDataSources"/>
 		</group>
 		<group name="Landscape" displayName="1 - Landscape">
 			<item name="LandscapeRasters"/>

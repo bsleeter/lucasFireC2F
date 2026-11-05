@@ -1,7 +1,7 @@
 # Stage 1 output (a result scenario) vs the validated own-draw run's C2F-W landscape (script 200 + scar rules)
 suppressPackageStartupMessages({ library(rsyncrosim); library(terra) })
 id <- as.integer(commandArgs(TRUE)[1])
-L <- suppressWarnings(ssimLibrary("F:/lucas-master/Models/lucasFireC2F Dev/lucasFireC2F P26.ssim"))
+L <- suppressWarnings(ssimLibrary("F:/lucasFireC2F/dev/libs/lucasFireC2F P26.ssim"))
 x <- datasheet(rsyncrosim::scenario(L, id), "lucasFireC2F_OutputEngineLandscape")
 O <- "F:/lucas-master/Models/California 30m BurnP3/data/c2fw/p026_LF2020_own/landscape"
 pairs <- c(FuelFileName = "fuels.tif", ElevationFileName = "elevation.tif", CanopyBaseHeightFileName = "cbh.tif",

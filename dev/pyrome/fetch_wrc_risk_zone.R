@@ -7,7 +7,7 @@ a <- commandArgs(TRUE); TAG <- a[1]; PREP <- as.integer(a[2])
 SVC <- "https://imagery.geoplatform.gov/iipp/rest/services/Fire_Aviation/USFS_EDW_RMRS_WRC_%s/ImageServer/exportImage"
 RAW <- file.path("F:/lucas-master/Data Sources/WRC", TAG); dir.create(RAW, showWarnings = FALSE, recursive = TRUE)
 LAYERS <- list(crps = list(svc = "ConditionalRiskToPotentialStructures", scale = 0.1), rps = list(svc = "RiskToPotentialStructures", scale = 0.01))
-g <- rast(list.files(sprintf("F:/lucas-master/Models/lucasFireC2F Dev/lucasFireC2F Sierra Nevada & Foothills.ssim.data/Scenario-%d/lucasFireC2F_LandscapeRasters", PREP), "^fuel", full.names = TRUE)[1])
+g <- rast(list.files(sprintf("F:/lucasFireC2F/dev/libs/lucasFireC2F Sierra Nevada & Foothills.ssim.data/Scenario-%d/lucasFireC2F_LandscapeRasters", PREP), "^fuel", full.names = TRUE)[1])
 e <- as.vector(ext(g)); TP <- 3000; TS <- TP * 30; xs <- seq(e[1], e[2] - 1, by = TS); ys <- seq(e[3], e[4] - 1, by = TS)
 say("%s: frame %.0f x %.0f km -> %d x %d tiles of %d px at 30 m", TAG, (e[2] - e[1]) / 1000, (e[4] - e[3]) / 1000, length(xs), length(ys), TP)
 for (key in names(LAYERS)) { L <- LAYERS[[key]]; fs <- character(0); t0 <- Sys.time()

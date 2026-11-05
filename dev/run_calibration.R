@@ -1,6 +1,6 @@
 # Runs the P26 calibration scenario and checks C2 / C3 / C5 against the development record.
 suppressPackageStartupMessages({ library(rsyncrosim); library(data.table); library(DBI) })
-L <- suppressWarnings(ssimLibrary("F:/lucas-master/Models/lucasFireC2F Dev/lucasFireC2F P26.ssim"))
+L <- suppressWarnings(ssimLibrary("F:/lucasFireC2F/dev/libs/lucasFireC2F P26.ssim"))
 P <- rsyncrosim::project(L, "P26 Northern Sierra Nevada"); C <- rsyncrosim::scenario(P, "P26 Calibration 1992-2020")
 t0 <- Sys.time(); tryCatch(run(C), error = function(e) NULL)
 ids <- rsyncrosim::scenario(P)[, "ScenarioId"]; R <- rsyncrosim::scenario(L, max(ids))

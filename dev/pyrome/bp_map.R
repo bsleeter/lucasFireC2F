@@ -3,14 +3,14 @@
 suppressPackageStartupMessages({ library(terra); library(sf); library(rsyncrosim) }); sf_use_s2(FALSE)
 a <- commandArgs(TRUE); PY <- as.integer(a[1]); RID <- as.integer(a[2]); OUTF <- a[3]; AUC1 <- if (length(a) > 3) a[4] else "?"; AUC2 <- if (length(a) > 4) a[5] else "?"; NOTE <- if (length(a) > 5) a[6] else ""
 M <- "F:/lucas-master/Models/California 30m BurnP3"; ZD <- file.path(M, sprintf("spatial/pyromes_150m_LF2020/pyrome_%03d", PY))
-L <- suppressWarnings(ssimLibrary(sprintf("F:/lucas-master/Models/lucasFireC2F Dev/lucasFireC2F P%02d.ssim", PY)))
+L <- suppressWarnings(ssimLibrary(sprintf("F:/lucasFireC2F/dev/libs/lucasFireC2F P%02d.ssim", PY)))
 bp <- rast(datasheet(rsyncrosim::scenario(L, RID), "lucasFireC2F_OutputBurnProbability")$FileName[1]) * 100
 el <- rast(file.path(ZD, "Elevation.tif")); if (!compareGeom(bp, el, stopOnError = FALSE)) ext(bp) <- ext(el)
 zone <- st_transform(read_sf(file.path(ZD, "zone.gpkg")), crs(el))
 bb <- st_bbox(zone); E <- ext(bb$xmin - 5000, bb$xmax + 5000, bb$ymin - 5000, bb$ymax + 5000)
 el <- crop(el, E); bp <- crop(bp, E)
 wrc <- crop(terra::project(rast("F:/lucas-master/Data Sources/WRC/california_270m/wrc_bp_270m.tif"), el, method = "near"), E) * 100
-fu <- crop(rast(sprintf("F:/lucas-master/Models/lucasFireC2F Dev/P%02d/inputs/fuel_type.tif", PY)), E)
+fu <- crop(rast(sprintf("F:/lucasFireC2F/dev/libs/P%02d/inputs/fuel_type.tif", PY)), E)
 nb <- fu %in% c(91, 92, 93, 98, 99)
 inz <- rasterize(vect(zone), el, field = 1)
 source("F:/lucas-master/Models/California 30m BurnP3/src/00_config.R")

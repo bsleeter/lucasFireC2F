@@ -2,7 +2,7 @@
 # 30 m DEM, national pyromes, no fire-zone / fire-age grids, interagency perimeters, NWS zones) - each building P26's prep (CA: P1;
 # National: P1, P3, P5). Then every raster is compared with SN&F result 32, and the national wind table with result 81.
 suppressPackageStartupMessages({ library(rsyncrosim); library(data.table); library(terra) })
-D <- "F:/lucas-master/Models/lucasFireC2F Dev"; DS <- "F:/lucas-master/Data Sources"; OUT <- "F:/lucasFireC2F/dev/conus"
+D <- "F:/lucasFireC2F/dev/libs"; DS <- "F:/lucas-master/Data Sources"; OUT <- "F:/lucasFireC2F/dev/conus"
 SNF <- suppressWarnings(ssimLibrary(file.path(D, "lucasFireC2F Sierra Nevada & Foothills.ssim")))
 src_ds <- datasheet(rsyncrosim::project(SNF, 1), "lucasFireC2F_DataSource", optional = TRUE)
 zp <- datasheet(rsyncrosim::scenario(SNF, 31), "lucasFireC2F_ZonePrepOption", optional = TRUE, lookupsAsFactors = FALSE); cat("P26 Prep options:\n"); print(zp)

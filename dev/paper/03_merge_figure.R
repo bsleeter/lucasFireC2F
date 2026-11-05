@@ -4,7 +4,7 @@
 # Usage: Rscript 03_merge_figure.R [merge result id]
 suppressPackageStartupMessages({ library(terra); library(sf); library(data.table) }); sf_use_s2(FALSE); terraOptions(progress = 0)
 source("F:/lucasFireC2F/src/report.R")
-S <- "F:/lucas-master/Models/lucasFireC2F Dev/lucasFireC2F Sierra Nevada & Foothills.ssim.data"
+S <- "F:/lucasFireC2F/dev/libs/lucasFireC2F Sierra Nevada & Foothills.ssim.data"
 OUT <- "F:/lucasFireC2F/dev/paper/figures"; dir.create(OUT, FALSE, TRUE)
 args <- commandArgs(TRUE); MERGE <- if (length(args)) as.integer(args[1]) else 82L
 bpf <- function(id) list.files(file.path(S, sprintf("Scenario-%d/lucasFireC2F_OutputBurnProbability", id)), "\\.tif$", full.names = TRUE)[1]

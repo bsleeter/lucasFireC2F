@@ -10,7 +10,7 @@ The unit of work is a **fire zone**: one of the 128 pyromes of the conterminous 
 A zone is prepared from national data, calibrated to its own fire record, run, and optionally merged with neighbouring
 zones so that fire crossing their shared boundaries is counted.
 
-Package version **2.4.0**. Runs anywhere in CONUS; developed and tested on California pyromes.
+Package version **2.5.0**. Runs anywhere in CONUS; developed and tested on California pyromes.
 
 ## Documentation
 
@@ -30,9 +30,13 @@ stages, datasheets or Data Sources); each also writes a print SVG and PNG beside
 
 ## Installing
 
-Requirements: Windows; SyncroSim Studio 3.1; R 4.4 or later with `rsyncrosim`, `data.table`, `terra`, `sf`, `arrow`, `DBI`,
-`RSQLite`, `cffdrs`, `jsonlite` and `mgcv` (also listed in `lucasFireC2F.yml`). The C2F-W executable and its DLLs ship in
-`bin/windows`.
+Requirements: Windows; SyncroSim Studio 3.1 (tested with 3.1.29); R 4.6 (tested with 4.6.1) with the packages below. The
+C2F-W executable and its DLLs ship in `bin/windows`. The package runs in your own R and does not support Conda on Windows,
+because conda-forge does not carry all of these packages there. Tested versions are in the User Guide, "Before you begin".
+
+```r
+install.packages(c("rsyncrosim", "data.table", "terra", "sf", "arrow", "cffdrs", "mgcv", "curl", "jsonlite", "digest"))
+```
 
 There are two ways to install. Close SyncroSim Studio first in either case; the package manager is
 `C:\Program Files\SyncroSim\SyncroSim.PackageManager.exe`.
@@ -41,7 +45,7 @@ There are two ways to install. Close SyncroSim Studio first in either case; the 
 [Releases](https://github.com/bsleeter/lucasFireC2F/releases) page and install it:
 
 ```
-"C:\Program Files\SyncroSim\SyncroSim.PackageManager.exe" --finstall="lucasFireC2F-2.4.0.ssimpkg"
+"C:\Program Files\SyncroSim\SyncroSim.PackageManager.exe" --finstall="lucasFireC2F-2.5.0.ssimpkg"
 ```
 
 The package is copied into SyncroSim's own package folder, so the downloaded file can be deleted afterwards.
@@ -85,6 +89,7 @@ named for the version in `package.xml`.
 
 | Scenario | Stages | Does |
 |---|---|---|
+| Data Download | D Data Download | Fetches the national data into one Data Sources Home folder, clipped to the fire zones asked; every other stage then reads it with no paths to set |
 | Prep | P1 Prepare Zone Landscape, P2 Fit Ignition Surfaces, P3 Extract Zone Weather, P4 MTBS Severity Target, P5 Burning-Period Wind (RAWS) | Builds the zone's 150 m landscape, ignition-probability surfaces, daily weather, severity target and wind table from national data |
 | Calibrate | C1 Import Fire Record, C2 Build Weather Stream, C3 Fit Ignitions, stages 1-5 as a seed run, C5 Fit Spread Days | Fits fires per season, their season and cause, and the spread-day distribution that reproduces the recorded fire sizes |
 | Run | 1 Prepare Landscape, 2 Sample Ignitions, 3 Sample Burning Conditions, 4 Grow Fires (C2F-W), 5 Summarize Burn Probability, 6 Fire Effects, 7 Hazard and Risk, 8 Fire Detail, C6, C7 Validate Burn Probability, R Report Figures | Burn probability, effects and risk maps, per-fire detail, scores against the record and WRC, report figures |
@@ -97,8 +102,17 @@ Calibrate depends on the Prep result; Run depends on the Calibrate and Prep resu
 All inputs are public national datasets: LANDFIRE (fuels, canopy, elevation, biophysical settings, roads), the FPA-FOD fire
 occurrence database, MTBS perimeters and severity mosaics, gridMET daily meteorology, FEMS RAWS hourly weather, NWS fire
 weather zones, pyromes, PRISM normals, Annual NLCD, SILVIS housing density, NIFC interagency fire perimeters, and WRC burn
-probability as a benchmark. Paths are set once per project in the *Data Sources* sheet; the files are read where they are and
-never copied into the library. The data are not in this repository.
+probability as a benchmark. The data are not in this repository.
+
+A *Data Download* scenario (stage D) fetches them: set **Data Sources Home** on the *Data Sources* page, list the fire zones, and run
+it. Each dataset goes to a standard place in that folder, clipped to the zones plus a buffer where the source allows and kept whole
+where it does not, with a manifest of what came from where and a checksum of every file. A blank Data Sources path then reads the
+home; a stage whose zone the download does not cover stops and says so. No file in a home is ever replaced, so a second region never
+changes what another library read. The folder layout is lucasCore's, so one home can serve both packages and what they share is
+fetched once. The LANDFIRE Product Service needs an email address, entered on the Data Download page.
+
+A path set in *Data Sources* always wins, so a copy you already hold can be used instead. Files are read where they are and never
+copied into the library.
 
 ## Repository layout
 
@@ -106,7 +120,8 @@ never copied into the library. The data are not in this repository.
 |---|---|
 | `package.xml` | SyncroSim package definition: datasheets, stages, layouts |
 | `src/` | R scripts, one per stage, and shared code (`shared.R`, `effects.R`, `rothermel.R`, `covariates.R`, `report.R`, ...) |
-| `defaults/` | Default project data: fuel models and types, fire and weather zones, moisture scenarios, seasons |
+| `defaults/` | Default project data: fuel models and types, fire and weather zones, moisture scenarios, seasons; the Data Sources tables (`library/`, `download/`) |
+| `ui/` | The Data Sources and Data Download pages (C#, built into `lucasFireUI.dll` by `tools/build_ui.ps1`) |
 | `updates/` | Schema updates applied when a library is upgraded |
 | `bin/windows/` | Cell2Fire-World v1.0.1 executable and DLLs (GPL-3.0) |
 | `docs/user-guide/` | The user guide and its figures |

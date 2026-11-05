@@ -2,7 +2,7 @@
 # Usage: Rscript dev/rerun_from_result.R <result scenario id> "<stage>" ["<stage>" ...]
 suppressPackageStartupMessages(library(rsyncrosim))
 a <- commandArgs(TRUE); src <- as.integer(a[1]); st <- a[-1]
-L <- suppressWarnings(ssimLibrary("F:/lucas-master/Models/lucasFireC2F Dev/lucasFireC2F P26.ssim"))
+L <- suppressWarnings(ssimLibrary("F:/lucasFireC2F/dev/libs/lucasFireC2F P26.ssim"))
 P <- rsyncrosim::project(L, "P26 Northern Sierra Nevada")
 S <- rsyncrosim::scenario(P, sprintf("dev: rerun %s from [%d]", paste(sub(" - .*", "", st), collapse = "+"), src),
                           sourceScenario = rsyncrosim::scenario(L, src), overwrite = TRUE)

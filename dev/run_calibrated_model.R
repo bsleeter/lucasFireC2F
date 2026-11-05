@@ -4,7 +4,7 @@
 # Usage: Rscript dev/run_calibrated_model.R <calibration result scenario id>
 suppressPackageStartupMessages({ library(rsyncrosim); library(data.table) })
 cid <- as.integer(commandArgs(TRUE)[1])
-L <- suppressWarnings(ssimLibrary("F:/lucas-master/Models/lucasFireC2F Dev/lucasFireC2F P26.ssim")); P <- rsyncrosim::project(L, "P26 Northern Sierra Nevada")
+L <- suppressWarnings(ssimLibrary("F:/lucasFireC2F/dev/libs/lucasFireC2F P26.ssim")); P <- rsyncrosim::project(L, "P26 Northern Sierra Nevada")
 base <- rsyncrosim::scenario(P, "P26 Baseline LF2020 (1992-2020 calibration)"); CR <- rsyncrosim::scenario(L, cid)
 S <- rsyncrosim::scenario(P, "P26 Model on package calibration", sourceScenario = base, overwrite = TRUE)
 cal <- c("SpreadDays", "IgnitionCount", "IgnitionDistribution", "ResampleOption", "WeatherStream")

@@ -42,4 +42,5 @@ thr <- max(mean(H$AreaHa), 73 * 0.404686)
 say("imported %s FPA-FOD fires inside the zone boundary, %d-%d (%s >= %.1f ha, the FSim-rule threshold of this record; C3 sets it for the calibration years; causes: %s)",
     format(nrow(H), big.mark = ","), min(yr), max(yr), format(sum(H$AreaHa >= thr), big.mark = ","), thr,
     paste(names(table(H$Cause, useNA = "ifany")), table(H$Cause, useNA = "ifany"), collapse = ", "))
+record_data_sources()
 progressBar(); progressBar(type = "end")

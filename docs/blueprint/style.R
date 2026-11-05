@@ -13,7 +13,7 @@ box <- function(x, y, w, h, eyebrow, name = NULL) paste0(sprintf('<rect class="b
 defs <- '<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs>'
 # stage families (both drawings colour a stage, its chips and its wires by these): zone preparation, calibration, fire growth
 # (and the merge that stands in for it), burn probability / effects / risk, scoring and figures
-fam <- c(P1 = "prep", P2 = "prep", P3 = "prep", P4 = "prep", P5 = "prep", U = "prep",
+fam <- c(D = "prep", P1 = "prep", P2 = "prep", P3 = "prep", P4 = "prep", P5 = "prep", U = "prep",
          C1 = "cal", C2 = "cal", C3 = "cal", C5 = "cal",
          `1` = "grow", `2` = "grow", `3` = "grow", `4` = "grow", M = "grow",
          `5` = "fx", `6` = "fx", `7` = "fx", `8` = "fx",

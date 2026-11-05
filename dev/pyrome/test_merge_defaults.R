@@ -2,7 +2,7 @@
 # Nothing else is filled: zone lists come from the package defaults, option sheets from source 1 via stage M.
 # Then compares the burn count with the earlier merge (P26+P29 library, result 2): must be identical.
 suppressPackageStartupMessages({ library(rsyncrosim); library(data.table); library(terra) })
-D <- "F:/lucas-master/Models/lucasFireC2F Dev"
+D <- "F:/lucasFireC2F/dev/libs"
 L <- suppressWarnings(ssimLibrary(file.path(D, "lucasFireC2F merge test.ssim"), packages = "lucasFireC2F", overwrite = TRUE)); P <- rsyncrosim::project(L, "California")
 cat(sprintf("new project lists: %d fire zones, %d weather zones\n", nrow(datasheet(P, "lucasFireC2F_FireZone")), nrow(datasheet(P, "lucasFireC2F_WeatherZone"))))
 S <- rsyncrosim::scenario(P, "Merge P26 + P29 (defaults)")

@@ -1,7 +1,7 @@
 # Stages 4-5 (a result scenario) vs the validated own-draw run (202 chunks + 203 kept / bp): per-fire areas, kept population, BP map
 suppressPackageStartupMessages({ library(rsyncrosim); library(data.table); library(terra) })
 id <- as.integer(commandArgs(TRUE)[1])
-L <- suppressWarnings(ssimLibrary("F:/lucas-master/Models/lucasFireC2F Dev/lucasFireC2F P26.ssim")); S <- rsyncrosim::scenario(L, id)
+L <- suppressWarnings(ssimLibrary("F:/lucasFireC2F/dev/libs/lucasFireC2F P26.ssim")); S <- rsyncrosim::scenario(L, id)
 B <- "F:/lucas-master/Models/California 30m BurnP3/data/c2fw/p026_LF2020_own"
 st <- as.data.table(datasheet(S, "lucasFireC2F_OutputFireStatistic", lookupsAsFactors = FALSE))
 res <- rbindlist(lapply(list.files(file.path(B, "runs_r4"), "^chunk_\\d+\\.rds$", full.names = TRUE), function(f) as.data.table(readRDS(f)$res)))

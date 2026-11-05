@@ -5,7 +5,7 @@
 suppressPackageStartupMessages({ library(terra); library(sf); library(data.table) }); sf_use_s2(FALSE)
 a <- commandArgs(TRUE); PY <- as.integer(a[1]); HS <- as.numeric(a[2]); MINHA <- as.numeric(a[3]); TAGS <- a[-(1:3)]
 M <- "F:/lucas-master/Models/California 30m BurnP3"; ZD <- file.path(M, sprintf("spatial/pyromes_150m_LF2020/pyrome_%03d", PY))
-fu <- rast(sprintf("F:/lucas-master/Models/lucasFireC2F Dev/P%02d/inputs/fuel_type.tif", PY)); el <- rast(file.path(ZD, "Elevation.tif"))
+fu <- rast(sprintf("F:/lucasFireC2F/dev/libs/P%02d/inputs/fuel_type.tif", PY)); el <- rast(file.path(ZD, "Elevation.tif"))
 zone <- st_transform(read_sf(file.path(ZD, "zone.gpkg")), crs(fu)); inz <- !is.na(values(rasterize(vect(zone), fu), mat = FALSE))
 fv <- values(fu, mat = FALSE); ok <- inz & !(fv %in% c(91, 92, 93, 98, 99)) & !is.na(fv)
 ev <- values(el, mat = FALSE); sl <- values(terrain(el, "slope", unit = "degrees"), mat = FALSE); yy <- yFromCell(fu, seq_len(ncell(fu))); zy <- range(yy[inz])

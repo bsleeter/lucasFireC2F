@@ -56,6 +56,7 @@ if (NAT) {                                                    # 150 m elevation 
   say("elevation: 150 m means of the 30 m DEM %s", basename(dsrc$StatewideElevationFile))
 } else { ref <- extend(crop(el0, e), e); coltab(ref) <- NULL }
 ext(ref) <- ext(round(xmin(ref)), round(xmax(ref)), round(ymin(ref)), round(ymax(ref)))
+home_coverage(terra::as.polygons(e + 300, crs = CRS), what = sprintf("%s's grid", zo$FireZone))   # a Data Download region must hold the grid (+ 300 m: the 5 x 5 blocks)
 say("%s (Map Code %d): %.0f km2, buffer %.0f km; grid %d x %d (%s cells)", zo$FireZone, ZID, as.numeric(st_area(zone)) / 1e6, BUF / 1000,
     nrow(ref), ncol(ref), format(ncell(ref), big.mark = ","))
 cropg <- function(f) { r <- rast(f); levels(r) <- NULL; coltab(r) <- NULL; extend(crop(r, ext(ref)), ext(ref)) }
@@ -121,7 +122,8 @@ if (has("FireAgeFile")) {
   yrs <- classify(ag, cbind(c(521, 522, 523), c(2, 5, 10)), others = NA); src_age <- basename(opt_src$FireAgeFile)
 } else if (has("MtbsSeverityFolder")) {
   Vn <- as.integer(V); last <- setValues(rast(grid), NA_integer_)
-  per <- if (has("InteragencyPerimeterFile")) { q <- st_as_text(st_as_sfc(st_bbox(st_transform(st_as_sfc(st_bbox(grid)), 3857))))
+  per <- if (has("InteragencyPerimeterFile")) { lyr <- st_layers(opt_src$InteragencyPerimeterFile)$name[1]; pc <- st_crs(read_sf(opt_src$InteragencyPerimeterFile, query = sprintf("SELECT * FROM \"%s\" LIMIT 0", lyr)))
+    q <- st_as_text(st_as_sfc(st_bbox(st_transform(st_as_sfc(st_bbox(grid)), pc))))   # the NIFC shapefile is in EPSG:3857, a Data Download's GeoPackage in EPSG:5070
     x <- read_sf(opt_src$InteragencyPerimeterFile, wkt_filter = q)
     x$yr <- suppressWarnings(as.integer(x$FIRE_YEAR)); x$ha <- suppressWarnings(as.numeric(x$GIS_ACRES)) * 0.404686
     x <- x[x$FEATURE_CA %in% c("Wildfire", "Wildfire Final Fire Perimeter") & !is.na(x$yr) & !is.na(x$ha) & x$ha < 405, ]
@@ -174,4 +176,5 @@ write_ds(data.frame(FuelFileName = P$Fuel, ElevationFileName = P$Elevation, Fire
                     FireAgeFileName = P$Age, VegetationFileName = P$Veg), "LandscapeRasters")
 write_ds(data.frame(CanopyBaseHeightFileName = C$cbh, CanopyBulkDensityFileName = C$cbd, CanopyCoverFileName = C$cc, CanopyHeightFileName = C$ch), "CanopyRasters")
 write_ds(data.frame(FileName = zp), "OutputZoneBoundary")
+record_data_sources()
 progressBar(); progressBar(type = "end")

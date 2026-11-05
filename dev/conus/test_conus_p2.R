@@ -2,7 +2,7 @@
 # them from the NWS zones, gridMET + MTBS weights, and the FEMS national catalogue); run P26's prep (P1, P3, P5) and compare with
 # SN&F result 32 (weather zone grid, Daily Weather) and 81 (wind table).
 suppressPackageStartupMessages({ library(rsyncrosim); library(data.table); library(terra) })
-D <- "F:/lucas-master/Models/lucasFireC2F Dev"; DS <- "F:/lucas-master/Data Sources"
+D <- "F:/lucasFireC2F/dev/libs"; DS <- "F:/lucas-master/Data Sources"
 L <- suppressWarnings(ssimLibrary(file.path(D, "lucasFireC2F CONUS test.ssim"))); P <- rsyncrosim::project(L, "National inputs")
 d <- datasheet(P, "lucasFireC2F_DataSource", optional = TRUE); d$WeatherZoneGridFile <- NA; d$ZoneDailyWeatherFile <- NA; d$RawsCatalogueFile <- NA
 d$GridMetFolder <- file.path(DS, "Climate/gridMET"); d$DataSourceId <- NULL; d$ProjectId <- NULL

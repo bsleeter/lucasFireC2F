@@ -4,7 +4,7 @@
 suppressPackageStartupMessages({ library(DBI); library(data.table) })
 source("F:/lucasFireC2F/src/report.R")
 RID <- as.integer(commandArgs(TRUE)[1] %||% 6L); if (is.na(RID)) RID <- 6L
-con <- dbConnect(RSQLite::SQLite(), "F:/lucas-master/Models/lucasFireC2F Dev/lucasFireC2F-Demo.ssim", flags = RSQLite::SQLITE_RO)
+con <- dbConnect(RSQLite::SQLite(), "F:/lucasFireC2F/dev/libs/lucasFireC2F-Demo.ssim", flags = RSQLite::SQLITE_RO)
 q <- function(s) as.data.table(dbGetQuery(con, sprintf(s, RID)))
 cz <- as.data.table(dbGetQuery(con, "SELECT CauseId, Name FROM lucasFireC2F_Cause"))
 st <- q("SELECT Iteration, Cause, Area, ResampleStatus FROM lucasFireC2F_OutputFireStatistic WHERE ScenarioId = %d")

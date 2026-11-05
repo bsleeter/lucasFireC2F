@@ -1,14 +1,14 @@
 # =============================================================================
 # data-sources.R - the national datasets of the Data Sources sheet: group, short label, vintage, and what each stage reads them for
 # =============================================================================
-# Sourced by build.R (the National data column) and build-data.R (the data blueprint). Vintages are the versions the user guide
-# (section 2.1) lists. u(stage, role, note, alt): note = the setting that switches it; alt = TRUE when only a non-default choice
+# Sourced by build.R (the National data column) and build-data.R (the data blueprint). Vintages are what a Data Download fetches (user guide
+# section 2.15). u(stage, role, note, alt): note = the setting that switches it; alt = TRUE when only a non-default choice
 # reads it - for the shortcut rows, a filled row that replaces what the stage would otherwise build (dashed wire).
 # =============================================================================
 u <- function(stage, role, note = NA_character_, alt = FALSE) list(stage = stage, role = role, note = note, alt = alt)
 shortcut <- "the Data Sources row is filled (it is blank by default, and the stage builds the input itself)"
 D <- list(
-  list("Landscape", "LandfireFolder", "LANDFIRE fuels and canopy", "LF 2020 (2.2.0) · FBFM40, CBD, CBH, CC, CH · 30 m", list(
+  list("Landscape", "LandfireFolder", "LANDFIRE fuels and canopy (zips by hand)", "LF 2020 (2.2.0) · FBFM40, CBD, CBH, CC, CH · 30 m", list(
     u("P1", "The fuel map (modal FBFM40 of the 25 cells in each 150 m cell) and the canopy maps (CBD, CBH, CC, CH)", "Zone Preparation Options > Canopy Height Vintage"),
     u("P2", "Fuel-group term of the ignition fit"),
     u("P4", "Pre-fire FBFM40 fuel groups the severity shares are split by"))),
@@ -22,16 +22,16 @@ D <- list(
     u("P2", "The zone and the buffer the ignition points are drawn from", "Zone Preparation Options > Ignition Buffer"))),
   list("Zones", "FireZoneGridFile", "Fire-zone grid (prebuilt)", "150 m · optional shortcut", list(
     u("P1", "Read in place of rasterising the pyrome boundaries", shortcut, TRUE))),
-  list("Zones", "WeatherZoneBoundaryFile", "NWS fire weather zones", "fz03mr26", list(
+  list("Zones", "WeatherZoneBoundaryFile", "NWS fire weather zones", "the latest the NWS lists", list(
     u("P1", "Weather-zone grid: rasterised at 30 m, gaps filled within 1 km, modal to 150 m"),
     u("P3", "The weather zones the daily weather is built for"),
     u("P5", "Each RAWS station's weather zone and time zone"))),
   list("Zones", "WeatherZoneGridFile", "Weather-zone grid (prebuilt)", "150 m · optional shortcut", list(
     u("P1", "Read in place of rasterising the NWS zones", shortcut, TRUE))),
-  list("Fire record", "FpaFodFile", "FPA-FOD fire occurrence", "6th edition · 1992-2020 · GeoPackage", list(
+  list("Fire record", "FpaFodFile", "FPA-FOD fire occurrence", "7th edition · 1992-2020 · GeoPackage", list(
     u("P2", "Origins of the large fires (405 ha and up) the ignition surfaces are fitted to", "Zone Preparation Options > Ignition fire size, years, buffer"),
     u("C1", "Every recorded fire whose ignition point is in the zone: date, size, cause"))),
-  list("Fire record", "MtbsPerimeterFile", "MTBS burned area boundaries", "August 2026 release · 1984-2026", list(
+  list("Fire record", "MtbsPerimeterFile", "MTBS burned area boundaries", "latest release · 1984 on", list(
     u("P3", "Fire-activity weights of the gridMET cells (fires / 8 + 0.05)"),
     u("C7", "Where large fires burned after the fuel vintage: the cells burn probability is scored on", "Validation Options > minimum fire size, years"),
     u("R", "Large fires after the fuel vintage, outlined on the burn probability figure"))),
@@ -42,7 +42,7 @@ D <- list(
     u("P1", "Fires under 405 ha (too small for MTBS) in the fire-age classes"))),
   list("Fire record", "FireAgeFile", "Fire-age classes (prebuilt)", "150 m · optional shortcut", list(
     u("P1", "Read in place of building the classes from MTBS and NIFC", shortcut, TRUE))),
-  list("Weather", "GridMetFolder", "gridMET daily meteorology", "4 km · 1979-2024", list(
+  list("Weather", "GridMetFolder", "gridMET daily meteorology", "4 km · 1979 to the last full year", list(
     u("P2", "Warm-season rain covariates (wet days and June-September share of rain)"),
     u("P3", "Daily temperature, humidity, wind and precipitation of each weather zone"))),
   list("Weather", "ZoneDailyWeatherFile", "Zone-daily weather table (prebuilt)", "CSV · optional shortcut", list(
@@ -54,11 +54,11 @@ D <- list(
   list("Ignition covariates", "IgnitionCovariateFolder", "Ignition covariates (prebuilt)", "30 m · optional shortcut", list(
     u("P2", "Read in place of building the ten covariates for the fit domain", shortcut, TRUE))),
   list("Ignition covariates", "RoadsFile", "LANDFIRE roads", "LF 2023 · 30 m", list(u("P2", "Distance to the nearest road (dist_road)"))),
-  list("Ignition covariates", "NlcdLandCoverFile", "Annual NLCD land cover", "Collection 1 · 2010 · 30 m", list(
+  list("Ignition covariates", "NlcdLandCoverFile", "Annual NLCD land cover", "Collection 1.2 · 2010 · 30 m", list(
     u("P2", "Distance to developed land and the developed share within 990 m (dist_dev, dev_frac)"))),
   list("Ignition covariates", "HousingDensityFile", "SILVIS housing density", "WUI v4 · HUDEN2010", list(u("P2", "Housing density covariate (huden)"))),
   list("Ignition covariates", "PrismPrecipFile", "PRISM precipitation normal", "1991-2020 · 4 km", list(u("P2", "Mean annual precipitation covariate (ppt)"))),
-  list("Benchmark", "WrcBurnProbabilityFile", "WRC burn probability", "2nd edition · RDS-2020-0016-2 · 270 m", list(
+  list("Benchmark", "WrcBurnProbabilityFile", "WRC burn probability", "2nd edition · RDS-2020-0016-2 · 30 m", list(
     u("C7", "Benchmark burn probability, scored on the same cells as the model's", "Blank = C7 scores without the benchmark"),
     u("R", "WRC's burn probability beside the model's (Fig2) and the skill comparison (Fig7)"))))
 names(D) <- vapply(D, `[[`, "", 2)

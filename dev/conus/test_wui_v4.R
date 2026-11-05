@@ -1,6 +1,6 @@
 # Option A check: SILVIS v4 (HUDEN2010 on 2020 blocks) vs the 2010 cp12 release, on P26 - the huden layer, then P2's fit and surfaces
 suppressPackageStartupMessages({ library(rsyncrosim); library(data.table); library(terra); library(sf) }); sf_use_s2(FALSE)
-D <- "F:/lucas-master/Models/lucasFireC2F Dev"; V4 <- "F:/lucas-master/Data Sources/WUI/v4_CONUS/Data/CONUS_WUI_block_1990_2020_change_v4.gdb"
+D <- "F:/lucasFireC2F/dev/libs"; V4 <- "F:/lucas-master/Data Sources/WUI/v4_CONUS/Data/CONUS_WUI_block_1990_2020_change_v4.gdb"
 ref <- rast("F:/lucasFireC2F/Data/ignition_covariates/huden.tif"); a <- rast("F:/lucasFireC2F/dev/conus/cov_test/huden.tif"); ref <- crop(ref, a, snap = "near")
 lyr <- st_layers(V4)$name[1]; wb <- read_sf(V4, layer = lyr, wkt_filter = st_as_text(st_transform(st_as_sfc(st_bbox(a)), st_crs(read_sf(V4, query = sprintf("SELECT * FROM \"%s\" LIMIT 0", lyr))))))
 wb <- st_make_valid(st_transform(wb, crs(a))); h4 <- round(log1p(rasterize(vect(wb), rast(a), field = "HUDEN2010", background = 0)) * 100)

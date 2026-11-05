@@ -3,7 +3,7 @@
 suppressPackageStartupMessages(library(rsyncrosim))
 st <- commandArgs(TRUE); IT <- NA
 if (length(st) && grepl("^--iters=", st[1])) { IT <- as.integer(sub("^--iters=", "", st[1])); st <- st[-1] }
-L <- suppressWarnings(ssimLibrary("F:/lucas-master/Models/lucasFireC2F Dev/lucasFireC2F P26.ssim"))
+L <- suppressWarnings(ssimLibrary("F:/lucasFireC2F/dev/libs/lucasFireC2F P26.ssim"))
 P <- rsyncrosim::project(L, "P26 Northern Sierra Nevada")
 base <- rsyncrosim::scenario(P, "P26 Baseline LF2020 (1992-2020 calibration)")
 nm <- sprintf("dev: %s", paste(sub(" - .*", "", st), collapse = "+"))

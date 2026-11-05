@@ -3,7 +3,7 @@
 # Usage: Rscript merge_full.R [merge result id, default 22]
 suppressPackageStartupMessages({ library(terra); library(sf); library(data.table) }); sf_use_s2(FALSE); terraOptions(progress = 0)
 source("F:/lucasFireC2F/src/report.R")
-DEV <- "F:/lucas-master/Models/lucasFireC2F Dev"; D <- file.path(DEV, "lucasFireC2F-Demo.ssim.data"); S <- file.path(DEV, "lucasFireC2F Sierra Nevada & Foothills.ssim.data")
+DEV <- "F:/lucasFireC2F/dev/libs"; D <- file.path(DEV, "lucasFireC2F-Demo.ssim.data"); S <- file.path(DEV, "lucasFireC2F Sierra Nevada & Foothills.ssim.data")
 OUT <- "F:/lucasFireC2F/docs/user-guide/figures/merge"; dir.create(OUT, FALSE, TRUE)
 args <- commandArgs(TRUE); MERGE <- if (length(args)) as.integer(args[1]) else 22L
 bpf <- function(dir) list.files(file.path(dir, "lucasFireC2F_OutputBurnProbability"), "\\.tif$", full.names = TRUE)[1]

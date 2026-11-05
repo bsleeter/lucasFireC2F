@@ -39,7 +39,7 @@ cat(sprintf("%s burns of %s fires; anchors resolved (%s)\n", format(nrow(b), big
 
 # ---- fire-day head runs, with the day's wind from the weather stream ---------------------------------------------------------
 fd <- b[, { j <- which.max(run); .(run_km = run[j], heading = head[j], end_cell = Cell[j], cells = .N) }, by = .(Iteration, FireID, day)]
-L <- suppressWarnings(ssimLibrary("F:/lucas-master/Models/lucasFireC2F Dev/lucasFireC2F P26.ssim"))
+L <- suppressWarnings(ssimLibrary("F:/lucasFireC2F/dev/libs/lucasFireC2F P26.ssim"))
 hw <- as.data.table(datasheet(rsyncrosim::scenario(L, id), "lucasFireC2F_OutputFireWeather", lookupsAsFactors = FALSE))
 HPD <- MPD / 60; hw[, day := as.integer((Hour - 1) %/% HPD) + 1L]
 wd <- hw[, .(wind20 = mean(WindSpeed), winddir = WindDirection[1]), by = .(Iteration, FireID, day)]

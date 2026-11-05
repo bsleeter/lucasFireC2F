@@ -2,7 +2,7 @@
 # both zones' fires in the same season (a cell counts once per season); how much of each zone's burning comes from the
 # other zone's fires; and a figure (merged BP, and the share of each cell's burns that came from across the boundary).
 suppressPackageStartupMessages({ library(rsyncrosim); library(terra); library(data.table); library(sf); library(arrow) }); sf_use_s2(FALSE)
-D <- "F:/lucas-master/Models/lucasFireC2F Dev"; M <- "F:/lucas-master/Models/California 30m BurnP3"
+D <- "F:/lucasFireC2F/dev/libs"; M <- "F:/lucas-master/Models/California 30m BurnP3"
 LM <- suppressWarnings(ssimLibrary(file.path(D, "lucasFireC2F P26+P29.ssim"))); RM <- rsyncrosim::scenario(LM, 2)
 gm <- function(n, R = RM) as.data.table(datasheet(R, paste0("lucasFireC2F_", n), lookupsAsFactors = FALSE))
 bcm <- rast(gm("OutputBurnCount")$FileName[1]); U <- bcm; NS <- 2500

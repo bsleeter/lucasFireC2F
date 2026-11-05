@@ -96,4 +96,5 @@ lw <- function(s) log(pmax(s, 0.01))
 for (dm in unique(S$Dimension)) { z <- S[Dimension == dm & is.finite(SelectionObserved)]
   cs <- function(m) if (all(is.na(m)) || nrow(z) < 3) NA_real_ else cov.wt(cbind(lw(m), lw(z$SelectionObserved)), wt = z$ShareOfGround, cor = TRUE)$cor[1, 2]
   say("  %-5s weighted correlation of log selection with observed: model %.2f%s", dm, cs(z$Selection), if (all(is.na(z$SelectionBenchmark))) "" else sprintf(", benchmark %.2f", cs(z$SelectionBenchmark))) }
+record_data_sources()
 progressBar(); progressBar(type = "end")

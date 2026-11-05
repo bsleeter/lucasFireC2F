@@ -3,7 +3,7 @@
 # Usage: Rscript compare_runs.R   (P18: results 14 = 1992-2020 calibration, 20 = 2011-2020; Calibrate results 4 and 17)
 suppressPackageStartupMessages({ library(terra); library(sf); library(data.table) }); sf_use_s2(FALSE); terraOptions(progress = 0)
 source("F:/lucasFireC2F/src/report.R")                                  # RAMP, size_rows, INK/MUTED
-LIB <- "F:/lucas-master/Models/lucasFireC2F Dev/lucasFireC2F-Demo.ssim"; D <- paste0(LIB, ".data"); OUT <- "F:/lucasFireC2F/docs/user-guide/figures/compare"
+LIB <- "F:/lucasFireC2F/dev/libs/lucasFireC2F-Demo.ssim"; D <- paste0(LIB, ".data"); OUT <- "F:/lucasFireC2F/docs/user-guide/figures/compare"
 dir.create(OUT, showWarnings = FALSE, recursive = TRUE)
 R <- list(list(run = 14, cal = 4, y = 1992:2020, lab = "1992-2020 calibration", rec = "#9aa5b1", mod = "#2f6f9f"),
           list(run = 20, cal = 17, y = 2011:2020, lab = "2011-2020 calibration", rec = "#efb592", mod = "#dd4b20"))

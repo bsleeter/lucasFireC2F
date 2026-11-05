@@ -2,7 +2,7 @@
 # calibration (scenario 3) with a 1,500-season seed run, then the model run (scenario 8) on that calibration. Prints the key log
 # lines of each; the user's scenarios are run in place (as in Studio), results appear as new result scenarios.
 suppressPackageStartupMessages({ library(rsyncrosim); library(data.table) })
-LIB <- "F:/lucas-master/Models/lucasFireC2F Dev/lucasFireC2F Sierra Nevada & Foothills.ssim"
+LIB <- "F:/lucasFireC2F/dev/libs/lucasFireC2F Sierra Nevada & Foothills.ssim"
 L <- suppressWarnings(ssimLibrary(LIB)); P <- rsyncrosim::project(L, 1)
 newest <- function() rsyncrosim::scenario(L, max(rsyncrosim::scenario(P)[, "ScenarioId"]))
 logs <- function(R, pat) { lg <- unlist(strsplit(paste(unlist(runLog(R)), collapse = "\n"), "\n")); lg <- sub(" +$", "", lg)

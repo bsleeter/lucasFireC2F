@@ -5,7 +5,7 @@
 # not changed. Usage: Rscript dieoff_run.R [min mortality share = 0.5]
 suppressPackageStartupMessages({ library(terra); library(sf); library(data.table); library(rsyncrosim) }); sf_use_s2(FALSE)
 a <- commandArgs(TRUE); MINM <- if (length(a)) as.numeric(a[1]) else 0.5
-LIB <- "F:/lucas-master/Models/lucasFireC2F Dev/lucasFireC2F Sierra Nevada & Foothills.ssim"; OUTD <- "F:/lucas-master/Models/lucasFireC2F Dev/P27/inputs"
+LIB <- "F:/lucasFireC2F/dev/libs/lucasFireC2F Sierra Nevada & Foothills.ssim"; OUTD <- "F:/lucasFireC2F/dev/libs/P27/inputs"
 dir.create(OUTD, FALSE, TRUE); DD <- "F:/lucas-master/Data Sources/Landfire Disturbance"; TYPES <- c("Insects", "Disease", "Insects/Disease")
 L <- suppressWarnings(ssimLibrary(LIB)); PR <- rsyncrosim::project(L, 1); PREP <- rsyncrosim::scenario(L, 2)
 lr <- as.data.table(datasheet(PREP, "lucasFireC2F_LandscapeRasters", lookupsAsFactors = FALSE))

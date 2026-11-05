@@ -14,9 +14,9 @@
 suppressPackageStartupMessages({ library(rsyncrosim); library(data.table); library(terra); library(sf) })
 sf_use_s2(FALSE)
 a <- commandArgs(TRUE); PY <- as.integer(a[1]); SEVF <- if (length(a) > 1) a[2] else ""; WRF <- if (length(a) > 2) a[3] else ""
-M    <- "F:/lucas-master/Models/California 30m BurnP3"; DEV <- sprintf("F:/lucas-master/Models/lucasFireC2F Dev/P%02d", PY)
+M    <- "F:/lucas-master/Models/California 30m BurnP3"; DEV <- sprintf("F:/lucasFireC2F/dev/libs/P%02d", PY)
 IN   <- file.path(DEV, "inputs"); ZD <- file.path(M, sprintf("spatial/pyromes_150m_LF2020/pyrome_%03d", PY))
-LIBF <- sprintf("F:/lucas-master/Models/lucasFireC2F Dev/lucasFireC2F P%02d.ssim", PY)
+LIBF <- sprintf("F:/lucasFireC2F/dev/libs/lucasFireC2F P%02d.ssim", PY)
 say  <- function(...) cat(sprintf(...), "\n", sep = "")
 pz <- read_sf(file.path(M, "data/zones/pyromes.gpkg")); pz <- pz[pz$PYROME == PY, ]; ZNAME <- pz$Name; ZID <- as.integer(pz$ID)
 for (f in c(file.path(IN, c("fuel_type.tif", "years_since_fire.tif", "canopy_base_height_m.tif")), file.path(ZD, c("Elevation.tif", "WeatherZone.tif", "Human.tif", "Lightning.tif", "zone.gpkg"))))

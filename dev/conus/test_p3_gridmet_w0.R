@@ -5,7 +5,7 @@ x <- readLines("F:/lucasFireC2F/src/shared.R"); i <- grep("^weather_zone_polygon
 FIRE_COUNT_REF <- 8; WEIGHT_FLOOR <- 0.05; Y <- 2020L
 src <- list(GridMetFolder = "F:/lucas-master/Data Sources/Climate/gridMET", WeatherZoneBoundaryFile = "F:/lucas-master/Data Sources/Study Areas/Fire Weather Zones/fz03mr26.shp",
             MtbsPerimeterFile = "F:/lucas-master/Data Sources/MTBS/Fire Perimeter/mtbs_perimeter_data/mtbs_perims_DD.shp")
-wzr <- rast("F:/lucas-master/Models/lucasFireC2F Dev/lucasFireC2F Sierra Nevada & Foothills.ssim.data/Scenario-32/lucasFireC2F_LandscapeRasters/weatherzone.tif")
+wzr <- rast("F:/lucasFireC2F/dev/libs/lucasFireC2F Sierra Nevada & Foothills.ssim.data/Scenario-32/lucasFireC2F_LandscapeRasters/weatherzone.tif")
 codes <- sort(unique(na.omit(values(wzr, mat = FALSE)))); g <- read_sf("F:/lucas-master/Models/California 30m BurnP3/data/zones/weather_zones.gpkg")
 names_ <- g$Name[match(codes, g$ID)]
 allz <- st_transform(weather_zone_polygons(src$WeatherZoneBoundaryFile), 4326); mine <- allz[allz$Name %in% names_, ]; cat("zones", length(codes), "found", nrow(mine), "\n")

@@ -14,6 +14,8 @@ Thumbs.db
 # statewide input data (GBs; paths set in Data Sources)
 Data/
 
+# development libraries, their data and test homes
+dev/libs/
 # development outputs: keep the scripts, not what they write
 dev/**/*.tif
 dev/**/*.tif.aux.xml

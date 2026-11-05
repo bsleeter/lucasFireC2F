@@ -41,9 +41,13 @@ build_ignition_covariates <- function(win, src, outdir) {
   out(round(focal(dv, w, "sum", na.rm = TRUE) * 1000), "dev_frac"); rm(dev, dv)
   say("ignition covariates: dist_dev, dev_frac (%s)", tm())
   # housing density
-  lyr <- st_layers(src$wui)$name[1]; wc <- st_crs(read_sf(src$wui, query = sprintf("SELECT * FROM \"%s\" LIMIT 0", lyr)))
-  wb <- read_sf(src$wui, layer = lyr, wkt_filter = st_as_text(st_transform(st_as_sfc(st_bbox(setNames(as.vector(win), c("xmin", "xmax", "ymin", "ymax")), crs = st_crs(CRS))), wc)))
-  if (!"HUDEN2010" %in% names(wb)) fail("Data Sources: the housing density file has no HUDEN2010 field (%s)", basename(src$wui))
+  # one national file, or (a Data Download) a folder of state geodatabases: the blocks of each that touch the window
+  wf <- if (dir.exists(src$wui) && !grepl("[.]gdb/?$", src$wui)) list.files(src$wui, "[.]gdb$", full.names = TRUE, include.dirs = TRUE) else src$wui
+  if (!length(wf)) fail("Data Sources: no state geodatabases in the housing density folder (%s)", src$wui)
+  wb <- do.call(rbind, lapply(wf, function(g) { lyr <- st_layers(g)$name[1]; wc <- st_crs(read_sf(g, query = sprintf("SELECT * FROM \"%s\" LIMIT 0", lyr)))
+    y <- read_sf(g, layer = lyr, wkt_filter = st_as_text(st_transform(st_as_sfc(st_bbox(setNames(as.vector(win), c("xmin", "xmax", "ymin", "ymax")), crs = st_crs(CRS))), wc)))
+    if (!"HUDEN2010" %in% names(y)) fail("Data Sources: the housing density file has no HUDEN2010 field (%s)", basename(g))
+    y[, "HUDEN2010"] }))
   wb <- st_make_valid(st_transform(wb, CRS)); wb$HUDEN2010 <- as.numeric(wb$HUDEN2010)
   out(round(log1p(rasterize(vect(wb), T, field = "HUDEN2010", background = 0)) * 100), "huden"); rm(wb)
   say("ignition covariates: huden (%s)", tm())

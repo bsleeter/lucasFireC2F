@@ -3,7 +3,7 @@
 # Usage: Rscript bp_panels.R <out png>   (zone, results and labels set below)
 suppressPackageStartupMessages({ library(terra); library(sf); library(data.table); library(rsyncrosim) }); sf_use_s2(FALSE); terraOptions(progress = 0)
 OUTF <- commandArgs(TRUE)[1]
-LIB <- "F:/lucas-master/Models/lucasFireC2F Dev/lucasFireC2F Sierra Nevada & Foothills.ssim"; PREP <- 2L; NBFROM <- 27L
+LIB <- "F:/lucasFireC2F/dev/libs/lucasFireC2F Sierra Nevada & Foothills.ssim"; PREP <- 2L; NBFROM <- 27L
 RES <- list(list(id = 11L, title = "Result 11: first P27 run", auc = 0.585),
             list(id = 19L, title = "Result 19: + by cause, remaps, die-off fuel", auc = 0.629),
             list(id = 27L, title = "Result 27: + recent-fire rules, vegetation strata", auc = 0.701))

@@ -3,7 +3,7 @@
 # 1984-2024, cell x years / 41) in 1 km strips by signed distance from the shared boundary (negative = zone A side).
 # Usage: Rscript boundary_check.R <out dir>   (zones set below)
 suppressPackageStartupMessages({ library(terra); library(sf); library(data.table); library(rsyncrosim) }); sf_use_s2(FALSE)
-OUT <- commandArgs(TRUE)[1]; dir.create(OUT, FALSE, TRUE); D <- "F:/lucas-master/Models/lucasFireC2F Dev"
+OUT <- commandArgs(TRUE)[1]; dir.create(OUT, FALSE, TRUE); D <- "F:/lucasFireC2F/dev/libs"
 A <- list(name = "P26 North Sierra", lib = file.path(D, "lucasFireC2F P26.ssim"), rid = 17L,
           zone = "F:/lucas-master/Models/California 30m BurnP3/spatial/pyromes_150m_LF2020/pyrome_026/zone.gpkg")
 B <- list(name = "P27 South Sierra", lib = file.path(D, "lucasFireC2F Sierra Nevada & Foothills.ssim"), rid = 19L, prep = 2L)

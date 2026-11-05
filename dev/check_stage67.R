@@ -1,7 +1,7 @@
 # Stages 6-7 (a result scenario) vs the validated own-draw run: 217's effects raster and 224's risk rasters
 suppressPackageStartupMessages({ library(rsyncrosim); library(data.table); library(terra) })
 id <- as.integer(commandArgs(TRUE)[1])
-L <- suppressWarnings(ssimLibrary("F:/lucas-master/Models/lucasFireC2F Dev/lucasFireC2F P26.ssim")); S <- rsyncrosim::scenario(L, id)
+L <- suppressWarnings(ssimLibrary("F:/lucasFireC2F/dev/libs/lucasFireC2F P26.ssim")); S <- rsyncrosim::scenario(L, id)
 B <- "F:/lucas-master/Models/California 30m BurnP3/data/c2fw/p026_LF2020_own"
 fx <- as.data.table(datasheet(S, "lucasFireC2F_OutputFireEffects", lookupsAsFactors = FALSE)); em <- as.data.table(datasheet(rsyncrosim::project(L, 1), "lucasFireC2F_EffectsMetric")); fx[, Metric := em$Code[match(Metric, em$Name)]]
 ref <- rast(file.path(B, "effects_roth_raws_cbh15_net_cruz_r4.tif"))

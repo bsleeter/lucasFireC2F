@@ -1,0 +1,18 @@
+Column,Category,Source,Url,Name,Note,Access,DatasetId,Version,Doi,HomePath
+LandfireFolder,Fuels and vegetation,"LANDFIRE fuel model and canopy layers (FBFM40, CBD, CBH, CC, CH)",https://landfire.gov/data/FullExtentDownloads,LANDFIRE fuels and canopy,,service,LF2020 archive; LF2016 LF2022-25,by vintage,10.5066/P1LJEZ3G,fuels/landfire
+BpsFile,Fuels and vegetation,LANDFIRE Biophysical Settings 2020,https://landfire.gov/data/FullExtentDownloads,LANDFIRE Biophysical Settings,,service,LF2020_BPS,LF 2020,,fuels/landfire-bps
+ElevationFile,Terrain,LANDFIRE elevation (30 m DEM),https://landfire.gov/data/FullExtentDownloads,Elevation,,service,LF2020_Elev,LF 2020,,soils-terrain/elevation/*.tif
+PyromesFile,Zones,Pyromes of the conterminous US (Short et al. 2020),https://www.fs.usda.gov/rds/archive/catalog/RDS-2020-0020,Pyromes,,file,RDS-2020-0020,RDS-2020-0020,10.2737/RDS-2020-0020,study-area/pyromes/*.shp
+StatesFile,Zones,US Census Bureau TIGER/Line 2009 states,https://www2.census.gov/geo/tiger/TIGER2009/,States,The states a region touches (SILVIS housing),file,tl_2009_us_state,TIGER/Line 2009,,study-area/states/*.shp
+WeatherZoneBoundaryFile,Zones,NWS fire weather zones,https://www.weather.gov/gis/FireZones,NWS fire weather zones,,file,WSOM fire zones,the latest NWS lists,,study-area/fire-weather-zones/*.shp
+GridMetFolder,Weather,gridMET daily meteorology (tmmx rmin vs th pr),https://www.climatologylab.org/gridmet.html,gridMET,,file,gridMET,Abatzoglou 2013,10.1002/joc.3413,climate/gridmet
+RawsHourlyFolder,Weather,RAWS hourly observations from FEMS,https://fems.fs2c.usda.gov/,RAWS hourly records and station catalogue,,service,FEMS climatology,replaced in place,,climate/raws
+FpaFodFile,Fire records,Fire Program Analysis fire-occurrence database (Short),https://www.fs.usda.gov/rds/archive/catalog/RDS-2013-0009.7,FPA-FOD,,file,RDS-2013-0009.7,RDS-2013-0009.7,10.2737/RDS-2013-0009.7,disturbance/fpa-fod/*.gpkg
+MtbsPerimeterFile,Fire records,MTBS burned-area boundaries,https://www.mtbs.gov/direct-download,MTBS perimeters,,file,mtbs_perimeter_data,replaced in place,,disturbance/mtbs-perimeters/*.shp
+MtbsSeverityFolder,Fire records,MTBS annual burn severity mosaics,https://www.sciencebase.gov/catalog/item/5e91dee782ce172707f02cdd,MTBS severity mosaics,,file,ScienceBase 5e91dee782ce172707f02cdd,annual,,disturbance/mtbs
+FirePerimeterHistoryFile,Fire records,Interagency Fire Perimeter History (NIFC),https://data-nifc.opendata.arcgis.com/,Interagency fire perimeters,,service,InterAgencyFirePerimeterHistory decade services,replaced in place,,disturbance/fire-perimeters/*.shp|*.gpkg
+WrcBurnProbabilityFile,Fire records,Wildfire Risk to Communities burn probability (30 m),https://www.fs.usda.gov/rds/archive/catalog/RDS-2020-0016-2,WRC burn probability (benchmark),,file,RDS-2020-0016-2,2nd edition (RDS-2020-0016-2),10.2737/RDS-2020-0016-2,disturbance/wrc/*.tif
+RoadsFile,Ignition covariates,LANDFIRE roads,https://landfire.gov/data/FullExtentDownloads,Roads,,service,LF2023_Roads,LF 2023,,infrastructure/roads/*.tif
+NlcdFolder,Ignition covariates,USGS Annual NLCD land cover,https://www.mrlc.gov/data,Annual NLCD 2010,,service,Annual NLCD,Collection 1.2 (C1V2),,land-cover/nlcd-annual
+WuiFolder,Ignition covariates,SILVIS WUI change 1990-2020 (field HUDEN2010),https://silvis.forest.wisc.edu/data/wui-change/,SILVIS housing density (by state),,file,WUI v4,"v4, 1990-2020",10.2737/RDS-2015-0012-4,infrastructure/wui
+PrismFolder,Ignition covariates,PRISM annual climate and 1991-2020 normals,https://prism.oregonstate.edu/normals/,PRISM climate and normals,,file,PRISM,PRISM AN (us_25m),,climate/prism

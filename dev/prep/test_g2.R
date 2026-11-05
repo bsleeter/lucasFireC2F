@@ -2,7 +2,7 @@
 # adopted surfaces (185, legacy fuel classes, _pNNNL405b20 masked into <dev>/P<NN>/inputs): cross-validated AUC, cell correlation,
 # and placement against the recorded large-fire origins (score_ignition_surfaces.R's metrics).
 suppressPackageStartupMessages({ library(rsyncrosim); library(data.table); library(terra) })
-D <- "F:/lucas-master/Models/lucasFireC2F Dev"; M <- "F:/lucas-master/Models/California 30m BurnP3"
+D <- "F:/lucasFireC2F/dev/libs"; M <- "F:/lucas-master/Models/California 30m BurnP3"
 L <- suppressWarnings(ssimLibrary(file.path(D, "lucasFireC2F prep test.ssim"))); P <- rsyncrosim::project(L, 1)
 ds <- datasheet(P, "lucasFireC2F_DataSource", optional = TRUE); ds$IgnitionCovariateFolder <- file.path(M, "spatial/ignition_covariates")
 saveDatasheet(P, ds, "lucasFireC2F_DataSource", append = FALSE)

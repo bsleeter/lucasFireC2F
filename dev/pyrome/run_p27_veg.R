@@ -4,7 +4,7 @@
 #   3 "P27 Prep vegetation": copy of P27 Prep (1) running P1 only -> the vegetation map
 #   4 "P27 Calibrate by vegetation": copy of 16 with the vegetation map and SpreadDaysBy = 3; "P27 Run by vegetation": copy of 18 on it
 suppressPackageStartupMessages({ library(rsyncrosim); library(data.table); library(terra) })
-D <- "F:/lucas-master/Models/lucasFireC2F Dev"; BPS <- "F:/lucas-master/Data Sources/BpS/LF2020_BPS_CONUS/LF2020_BPS_CONUS/Tif/LF2020_BPS_CONUS.tif"
+D <- "F:/lucasFireC2F/dev/libs"; BPS <- "F:/lucas-master/Data Sources/BpS/LF2020_BPS_CONUS/LF2020_BPS_CONUS/Tif/LF2020_BPS_CONUS.tif"
 VC <- data.frame(Name = c("Conifer", "Hardwood", "Shrub", "Grass", "Other"), ID = 1:5,
                  Description = c("BpS Conifer, Conifer-Hardwood", "BpS Hardwood, Hardwood-Conifer", "BpS Shrubland", "BpS Grassland, Savanna", "BpS Riparian, Sparse, Peatland and the rest"))
 for (n in c("lucasFireC2F Sierra Nevada & Foothills", "lucasFireC2F P26", "lucasFireC2F P29")) {

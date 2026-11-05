@@ -18,9 +18,9 @@
 suppressPackageStartupMessages({ library(rsyncrosim); library(data.table); library(DBI); library(terra); library(sf) })
 sf_use_s2(FALSE)
 a <- commandArgs(TRUE)
-LIBF <- if (length(a)) a[1] else "F:/lucas-master/Models/lucasFireC2F Dev/lucasFireC2F P26.ssim"
+LIBF <- if (length(a)) a[1] else "F:/lucasFireC2F/dev/libs/lucasFireC2F P26.ssim"
 M    <- "F:/lucas-master/Models/California 30m BurnP3"
-IN   <- "F:/lucas-master/Models/lucasFireC2F Dev/P26/inputs"
+IN   <- "F:/lucasFireC2F/dev/libs/P26/inputs"
 ZD   <- file.path(M, "spatial/pyromes_150m_LF2020/pyrome_026")
 S3   <- file.path(M, "California BurnP3 Pyrome026 LF2020.ssim.data/Scenario-3")
 say  <- function(...) cat(sprintf(...), "\n", sep = "")

@@ -3,7 +3,7 @@
 # Usage: Rscript run_pyrome.R <pyrome number> [calibration result id: skip calibration and use it]
 suppressPackageStartupMessages({ library(rsyncrosim); library(data.table) })
 a <- commandArgs(TRUE); PY <- as.integer(a[1]); CID <- if (length(a) > 1) as.integer(a[2]) else NA
-L <- suppressWarnings(ssimLibrary(sprintf("F:/lucas-master/Models/lucasFireC2F Dev/lucasFireC2F P%02d.ssim", PY)))
+L <- suppressWarnings(ssimLibrary(sprintf("F:/lucasFireC2F/dev/libs/lucasFireC2F P%02d.ssim", PY)))
 P <- rsyncrosim::project(L, 1)
 logs <- function(R, pat) { lg <- strsplit(paste(runLog(R), collapse = "\n"), "\n")[[1]]; cat(unique(trimws(grep(pat, lg, value = TRUE))), sep = "\n") }
 newest <- function() rsyncrosim::scenario(L, max(rsyncrosim::scenario(P)[, "ScenarioId"]))

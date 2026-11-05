@@ -3,7 +3,7 @@
 # Usage: Rscript run_surface_swap.R <pyrome> <source scenario id> <tag>
 suppressPackageStartupMessages({ library(rsyncrosim); library(data.table) })
 a <- commandArgs(TRUE); PY <- as.integer(a[1]); SRC <- as.integer(a[2]); TG <- a[3]
-D <- "F:/lucas-master/Models/lucasFireC2F Dev"; IN <- file.path(D, sprintf("P%d/inputs", PY))
+D <- "F:/lucasFireC2F/dev/libs"; IN <- file.path(D, sprintf("P%d/inputs", PY))
 L <- suppressWarnings(ssimLibrary(file.path(D, sprintf("lucasFireC2F P%d.ssim", PY)))); P <- rsyncrosim::project(L, 1)
 ds <- datasheet(P, "lucasFireC2F_DataSource", optional = TRUE); if (!nrow(ds)) ds <- data.frame(MtbsPerimeterFile = NA_character_)
 ds$MtbsPerimeterFile <- "F:/lucas-master/Data Sources/MTBS/Fire Perimeter/mtbs_perimeter_data/mtbs_perims_DD.shp"

@@ -37,4 +37,5 @@ if (!nrow(obs) || nrow(obs) < 5 * MINPX) { say("only %s burned pixels %d-%d: too
   write_ds(T[, .(FuelGroup, UnburnedLow = round(UnburnedLow, 4), Low = round(Low, 4), Moderate = round(Moderate, 4), High = round(High, 4))], "SeverityTarget")
   for (i in seq_len(nrow(T))) with(T[i], say("%-18s %9s px  %.3f / %.3f / %.3f / %.3f", FuelGroup, format(Pixels, big.mark = ","), UnburnedLow, Low, Moderate, High))
 }
+record_data_sources()
 progressBar(); progressBar(type = "end")

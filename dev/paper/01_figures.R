@@ -136,7 +136,7 @@ figure("Fig6_fire_severity.png", list(
 # ---- Fig 7 size distribution and calibration ----------------------------------------------------------------------------------
 T2 <- fread(file.path(D, "tables/T2_size_classes_vs_FPA.csv"))[SizeClassHa != "Total"]
 st <- X$fire_stat[ResampleStatus %in% c("Kept", "Reassigned") & Area >= X$resample$MinimumFireSize]
-L <- suppressWarnings(rsyncrosim::ssimLibrary("F:/lucas-master/Models/lucasFireC2F Dev/lucasFireC2F P26.ssim"))
+L <- suppressWarnings(rsyncrosim::ssimLibrary("F:/lucasFireC2F/dev/libs/lucasFireC2F P26.ssim"))
 H <- as.data.table(rsyncrosim::datasheet(rsyncrosim::scenario(L, 1), "lucasFireC2F_HistoricalFire", lookupsAsFactors = FALSE, optional = TRUE))
 obs <- H[as.integer(substr(Date, 1, 4)) %in% 1992:2020 & AreaHa >= X$resample$MinimumFireSize, AreaHa]
 png(file.path(FD, "Fig7_size_calibration.png"), width = 2400, height = 1500, res = 200, bg = "white"); par(mfrow = c(2, 2), mar = c(5, 5, 3, 1), family = "sans")

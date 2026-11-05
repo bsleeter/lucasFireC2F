@@ -12,7 +12,7 @@
 # Usage: Rscript historical_target.R <out dir>   (zones and results are set below)
 suppressPackageStartupMessages({ library(terra); library(sf); library(data.table); library(arrow); library(dplyr); library(rsyncrosim) }); sf_use_s2(FALSE)
 OUT <- commandArgs(TRUE)[1]; dir.create(OUT, FALSE, TRUE)
-D <- "F:/lucas-master/Models/lucasFireC2F Dev"; DS <- "F:/lucas-master/Data Sources"
+D <- "F:/lucasFireC2F/dev/libs"; DS <- "F:/lucas-master/Data Sources"
 ZONES <- list(
   P26 = list(lib = file.path(D, "lucasFireC2F P26.ssim"), results = 17L,
              zone = "F:/lucas-master/Models/California 30m BurnP3/spatial/pyromes_150m_LF2020/pyrome_026/zone.gpkg"),

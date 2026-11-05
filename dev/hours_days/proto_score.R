@@ -22,7 +22,7 @@ cat(sprintf("%s: %d/%d fires grown; A %g B %g wind %s\n", TAG, sum(!is.na(f$area
 f <- f[!is.na(area_ha)]
 
 # ---- 1 size fit ---------------------------------------------------------------------------------------------------------------
-L <- suppressWarnings(ssimLibrary("F:/lucas-master/Models/lucasFireC2F Dev/lucasFireC2F P26.ssim"))
+L <- suppressWarnings(ssimLibrary("F:/lucasFireC2F/dev/libs/lucasFireC2F P26.ssim"))
 H <- as.data.table(datasheet(rsyncrosim::scenario(L, 1), "lucasFireC2F_HistoricalFire", lookupsAsFactors = FALSE))[as.integer(substr(Date, 1, 4)) %in% 1992:2020]
 fit <- fit_spread_days(f$area_ha, f$FireDuration, H$AreaHa, MINA, 5)
 w <- setNames(fit$curve$RelativeFrequency, fit$curve$Days); nD <- f[, .N, by = FireDuration]

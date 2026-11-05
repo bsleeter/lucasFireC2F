@@ -2,7 +2,7 @@
 # P29's project predates the statewide defaults: the first run must stop with the missing-zone message; then only the missing
 # names are APPENDED (existing rows untouched, so saved references keep their keys) and the merge runs from the same library.
 suppressPackageStartupMessages({ library(rsyncrosim); library(data.table); library(terra) })
-D <- "F:/lucas-master/Models/lucasFireC2F Dev"
+D <- "F:/lucasFireC2F/dev/libs"
 L <- suppressWarnings(ssimLibrary(file.path(D, "lucasFireC2F P29.ssim"))); P <- rsyncrosim::project(L, 1)
 S <- rsyncrosim::scenario(P, "Merge P29 (this library) + P26", overwrite = TRUE)
 saveDatasheet(S, data.frame(StageNameId = c("M - Merge Zone Results", "5 - Summarize Burn Probability", "6 - Fire Effects", "7 - Hazard and Risk", "8 - Fire Detail (optional)"), RunOrder = 1:5), "core_Pipeline")

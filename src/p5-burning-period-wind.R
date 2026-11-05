@@ -25,7 +25,8 @@ opt <- function(k, d) if (nrow(wo) && k %in% names(wo) && !is.na(wo[[k]][1])) wo
 Y0 <- opt("FirstYear", 2006L); Y1 <- opt("LastYear", 2024L); M0 <- opt("FirstMonth", 6L); M1 <- opt("LastMonth", 11L)
 H0 <- opt("FirstHour", 12L); H1 <- opt("LastHour", 19L); BUF <- opt("BufferKm", 10); DL <- isTRUE(as.logical(opt("DownloadMissing", TRUE)))
 dsrc <- read_data_sources(c("RawsHourlyFolder", "RawsCatalogueFile"), optional = TRUE)
-RAWD <- dsrc$RawsHourlyFolder; if (is.na(RAWD) || !nzchar(RAWD)) fail("Data Sources: set RAWS Hourly Records Folder (where the station-year CSVs are kept)")
+RAWD <- dsrc$RawsHourlyFolder; if (is.na(RAWD) || !nzchar(RAWD)) RAWD <- home_place("RawsHourlyFolder")   # blank: its place in Data Sources Home, even while empty
+if (is.na(RAWD) || !nzchar(RAWD)) fail("Data Sources: set RAWS Hourly Records Folder (where the station-year CSVs are kept), or Data Sources Home")
 if (!dir.exists(RAWD)) { if (DL) dir.create(RAWD, recursive = TRUE) else fail("RAWS Hourly Records Folder not found (%s)", RAWD) }
 zb <- need("OutputZoneBoundary", "FileName"); zone <- st_union(st_make_valid(read_sf(zb$FileName[1])))
 wzr <- read_raster("LandscapeRasters", "WeatherZoneFileName"); if (is.null(wzr)) fail("Landscape Maps has no weather zone grid - run P1 first")
@@ -127,4 +128,5 @@ if (anyNA(Q$Ratio)) fail("the wind table has NA ratios")                        
 progressBar()
 write_ds(Q[, .(LowerWindSpeed, UpperWindSpeed, Quantile, Ratio)], "WindRatio")
 say("Burning-Period Wind Ratio Table: %d bins x %d quantiles; overall median ratio %.2f", length(keep), length(P), median(X$ratio))
+record_data_sources()
 progressBar(); progressBar(type = "end")

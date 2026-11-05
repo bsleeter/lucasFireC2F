@@ -1,7 +1,7 @@
 # Stage 2 fire list (a result scenario) vs 221's firelist_drawn.csv for p026_LF2020_own (same seed -> same fires)
 suppressPackageStartupMessages({ library(rsyncrosim); library(data.table) })
 id <- as.integer(commandArgs(TRUE)[1])
-L <- suppressWarnings(ssimLibrary("F:/lucas-master/Models/lucasFireC2F Dev/lucasFireC2F P26.ssim"))
+L <- suppressWarnings(ssimLibrary("F:/lucasFireC2F/dev/libs/lucasFireC2F P26.ssim"))
 a <- as.data.table(datasheet(rsyncrosim::scenario(L, id), "lucasFireC2F_OutputFireList", lookupsAsFactors = FALSE))
 b <- fread("F:/lucas-master/Models/California 30m BurnP3/data/c2fw/p026_LF2020_own/firelist_drawn.csv")
 setorder(a, Iteration, FireID); setorder(b, Iteration, FireID)

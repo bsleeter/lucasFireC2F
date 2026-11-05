@@ -1,7 +1,7 @@
 # Phase 3 CONUS test: P2 with covariates built per zone (no covariate folder). (1) "CA inputs" project, P2 only on the CA prep
 # result -> compare surfaces and fits with SN&F result 32. (2) "National inputs", P2 only on the national prep result 6.
 suppressPackageStartupMessages({ library(rsyncrosim); library(data.table); library(terra) })
-D <- "F:/lucas-master/Models/lucasFireC2F Dev"; DS <- "F:/lucas-master/Data Sources"
+D <- "F:/lucasFireC2F/dev/libs"; DS <- "F:/lucas-master/Data Sources"
 L <- suppressWarnings(ssimLibrary(file.path(D, "lucasFireC2F CONUS test.ssim"))); SNF <- suppressWarnings(ssimLibrary(file.path(D, "lucasFireC2F Sierra Nevada & Foothills.ssim")))
 g <- function(S, n) as.data.table(datasheet(S, paste0("lucasFireC2F_", n), optional = TRUE, lookupsAsFactors = FALSE))
 cov <- list(StatewideElevationFile = file.path(DS, "DEM/LF2020_Elev_220_CONUS/Tif/LC20_Elev_220.tif"), RoadsFile = file.path(DS, "Roads/LF2023_Roads_CONUS/Tif/LF2023_Roads_CONUS.tif"),

@@ -1,6 +1,6 @@
 # lucasFireC2F User Guide
 
-For lucasFireC2F 2.4.0. Exported 16 October 2026 from the working copy of the guide.
+For lucasFireC2F 2.5.0. Exported 4 November 2026 from the working copy of the guide.
 
 ## About this guide
 
@@ -14,9 +14,51 @@ It is for modelers who know SyncroSim's basics (libraries, projects, scenarios, 
 - **Scenario descriptions.** Every scenario gets a written description (Properties, Description) recording its purpose, dependencies, key settings and assumptions. Chapter 9 gives a template per scenario type; chapters 3 to 5 show the P18 versions.
 - **Names and folders.** A single-zone library needs no folders; a library holding several zones uses one folder per zone (Chapter 8). Scenarios are named `<zone> - <step>`, with the zone's full name, for example `P18 Southern Cascades - Prep`, `P18 Southern Cascades - Calibrate`, `P18 Southern Cascades - Run`. SyncroSim names results after their parent with a run time stamp.
 - **Result IDs.** Dependencies point at results, not at the scenarios that made them. Write down each result's ID as you go; later steps ask for them.
-- **Package version.** Written for lucasFireC2F 2.3.0 on SyncroSim 3.1.
+- **Package version.** Written for lucasFireC2F 2.5.0 on SyncroSim 3.1. Some screen captures come from earlier versions.
 
-**The workflow in one line.** Prep (P1-P5) → Calibrate (C1-C3, seed run, C5) → Run (stages 1-8, C6, C7, optionally R) → optionally Merge (stage M) with neighbouring zones.
+**The workflow in one line.** Data Download (D) → Prep (P1-P5) → Calibrate (C1-C3, seed run, C5) → Run (stages 1-8, C6, C7, optionally R) → optionally Merge (stage M) with neighbouring zones.
+
+## Before you begin: install the software
+
+Every stage runs in R on your own computer, so install these in order before Chapter 1. lucasFireC2F runs on Windows only. The versions below are the ones this release was tested with.
+
+| Software | Version | Where to get it | Notes |
+| --- | --- | --- | --- |
+| SyncroSim Studio | 3.1 or later; tested with 3.1.29 | [syncrosim.com](https://syncrosim.com) | Install in `C:\Program Files\SyncroSim` |
+| R | 4.6; tested with 4.6.1 | [CRAN for Windows](https://cran.r-project.org/bin/windows/base/) | Install it before the R packages. Older versions of R are untested |
+| R packages, including rsyncrosim | The table below | CRAN, with the line below | Install into the R you just installed |
+| lucasFireC2F | 2.5.0 | [Releases page](https://github.com/bsleeter/lucasFireC2F/releases) | Section 1.1. The C2F-W program and its DLLs come with the package, so there is nothing else to install |
+
+**R packages**
+
+| Package | Tested version | What it does here |
+| --- | --- | --- |
+| rsyncrosim | 2.1.13 | Connects R to SyncroSim; every stage uses it |
+| data.table | 1.18.6.1 | Tables, in every stage |
+| terra | 1.9.46 | Raster maps |
+| sf | 1.1.2 | Vector maps: zones, perimeters and fire points |
+| arrow | 25.0.1 | The burned-cell tables (Parquet files) |
+| cffdrs | 1.9.2 | Fire weather indices (C2) |
+| mgcv | 1.9.4 | The ignition fit (P2) |
+| curl | 8.0.0 | Downloads (Data Download, P5) |
+| jsonlite | 2.0.0 | Web service answers (Data Download, P5) |
+| digest | 0.6.39 | File checksums in the data home |
+
+Open R and run this line. R adds whatever these packages depend on.
+
+```r
+install.packages(c("rsyncrosim", "data.table", "terra", "sf", "arrow", "cffdrs", "mgcv", "curl", "jsonlite", "digest"))
+```
+
+To check, run the line below. It should print `character(0)`; anything else it prints is a package still missing.
+
+```r
+setdiff(c("rsyncrosim", "data.table", "terra", "sf", "arrow", "cffdrs", "mgcv", "curl", "jsonlite", "digest"), rownames(installed.packages()))
+```
+
+> **Use your own R, not Conda.** lucasFireC2F does not support Conda on Windows, because conda-forge does not carry all of these packages for Windows. Leave **Conda** unticked (1.6) and point the library at your R (1.7).
+
+**Disk space.** Allow about 60 GB on the drive that will hold the data, for one zone: 27 GB of data, 11 GB of LANDFIRE zips, and 21 GB of temporary files during the download (2.15). Each library needs several GB more per zone.
 
 ## 1. Install and library setup
 
@@ -24,10 +66,9 @@ A lucasFireC2F model lives in a SyncroSim library (`.ssim` file) that uses the l
 
 **Before you start**
 
-- SyncroSim Studio 3.1 or later, installed in `C:\Program Files\SyncroSim`.
-- R 4.6 with the packages rsyncrosim, terra, sf, data.table, arrow, mgcv and jsonlite. SyncroSim runs every stage in R.
+- The software in **Before you begin** installed: SyncroSim Studio, R and its packages.
 - The lucasFireC2F package installed (section 1.1).
-- The national data on a local drive (Chapter 2 lists each file).
+- A folder for the data, on a drive with about 60 GB free. Section 2.15 fills it.
 
 ### 1.1 Install the package
 
@@ -38,6 +79,8 @@ SyncroSim keeps one list of installed packages for the whole computer. A package
 3. If **lucasFireC2F** is listed with the version you want (2.3.0 here), go on to 1.2.
 
 ![File, Local Packages: every package installed on this computer, lucasFireC2F 2.3.0 among them. The install buttons are along the bottom.](figures/01-00-local-packages.png)
+
+**Figure 1.1-1.** *File, Local Packages: every package installed on this computer. The install buttons are along the bottom.*
 
 Otherwise install it with one of the buttons along the bottom of the tab:
 
@@ -54,6 +97,8 @@ Start SyncroSim Studio. If a library opened last time, it appears in the Explore
 
 ![SyncroSim Studio after start-up. The Multiprocessing control (outlined) must be off for lucasFireC2F runs.](figures/01-00-studio-window.png)
 
+**Figure 1.2-1.** *SyncroSim Studio after start-up. The Multiprocessing control (outlined) must be off for lucasFireC2F runs.*
+
 > **Turn Multiprocessing off.** lucasFireC2F parallelises fire growth itself, across all cores but one. SyncroSim's own Multiprocessing splits a scenario into separate jobs, which this package cannot use; a run started with it on stops at once with a message saying so. The toolbar box (outlined) only shows the maximum number of jobs; whether multiprocessing is on is set in the library's System tab (step 1.7).
 
 ### 1.3 Create an empty library
@@ -63,6 +108,8 @@ Start SyncroSim Studio. If a library opened last time, it appears in the Explore
 3. Click **Empty Library...**.
 
 ![File, New, Empty Library.](figures/01-01-file-new-empty-library.png)
+
+**Figure 1.3-1.** *File, New, Empty Library.*
 
 ### 1.4 Name and save the library
 
@@ -81,6 +128,8 @@ A new library has no packages. Add lucasFireC2F from the library's properties.
 
 ![Library properties, General, Packages, Add.](figures/01-03-library-packages.png)
 
+**Figure 1.5-1.** *Library properties, General, Packages, Add.*
+
 The Add Package dialog lists every package SyncroSim can see: installed ones (page or folder icon under Source) and ones it can download from the online repository (globe icon).
 
 5. Tick **lucasFireC2F** and check its version (1.9.1 in this screenshot; 2.3.0 at the time of writing). A folder icon under Source means it is installed from a folder on disk.
@@ -88,11 +137,15 @@ The Add Package dialog lists every package SyncroSim can see: installed ones (pa
 
 ![The Add Package dialog with lucasFireC2F ticked.](figures/01-04-add-package.png)
 
+**Figure 1.5-2.** *The Add Package dialog with lucasFireC2F ticked.*
+
 ### 1.6 Check the package
 
 The Packages list now shows lucasFireC2F with its version. Leave **Conda** unticked: lucasFireC2F uses the R installation SyncroSim finds, not a Conda environment.
 
 ![lucasFireC2F 1.9.1 added to the library. The warning icon is expected.](figures/01-05-package-added.png)
+
+**Figure 1.6-1.** *lucasFireC2F added to the library. The warning icon is expected.*
 
 > **The warning icon.** A package installed from a folder shows a warning triangle: SyncroSim reports it was "built for an undetermined version of SyncroSim". It does not affect runs and can be ignored.
 
@@ -110,12 +163,16 @@ Two library settings matter for lucasFireC2F: multiprocessing must be off, and S
 
 ![System, Multiprocessing, General: Enable multiprocessing unticked.](figures/01-06-system-multiprocessing.png)
 
+**Figure 1.7-1.** *System, Multiprocessing, General: Enable multiprocessing unticked.*
+
 **R installation**
 
 1. Still on the **System** tab, expand **Tools** and select **R**.
-2. Choose **Run directly** and check that **R executable** points to the `Rscript.exe` of the R that has the packages listed under Before you start (here `C:\Program Files\R\R-4.6.1\bin\Rscript.exe`). Use **Browse...** if it points elsewhere; **Default** restores SyncroSim's guess.
+2. Choose **Run directly** and check that **R executable** points to the `Rscript.exe` of the R that has the packages listed under Before you begin (here `C:\Program Files\R\R-4.6.1\bin\Rscript.exe`). Use **Browse...** if it points elsewhere; **Default** restores SyncroSim's guess.
 
 ![System, Tools, R: Run directly with the R 4.6.1 Rscript.exe.](figures/01-07-system-r.png)
+
+**Figure 1.7-2.** *System, Tools, R: Run directly with the R 4.6.1 Rscript.exe.*
 
 > If several R versions are installed, SyncroSim may pick one without the packages. A stage then fails at its first line with "there is no package called ...". Point **R executable** at the right `Rscript.exe` and run again.
 
@@ -131,6 +188,8 @@ A library holds one or more projects; everything lucasFireC2F shares between sce
 4. Write a short **Description**: what the project models, the package version, and where its data come from.
 
 ![Project properties: General, Summary, Name and Description.](figures/01-08-project-rename.png)
+
+**Figure 1.8-1.** *Project properties: General, Summary, Name and Description.*
 
 Example description:
 
@@ -148,9 +207,11 @@ Save the library.
 
 ### 1.9 The stage list
 
-The project properties' **General, Pipeline** page lists every stage the package defines: 22 in all since version 2.3.0 added **R - Report Figures (optional)** (the screenshot, taken earlier, shows 21). They are sorted by internal name (Stage Name) with the name you see in pipelines beside it (Stage Description). It is a catalog, not a run order, and it cannot be edited. Each scenario picks its own stages and their order in its own **Pipeline** sheet; a new scenario's pipeline is empty, and nothing runs until you fill it.
+The project properties' **General, Pipeline** page lists every stage the package defines: 23 in all: version 2.5.0 added D - Data Download, and version 2.3.0 added **R - Report Figures (optional)** (the screenshot, taken earlier, shows 21). They are sorted by internal name (Stage Name) with the name you see in pipelines beside it (Stage Description). It is a catalog, not a run order, and it cannot be edited. Each scenario picks its own stages and their order in its own **Pipeline** sheet; a new scenario's pipeline is empty, and nothing runs until you fill it.
 
 ![Project properties, General, Pipeline: the package's 21 stages (read-only).](figures/01-09-project-pipeline.png)
+
+**Figure 1.9-1.** *Project properties, General, Pipeline: the package's stages (read-only).*
 
 One of them, **Utility - Offshore Wind Event Weather**, is an optional tool for adding observed offshore-wind (Diablo, Santa Ana) days to a weather stream; a standard zone build does not use it.
 
@@ -158,6 +219,7 @@ A zone is built with three scenarios, each running its own part of the catalog:
 
 | Scenario | Stages, in run order | Depends on |
 | --- | --- | --- |
+| Data Download | D Data Download (once per region; section 2.15) | nothing |
 | Prep | P1 Prepare Zone Landscape, P2 Fit Ignition Surfaces, P3 Extract Zone Weather, P4 MTBS Severity Target, P5 Burning-Period Wind (RAWS) | nothing |
 | Calibrate | C1 Import Fire Record, C2 Build Weather Stream, C3 Fit Ignitions, 1 Prepare Landscape, 2 Sample Ignitions, 3 Sample Burning Conditions, 4 Grow Fires (C2F-W), 5 Summarize Burn Probability, C5 Fit Spread Days | the Prep result |
 | Run | 1 Prepare Landscape, 2 Sample Ignitions, 3 Sample Burning Conditions, 4 Grow Fires (C2F-W), 5 Summarize Burn Probability, 6 Fire Effects, 7 Hazard and Risk, 8 Fire Detail (optional), C6 Score Against Fire Records, C7 Validate Burn Probability, R Report Figures (optional) | the Calibrate result, then the Prep result |
@@ -173,6 +235,8 @@ Project data are shared by every scenario in the project. They sit on the projec
 ### 2.1 The input data
 
 The 22 Data Sources rows point at 17 published datasets, all of them national, so the same rows serve any pyrome in the conterminous US. The prep stages build each zone's inputs from these files (grids, zone weather, ignition covariates, the wind table) when the zone is prepared; nothing has to be pre-processed by hand. This section lists what each dataset is, which products and files are used, and where to download them. Links were checked on 30 Sep 2026.
+
+**You do not have to fetch these yourself.** Data Download (2.15) gets all of them for your zone except five LANDFIRE zips. The links below are for reference, or for setting paths by hand.
 
 #### Published datasets
 
@@ -242,19 +306,21 @@ The ignition fit (P2) uses ten covariates. Human-activity layers are fixed at 20
 
 The prebuilt California folder (`F:\lucasFireC2F\Data\ignition_covariates`) also holds seven layers kept for testing: dist\_road\_maj, popden, tmean, ppt\_warm and three GOES-West lightning layers. P2 does not read them.
 
-> **Outside California** the rows are the same. The one input that is not national in this guide is the WRC benchmark: WRC publishes burn probability per state, so download the state(s) your pyrome covers and mosaic them, or leave the row blank and C7 scores without the benchmark.
+> **Outside California** the rows are the same. The one input that is not national in this guide is the WRC benchmark: WRC publishes burn probability per state, so Data Download fetches the state(s) your pyrome touches and joins them (by hand, download and mosaic them yourself), or leave the row blank and C7 scores without the benchmark.
 
 ### 2.2 Data Sources
 
-Data Sources tells the prep and calibration stages where the national data are (the sheet's name still says "statewide and national", from the package's California origins). These are plain paths: SyncroSim reads the files where they are and never copies them into the library, because several are gigabytes.
+**There are two routes.** The simple one: set **Data Sources Home** at the top of this page, leave every path blank and run Data Download (2.15). The rest of this section is the other route, setting each path by hand to data you already hold; a path you set always wins over the home. Figure 2.2-1 shows the page.
+
+Data Sources tells the prep and calibration stages where the national data are. These are plain paths: SyncroSim reads the files where they are and never copies them into the library, because several are gigabytes.
 
 1. Open the project properties (double-click **My Fire Project**) and select the **LUCAS Fire (C2F-W)** tab.
-2. Expand **Data Sources** and select **Data Sources (statewide and national data on disk)**.
+2. Expand **Data Sources** and select **Data Sources**.
 3. Fill the value column, one path per row. A new project starts empty.
 
-![Project properties, LUCAS Fire (C2F-W), Data Sources: 22 rows, all empty in a new project.](figures/02-01-data-sources-empty.png)
+![The Data Sources page: Data Sources Home at the top, then one row per dataset with its path, Browse, Source page and a mark.](figures/02-01-data-sources-page.png)
 
-*A new project's Data Sources: (1) the sheet under Data Sources in the tree; (2) the value column, empty until you fill it.*
+**Figure 2.2-1.** *The Data Sources page, shown after a Data Download for P26: Data Sources Home at the top, then one row per dataset with its path, Browse, Source page and a mark. In a new project the home and paths are empty.*
 
 The rows, the stages that read them, and the paths used for this guide:
 
@@ -289,11 +355,7 @@ A required row that is empty or points at a missing file stops its stage with a 
 
 Save the library when the rows are filled (Ctrl+S). The paths are written to the library only on save; a stage run before saving sees the old, empty sheet.
 
-![Data Sources filled and saved: all 22 rows, national paths, the five shortcut rows left blank.](figures/02-02-data-sources-filled.png)
-
-*Data Sources filled for the national route. The boxed rows are the shortcuts, left blank: (1) P1 rasterises the fire-zone grid from the pyrome boundaries; (2) P1 builds the weather-zone grid and fire-age classes, and P3 builds the zone daily weather from gridMET; (3) P2 builds the ignition covariates from the Roads, NLCD, SILVIS and PRISM rows below it.*
-
-> **Check before moving on.** Long paths are cut off in the grid. Drag the divider between the Explorer and the properties pane to the left (as here) or click a cell to see the whole path. A path that points at the wrong copy of a file still runs, so read each row against the table rather than trusting that the stage will complain.
+> **Check before moving on.** Long paths are cut off in the grid. Drag the divider between the Explorer and the properties pane to the left or click a cell to see the whole path. A path that points at the wrong copy of a file still runs, so read each row against the table rather than trusting that the stage will complain.
 
 ### 2.3 Fuel Types
 
@@ -304,7 +366,7 @@ Fuel Types lists every value of the LANDFIRE fuel map (FBFM40) and says what C2F
 
 ![Fuel Types: the 45 default rows, Fuel Model Sent to C2F-W column boxed.](figures/02-03-fuel-types.png)
 
-*Fuel Types with the package defaults: (1) the sheet under Fuels; (2) the model C2F-W burns for each fuel. Compare it with the column to its left: GR9, GS2, SB1-SB4, SH1, TL2, TL3, TL4 and TL7 are sent as a different model.*
+**Figure 2.3-1.** *Fuel Types with the package defaults: (1) the sheet under Fuels; (2) the model C2F-W burns for each fuel. Compare it with the column to its left: GR9, GS2, SB1-SB4, SH1, TL2, TL3, TL4 and TL7 are sent as a different model.*
 
 | Column | What it means |
 | --- | --- |
@@ -346,7 +408,7 @@ Fuel Models holds the published parameters of the 40 Scott and Burgan (2005) fue
 
 ![Fuel Models: the 40 Scott and Burgan models with fuel group and Rothermel parameters.](figures/02-04-fuel-models.png)
 
-*Fuel Models: (1) the sheet under Fuels; (2) Fuel Group, used to group results and targets by fuel; (3) the Rothermel fuel-bed parameters used for fire effects.*
+**Figure 2.4-1.** *Fuel Models: (1) the sheet under Fuels; (2) Fuel Group, used to group results and targets by fuel; (3) the Rothermel fuel-bed parameters used for fire effects.*
 
 The sheet does not set how fast fire spreads. C2F-W spreads fire with its own built-in copy of the Scott and Burgan models, chosen by the code in Fuel Types' Sent to C2F-W column. The package uses this sheet in three other ways:
 
@@ -369,7 +431,7 @@ C2F-W does not compute fuel moisture from the weather. It takes one of four fixe
 
 ![Fuel Moisture Scenarios: the four Scott and Burgan scenarios D1L1 to D4L4.](figures/02-05-fuel-moisture.png)
 
-*Fuel Moisture Scenarios: (1) the sheet under Fuels; (2) the scenario number C2F-W is given; (3) the moisture of each fuel class in that scenario, in percent.*
+**Figure 2.5-1.** *Fuel Moisture Scenarios: (1) the sheet under Fuels; (2) the scenario number C2F-W is given; (3) the moisture of each fuel class in that scenario, in percent.*
 
 | Name | Dead fuel (1-h / 10-h / 100-h) | Live herb / live woody | Meaning |
 | --- | --- | --- | --- |
@@ -391,7 +453,7 @@ A fire zone is the unit the model is prepared, calibrated and run on. lucasFireC
 
 ![Fire Zones: the 128 pyromes, P18 Southern Cascades boxed.](figures/02-06-fire-zones.png)
 
-*Fire Zones: (1) the sheet under Zones and Categories; (2) P18 Southern Cascades, Map Code 1018.*
+**Figure 2.6-1.** *Fire Zones: (1) the sheet under Zones and Categories; (2) P18 Southern Cascades, Map Code 1018.*
 
 The Map Code is 1000 + the pyrome number. P1 writes it into the fire-zone grid, and every later stage finds the zone's cells by it. The rows sort as text (P1, P10, P100, P101...), so scroll or click the Map Code header to sort by number.
 
@@ -406,7 +468,7 @@ Weather zones are the NWS fire weather zones, 3,373 of them across CONUS. Each c
 
 ![Weather Zones: the NWS fire weather zones with latitude.](figures/02-07-weather-zones.png)
 
-*Weather Zones: (1) the sheet under Zones and Categories; (2) Latitude of the zone's centre.*
+**Figure 2.7-1.** *Weather Zones: (1) the sheet under Zones and Categories; (2) Latitude of the zone's centre.*
 
 | Column | Used for |
 | --- | --- |
@@ -425,7 +487,7 @@ Seasons split the year for three purposes: how ignitions are spread through the 
 
 ![Seasons: Spring, Summer, Autumn and Winter with months and live fuel moisture class.](figures/02-08-seasons.png)
 
-*Seasons: (1) the sheet under Zones and Categories; (2) the months of each season; (3) the live fuel moisture class.*
+**Figure 2.8-1.** *Seasons: (1) the sheet under Zones and Categories; (2) the months of each season; (3) the live fuel moisture class.*
 
 | Season | Months | Live fuel moisture class |
 | --- | --- | --- |
@@ -447,7 +509,7 @@ Two ignition causes, Human and Lightning. They have separate ignition-probabilit
 
 ![Causes: Human and Lightning.](figures/02-09-causes.png)
 
-*Causes: (1) the sheet under Zones and Categories; (2) the two causes.*
+**Figure 2.9-1.** *Causes: (1) the sheet under Zones and Categories; (2) the two causes.*
 
 The names must stay exactly Human and Lightning: P2 maps FPA-FOD's cause classes onto them (Natural to Lightning, Human to Human; fires of unknown cause are left out).
 
@@ -460,7 +522,7 @@ Vegetation classes describe a cell's potential vegetation, from LANDFIRE Biophys
 
 ![Vegetation Classes: Conifer, Hardwood, Shrub, Grass and Other with fallback groups.](figures/02-10-vegetation-classes.png)
 
-*Vegetation Classes: (1) the sheet under Zones and Categories; (2) the class code written into the vegetation map; (3) the fallback group.*
+**Figure 2.10-1.** *Vegetation Classes: (1) the sheet under Zones and Categories; (2) the class code written into the vegetation map; (3) the fallback group.*
 
 | Class | BpS vegetation groups (GROUPVEG) | Fallback group |
 | --- | --- | --- |
@@ -485,7 +547,7 @@ Distributions is a short list of the probability distributions that sheets elsew
 
 ![Distributions: Fixed, Gamma, Normal, Poisson.](figures/02-11-distributions.png)
 
-*Distributions: (1) the sheet under Zones and Categories; (2) the four distributions.*
+**Figure 2.11-1.** *Distributions: (1) the sheet under Zones and Categories; (2) the four distributions.*
 
 | Distribution | Fires per season |
 | --- | --- |
@@ -506,7 +568,7 @@ The four sheets under **Effects and Risk** describe the fire-behaviour and risk 
 
 ![Lifeforms and Response Functions: percent loss by flame length class for grass, shrub and tree.](figures/02-12-lifeforms.png)
 
-*Lifeforms and Response Functions: (1) the sheet under Effects and Risk; (2) the response, in percent change, for each of the six flame-length classes.*
+**Figure 2.12-1.** *Lifeforms and Response Functions: (1) the sheet under Effects and Risk; (2) the response, in percent change, for each of the six flame-length classes.*
 
 Each row gives the percent change in value a structure suffers when fire reaches it at each flame-length class, by the lifeform of the surrounding fuel. Values are negative (loss): a tree-fuel cell burning at over 12 ft (FIL6) means total loss (-100%); a grass cell burning under 2 ft (FIL1) a 10% loss. The lifeform of each cell comes from Fuel Types (2.3), using the fuel C2F-W burned. Stage 7 multiplies each cell's flame-length class probabilities by these responses to get the conditional risk (CRPS).
 
@@ -514,7 +576,7 @@ Each row gives the percent change in value a structure suffers when fire reaches
 
 ![Flame Length Classes: FIL1 to FIL6 with lower and upper bounds in feet.](figures/02-13-flame-length-classes.png)
 
-*Flame Length Classes: (1) the sheet under Effects and Risk; (2) the bounds of each class, in feet.*
+**Figure 2.12-2.** *Flame Length Classes: (1) the sheet under Effects and Risk; (2) the bounds of each class, in feet.*
 
 The six FSim flame-intensity classes: under 2 ft, 2-4, 4-6, 6-8, 8-12 and over 12 ft. They label the classes used in Fire Effects Metrics and the response functions. The bounds themselves are fixed in stage 6 to match FSim and WRC, so editing them here does not change the results.
 
@@ -522,7 +584,7 @@ The six FSim flame-intensity classes: under 2 ft, 2-4, 4-6, 6-8, 8-12 and over 1
 
 ![Fire Effects Metrics: the 13 per-cell maps stage 6 writes.](figures/02-14-fire-effects-metrics.png)
 
-*Fire Effects Metrics: (1) the sheet under Effects and Risk; (2) the code stage 6 writes each map under.*
+**Figure 2.12-3.** *Fire Effects Metrics: (1) the sheet under Effects and Risk; (2) the code stage 6 writes each map under.*
 
 | Code | Map |
 | --- | --- |
@@ -539,7 +601,7 @@ All except BURNS and CROWNBP are *conditional*: they describe what happens when 
 
 ![Risk Metrics: HIBP, RPS, CRPS and RPSCLASS.](figures/02-15-risk-metrics.png)
 
-*Risk Metrics: (1) the sheet under Effects and Risk; (2) the code stage 7 writes each map under.*
+**Figure 2.12-4.** *Risk Metrics: (1) the sheet under Effects and Risk; (2) the code stage 7 writes each map under.*
 
 | Code | Map |
 | --- | --- |
@@ -558,7 +620,7 @@ Burn probability and CRPS are spread into non-burnable ground (towns, roads) fro
 
 ![Fire Record Sources: FPA-FOD, MTBS and User.](figures/02-16-fire-record-sources.png)
 
-*Fire Record Sources: (1) the sheet under Advanced; (2) the three source labels.*
+**Figure 2.13-1.** *Fire Record Sources: (1) the sheet under Advanced; (2) the three source labels.*
 
 | Source | Meaning |
 | --- | --- |
@@ -575,7 +637,156 @@ The project now holds everything the scenarios share:
 - **Data Sources** pointing at the national datasets, with the five shortcut rows blank (2.1-2.2).
 - The package defaults for **Fuels**, **Zones and Categories**, **Effects and Risk** and **Advanced**, checked but unchanged (2.3-2.13).
 
-Save the library (Ctrl+S). Nothing has been computed yet: the zone's grids, weather and ignition surfaces are built by the first scenario in chapter 3.
+Save the library (Ctrl+S). Nothing has been computed yet: the zone's grids, weather and ignition surfaces are built by the first scenario in chapter 3. If you use Data Sources Home, fill it first (2.15).
+
+### 2.15 Download the national data (Data Download)
+
+Stage D fetches the 17 datasets for your zone into one folder, the Data Sources Home, so every path on the Data Sources page can stay blank. Only one thing needs a person: five LANDFIRE zips sit behind a CAPTCHA. For P26 the rest took about 50 minutes and fetched about 47 GB.
+
+Skip this section if you set every path by hand (2.2).
+
+#### Step 1: Set the home folder
+
+1. Open the project properties and select the **LUCAS Fire (C2F-W)** tab.
+2. Select **Data Sources**, at the top of the tree.
+3. In **Data Sources Home**, click **Browse...** and choose an empty folder on a drive with about 60 GB free.
+4. Click **Make folders**. It creates the empty folder layout, and moves and deletes nothing.
+5. Save the library (Ctrl+S).
+
+Figure 2.2-1 shows this page, with **Browse...** and **Make folders** beside the home folder.
+
+#### Step 2: Download the five LANDFIRE zips by hand
+
+LANDFIRE 2020 fuels and canopy are only on [USGS ScienceBase](https://www.sciencebase.gov/catalog/item/6a1602c7b66b013d45990b82), behind a CAPTCHA, so a script cannot fetch them. This needs doing once per home folder, and takes 10.6 GB.
+
+1. Open the ScienceBase page in a browser and download these five files. Do not unzip or rename them.
+   - `LF2020_FBFM40_CONUS_20260522.zip`
+   - `LF2020_CBD_CONUS_20260522.zip`
+   - `LF2020_CBH_CONUS_20260522.zip`
+   - `LF2020_CC_CONUS_20260522.zip`
+   - `LF2020_CH_CONUS_20260522.zip`
+2. Put them in the `supplied` folder of the home folder, for example `E:\lucasData\supplied`.
+
+The stage clips each zip to your region and leaves the zip where it is.
+
+#### Step 3: Create the scenario
+
+Data Download is a scenario of its own. Prep reads the home folder, so it does not depend on this result.
+
+1. In the Explorer, right-click **My Fire Project** and choose **New**, then **Scenario...**.
+2. Name it `P18 Southern Cascades - Data Download`.
+3. In **Description**, paste the text below.
+4. On the **General** tab, select **Pipeline** and choose **D - Data Download** as the only stage.
+5. Click outside the grid so the row is committed, then save (Ctrl+S).
+
+```
+P18 Southern Cascades - Data Download: fetches the Data Sources for pyrome 18 into Data Sources Home. PURPOSE: fills the home folder; Prep reads the data from there and does not depend on this result. PIPELINE: D Data Download. REGION: P18 Southern Cascades + 60 km, By region layout. DATASETS: all 17. LANDFIRE 2020 zips supplied by hand in the home's supplied folder.
+```
+
+![Scenario properties, General, Summary: the Data Download scenario's description pasted in.](figures/02-17-1-data-download.png)
+
+**Figure 2.15-1.** *Scenario Summary: the description pasted into Description.*
+
+![Scenario properties, General, Pipeline: D - Data Download at run order 1.](figures/02-17-2-data-download.png)
+
+**Figure 2.15-2.** *Pipeline: D - Data Download as the only stage.*
+
+#### Step 4: Name the zone and check the settings
+
+1. In the scenario properties, select the **LUCAS Fire (C2F-W)** tab, then **Data Download**.
+2. Select **Fire Zones to Download** and choose **P18 Southern Cascades**. Add a row for each further zone the region should hold.
+3. Select the **Data Download** page.
+4. Under **How**, type your address in **LANDFIRE email**. The LANDFIRE Product Service needs one for its elevation, roads and Biophysical Settings jobs. It is saved in the home folder, not in the library.
+5. Leave everything else as it is, and save (Ctrl+S).
+
+![Fire Zones to Download: P18 Southern Cascades chosen from the list.](figures/02-17-3-data-download.png)
+
+**Figure 2.15-3.** *Fire Zones to Download: the zone chosen from the list.*
+
+![The Data Download page at its defaults, showing the Region and Datasets groups.](figures/02-17-4-data-download.png)
+
+**Figure 2.15-4.** *The Data Download page at its defaults: the Region and Datasets groups. Scroll down for Vintages and years, and for How, which holds the LANDFIRE email box.*
+
+The defaults suit one zone:
+
+| Setting | Default | When to change it |
+| --- | --- | --- |
+| Buffer around the fire zones | 60 km | Widen it if Zone Preparation's own buffer is wider than 25 km |
+| Home layout | By region | National keeps every dataset whole at the top of the home, for a home serving many zones (about 100 GB) |
+| Region name | From the zones, as `Fire-P18-Southern-Cascades` | A region whose extent differs from one already downloaded needs its own name |
+| Datasets | All ticked | Untick **WRC burn probability** to save about 21 GB; C7 then scores without the benchmark |
+| LANDFIRE vintages | 2020 | Other vintages come from the LANDFIRE Product Service |
+| Check only | Off | Tick it for a first run: it lists what would download and how big, and fetches nothing |
+| Fetch new editions | Off | Tick it to add a newer version of a dataset beside the first |
+
+#### Step 5: Run it and read the results
+
+1. Right-click the scenario and choose **Run**. If you ticked **Check only**, read the result, untick it and run again.
+2. When the run ends, open the result and select **Download Results**. There is one row per dataset.
+
+![Download Results: one row per dataset with its status, files, size and minutes.](figures/02-17-5-data-download.png)
+
+**Figure 2.15-5.** *Download Results from a rerun: NLCD was fetched (done), and the other 16 datasets were already in the home (skipped).*
+
+> **A green run can still have a failed dataset.** The stage always finishes, so that Download Results gets saved. Read the **Status** column every time; a failure also appears as a warning near the end of the run log.
+
+| Status | Meaning | What to do |
+| --- | --- | --- |
+| done | Fetched and recorded | Nothing |
+| skipped | Already in the home for this region | Nothing |
+| manual | LANDFIRE zips not in `supplied` | Step 2, then run again |
+| failed | The source or the connection failed; **Next** gives the reason | Run the scenario again |
+
+Running it again is safe. It skips what is finished and fetches only what is missing, and no file in the home is ever replaced. A full run keeps its own log in the home folder's `logs` folder.
+
+#### Step 6: Check the Data Sources page
+
+Open the project's **Data Sources** page again, and refresh the library if the marks have not changed. It checks each dataset against the zones your scenarios name.
+
+- Green **✓ Good**: the data are there and cover those zones.
+- Red, with the reason on the line below: not downloaded yet, or held for too small a region. Run a Data Download for that zone.
+- **Advanced: use a grid you already have** stays collapsed and blank. The stages build those grids themselves.
+
+![The Data Sources page after a Data Download: Data Sources Home set, every dataset marked Good, and the five LANDFIRE layers listed.](figures/02-17-6-data-download.png)
+
+**Figure 2.15-6.** *The Data Sources page after the download, for P26: every path blank and every dataset marked Good. The five LANDFIRE layers are listed one by one, and the line under Data Sources Home names the zones checked.*
+
+The home is ready, and Prep (Chapter 3) reads from it with no paths to set.
+
+#### What it fetches
+
+Sizes are measured for P26 + 60 km, in MB; a clipped dataset grows with the region's area. "Service" means the source clips the data itself, so only your region is sent.
+
+| Dataset | How it arrives | Kept in | Download (MB) | On disk (MB) |
+| --- | --- | --- | --- | --- |
+| gridMET daily weather | Direct | Top of the home | 22,210 | 22,210 |
+| WRC burn probability | Direct: whole state zips, then clipped | Region | 21,206 | 420 |
+| RAWS hourly records | Service | Top of the home | 1,204 | 1,204 |
+| MTBS perimeters | Direct | Top of the home | 390 | 660 |
+| SILVIS WUI, by state | Direct | Region | 335 | 501 |
+| FPA-FOD fire occurrence | Direct | Top of the home | 238 | 1,082 |
+| PRISM climate and normals | Direct | Top of the home | 238 | 246 |
+| MTBS burn severity | Direct, then clipped | Region | 214 | 16 |
+| Pyromes | Direct | Top of the home | 28 | 41 |
+| NWS fire weather zones | Direct | Top of the home | 23 | 40 |
+| TIGER/Line states | Direct | Top of the home | 9 | 14 |
+| LANDFIRE fuels and canopy | By hand (Step 2): 10.6 GB once | Region | 0 | 142 |
+| LANDFIRE elevation | Service (email) | Region | Region only | 237 |
+| Interagency fire perimeters | Service | Region | Region only | 95 |
+| LANDFIRE Biophysical Settings | Service (email) | Region | Region only | 52 |
+| LANDFIRE roads | Service (email) | Region | Region only | 11 |
+| Annual NLCD 2010 | Service | Region | Region only | 10 |
+
+The downloads use the current release of each source, so some differ from the table in 2.1: FPA-FOD is the 7th edition and the NWS zones are the newest file the NWS lists. A second zone in the same home fetches only its regional datasets. The same home can also serve lucasCore, and what the two packages share is fetched once.
+
+```
+<home>
+  supplied\               the five LANDFIRE zips
+  climate\  disturbance\  study-area\   datasets kept whole, shared by every region
+  regions\Fire-P18-Southern-Cascades\   this region's clips
+  logs\                   one log per run
+  manifest.csv  files.csv what was downloaded, from where, and each file's checksum
+```
 
 ## 3. Prepare the zone (Prep)
 
@@ -592,7 +803,7 @@ A new library already has one scenario, **\[1\] New Scenario**. Use it for Prep.
 
 ![Scenario properties, General tab, Summary: the Prep scenario named and described.](figures/03-01-scenario-summary.png)
 
-*Scenario Summary: (1) the scenario in the Explorer; (2) Name; (3) Description.*
+**Figure 3.1-1.** *Scenario Summary: (1) the scenario in the Explorer; (2) Name; (3) Description.*
 
 ```
 P18 Southern Cascades - Prep: zone preparation for pyrome 18. PURPOSE: builds every zone input from the national Data Sources; Calibrate and Run depend on this result. PIPELINE: P1 Prepare Zone Landscape, P2 Fit Ignition Surfaces, P3 Extract Zone Weather, P4 MTBS Severity Target, P5 Burning-Period Wind (RAWS). ZONE: P18 Southern Cascades, 25 km buffer, LANDFIRE 2020 (LF 2.2.0) fuels and canopy. IGNITIONS: FPA-FOD 1992-2020 fires >= 405 ha within a 20 km buffer (large-fire surfaces); covariates built from national sources (SILVIS v4 housing). WEATHER: gridMET daily weather per NWS fire weather zone, weighted by MTBS fire activity. SEVERITY TARGET: MTBS mosaics 2021-2024. WIND: FEMS RAWS hourly within 10 km, June-November 2006-2024, 12:00-19:00 local. DATA: shortcut Data Sources rows blank, all grids built from national data.
@@ -613,7 +824,7 @@ The pipeline lists the stages this scenario runs, in order. Prep runs the five p
 
 ![Prep pipeline: P1 to P5 in run order 1 to 5.](figures/03-02-prep-pipeline.png)
 
-*Pipeline: (1) Pipeline under the General tab; (2) the five Prep stages with their run order.*
+**Figure 3.2-1.** *Pipeline: (1) Pipeline under the General tab; (2) the five Prep stages with their run order.*
 
 | Stage | Builds | Time for P18 |
 | --- | --- | --- |
@@ -635,7 +846,7 @@ The scenario's **LUCAS Fire (C2F-W)** tab lists only the sheets its pipeline sta
 
 ![Zone Preparation Options selected in the scenario's LUCAS Fire (C2F-W) tab, fields empty.](figures/03-03-zone-prep-options.png)
 
-*Zone Preparation Options: (1) the sheet under Zone Preparation; (2) the ten settings, empty in a new scenario.*
+**Figure 3.3-1.** *Zone Preparation Options: (1) the sheet under Zone Preparation; (2) the ten settings, empty in a new scenario.*
 
 | Field | P18 value | Default | Used by | What it does |
 | --- | --- | --- | --- | --- |
@@ -650,7 +861,7 @@ The scenario's **LUCAS Fire (C2F-W)** tab lists only the sheets its pipeline sta
 
 ![Zone Preparation Options filled for P18.](figures/03-04-zone-prep-filled.png)
 
-*Zone Preparation Options filled for P18: (1) Fire Zone, chosen from the drop-down; (2) the other settings. Studio shows decimals as 25.0000 and 405.0000; that is only display.*
+**Figure 3.3-2.** *Zone Preparation Options filled for P18: (1) Fire Zone, chosen from the drop-down; (2) the other settings. Studio shows decimals as 25.0000 and 405.0000; that is only display.*
 
 > **Match the severity years to the fuels.** The severity target starts in 2021 because MTBS severity is compared with fire on the LANDFIRE 2020 fuels, so it takes the years after that vintage. For another vintage, move the severity window with it. The ignition window follows the FPA-FOD record instead and needs no change.
 
@@ -663,7 +874,7 @@ C2F-W needs hourly wind, but the zone's weather (P3) is daily: gridMET's daily m
 
 ![Wind Table Options filled with the package defaults.](figures/03-05-wind-table-options.png)
 
-*Wind Table Options: (1) the sheet under Utilities; (2) the settings, here the package defaults with Time Zone blank.*
+**Figure 3.4-1.** *Wind Table Options: (1) the sheet under Utilities; (2) the settings, here the package defaults with Time Zone blank.*
 
 | Field | Default | What it does |
 | --- | --- | --- |
@@ -687,19 +898,19 @@ The **RAWS Stations** sheet above it is an output: P5 lists the stations it used
 
 ![Starting a run: right-click the scenario and choose Run, or use the toolbar triangle.](figures/03-06-run-menu.png)
 
-*Starting a run: (1) the scenario in the Explorer; (2) Run on its right-click menu; (3) the same command on the toolbar.*
+**Figure 3.5-1.** *Starting a run: (1) the scenario in the Explorer; (2) Run on its right-click menu; (3) the same command on the toolbar.*
 
 3. Studio asks to save the library first. Click **Yes**: the run uses the saved library, so unsaved edits would not be in it.
 
 ![The save prompt before a run.](figures/03-07-run-save-prompt.png)
 
-*Studio saves the library before every run.*
+**Figure 3.5-2.** *Studio saves the library before every run.*
 
 4. The **Run Monitor** opens. It lists the run with its Result Id and Status, and the bar at the bottom of the window shows the stage running now. Leave Studio open until the status changes; it can be minimised.
 
 ![Run Monitor during the Prep run, P1 running.](figures/03-08-run-monitor.png)
 
-*Run Monitor: (1) the Run Monitor tab; (2) the run, its Result Id (the number of the result scenario it will create) and Status; (3) Run Log, the stage messages so far; (4) the status bar with the current stage, here P1 - Prepare Zone Landscape.*
+**Figure 3.5-3.** *Run Monitor: (1) the Run Monitor tab; (2) the run, its Result Id (the number of the result scenario it will create) and Status; (3) Run Log, the stage messages so far; (4) the status bar with the current stage, here P1 - Prepare Zone Landscape.*
 
 To stop a run, click the red square in its row. The partial result is kept and can be deleted. Click **Run Log** at any time to see each stage's messages: what it read, what it built and how long it took. If a stage fails, the log names the problem, usually a missing Data Sources row or file.
 
@@ -722,7 +933,7 @@ When the run finishes, open **Run Log** and read it from the top. Each stage rep
 | P4 | `2021: 2,351,260 burned 30 m pixels`, `2023: 0`, `2024: 0` | Which fire years the severity target rests on (below) |
 | P5 | `655,233 from 28 stations`, `overall median ratio 0.65` | Enough stations and hours; per-station medians listed |
 
-Two warnings at the top of the log are harmless: that the package was built for an undetermined SyncroSim version, and that conda is disabled (lucasFireC2F uses the R set in 1.7).
+One warning at the top of the log is harmless when the package is installed from a folder: that it was built for an undetermined SyncroSim version. lucasFireC2F uses the R set in 1.7.
 
 > **What this P18 log shows.** Two things are worth noting, neither of which stops the model. (1) The severity target is almost entirely 2021, the year of the Dixie Fire: 2,351,260 of 2,352,228 burned pixels. The 2023 and 2024 MTBS mosaics in this release have no burned pixels in P18. The class shares therefore describe one extreme fire year. (2) One RAWS station, Panther Springs, has a median ratio of 0.00: most of its afternoon hours that pass the quality flag read 0 mph, a sheltered or faulty anemometer. It contributes a few percent of the hours and slightly lowers the bottom of the wind table.
 
@@ -730,7 +941,7 @@ In the Explorer, the Prep scenario now has a **Results** folder holding **\[2\] 
 
 ![The Prep result in the Explorer.](figures/03-09-prep-result.png)
 
-*The Prep result: (1) the Results folder under the scenario; (2) result \[2\], named after its parent with the run time; the yellow triangle means the run finished with warnings, here only the package-version warning; (3) the Results button, which shows only the scenarios ticked in red when you open charts and maps.*
+**Figure 3.6-1.** *The Prep result: (1) the Results folder under the scenario; (2) result \[2\], named after its parent with the run time; the yellow triangle means the run finished with warnings, here only the package-version warning; (3) the Results button, which shows only the scenarios ticked in red when you open charts and maps.*
 
 Chapter 4 makes this result a dependency of the Calibrate scenario.
 
@@ -744,11 +955,13 @@ The Calibrate scenario fits the zone's fire regime to the fire record. It import
 
 ![New scenario: right-click, New, Scenario.](figures/04-01-new-scenario.png)
 
-*Creating a scenario: (1) New on the right-click menu; (2) Scenario...*
+**Figure 4.1-1.** *Creating a scenario: (1) New on the right-click menu; (2) Scenario...*
 
 2. In the **New Scenario** window, type the name `P18 Southern Cascades - Calibrate` and click **OK**. Leave the Description for now: section 4.6 fills it once the settings are chosen.
 
 ![The New Scenario window.](figures/04-02-new-scenario-dialog.png)
+
+**Figure 4.1-2.** *The New Scenario window.*
 
 ### 4.2 Add the Prep result as a dependency
 
@@ -760,7 +973,7 @@ A dependency makes a scenario read another scenario's data instead of its own. C
 
 ![The Prep result added as a dependency of Calibrate.](figures/04-03-dependency.png)
 
-*Dependencies: (1) the Prep result; (2) the new Calibrate scenario; (3) its Dependencies folder, listing the Prep result.*
+**Figure 4.2-1.** *Dependencies: (1) the Prep result; (2) the new Calibrate scenario; (3) its Dependencies folder, listing the Prep result.*
 
 > **Depend on the result, not the Prep scenario.** The result holds the outputs P1-P5 wrote; the Prep scenario \[1\] itself has only its settings. If you rerun Prep, the new result is a new scenario: remove the old dependency and add the new one.
 
@@ -772,18 +985,18 @@ A dependency passes on **every** sheet of the result it points to, the pipeline 
 
 ![Calibrate's pipeline inherited from the Prep result.](figures/04-04-pipeline-inherited.png)
 
-*The inherited pipeline: (1) Prep's stages, greyed because they come from the dependency; (2) the Inherit values box, ticked.*
+**Figure 4.3-1.** *The inherited pipeline: (1) Prep's stages, greyed because they come from the dependency; (2) the Inherit values box, ticked.*
 
 2. Untick **Inherit values from '\[2\] P18 Southern Cascades - Prep ...'**.
 3. Studio asks what to start from. Click **No Data**, for an empty pipeline. (Copy Data would copy Prep's five stages into Calibrate's own pipeline, to edit.)
 
 ![Data Options: No Data, Copy Data or Cancel.](figures/04-05-data-options.png)
 
-*Breaking inheritance: (1) No Data starts the sheet empty.*
+**Figure 4.3-2.** *Breaking inheritance: (1) No Data starts the sheet empty.*
 
 ![Calibrate's pipeline after breaking inheritance: empty and editable.](figures/04-06-pipeline-cleared.png)
 
-*The pipeline after No Data: (1) empty and editable; (2) Inherit values unticked.*
+**Figure 4.3-3.** *The pipeline after No Data: (1) empty and editable; (2) Inherit values unticked.*
 
 4. Add the ten Calibrate stages in order, as in 3.2: choose each from the Stage list on a new row.
 
@@ -803,7 +1016,7 @@ A dependency passes on **every** sheet of the result it points to, the pipeline 
 
 ![Calibrate's pipeline: the nine stages, C1 to C5.](figures/04-07-calibrate-pipeline.png)
 
-*Calibrate's own pipeline: (1) the nine stages in run order; (2) Inherit values stays unticked.*
+**Figure 4.3-4.** *Calibrate's own pipeline: (1) the nine stages in run order; (2) Inherit values stays unticked.*
 
 > **Only the pipeline is unticked.** Leave every other sheet inheriting from the Prep result. Breaking inheritance on a data sheet such as Landscape Maps would leave Calibrate without the zone's maps. The same applies to the Run scenario in chapter 5.
 
@@ -815,7 +1028,7 @@ On the Calibrate scenario's **LUCAS Fire (C2F-W)** tab the tree now shows the sh
 
 ![Run Control: 500 fire seasons, the default random seed.](figures/04-08-run-control.png)
 
-*Run Control: (1) the sheet, at the top of the tree; (2) Fire Seasons and Random Seed.*
+**Figure 4.4-1.** *Run Control: (1) the sheet, at the top of the tree; (2) Fire Seasons and Random Seed.*
 
 | Field | P18 value | Notes |
 | --- | --- | --- |
@@ -838,7 +1051,7 @@ You do not know a new zone's fires per season before the first Calibrate run. St
 
 ![Calibration Period: fire record and weather 1992-2020, holdout 2021-2024, FPA-FOD, FSim per-zone minimum size.](figures/04-09-calibration-period.png)
 
-*Calibration Period: (1) the sheet under Calibration; (2) the years and record source; (3) Minimum Size Rule, changed from the default.*
+**Figure 4.4-2.** *Calibration Period: (1) the sheet under Calibration; (2) the years and record source; (3) Minimum Size Rule, changed from the default.*
 
 | Field | P18 value | What it does |
 | --- | --- | --- |
@@ -854,7 +1067,7 @@ You do not know a new zone's fires per season before the first Calibrate run. St
 
 ![Calibration Options with one spread-day curve for all fires.](figures/04-10-calibration-options.png)
 
-*Calibration Options: (1) the sheet under Calibration; (2) the fit switches and weights, left at their defaults; (3) Spread Days Fitted By, set to one curve for all fires.*
+**Figure 4.4-3.** *Calibration Options: (1) the sheet under Calibration; (2) the fit switches and weights, left at their defaults; (3) Spread Days Fitted By, set to one curve for all fires.*
 
 | Field | P18 value | What it does |
 | --- | --- | --- |
@@ -877,7 +1090,7 @@ Under **3 - Burning Conditions**, select **Burning Hours per Spread Day**. It se
 
 ![Burning Hours per Spread Day: one committed row of 2 hours.](figures/04-11-burning-hours.png)
 
-*Burning Hours per Spread Day: (1) the sheet under 3 - Burning Conditions; (2) the committed row, 2 hours, with the empty new-row line (\*) below it.*
+**Figure 4.5-1.** *Burning Hours per Spread Day: (1) the sheet under 3 - Burning Conditions; (2) the committed row, 2 hours, with the empty new-row line (\) below it.*
 
 A row with no Season applies to every season. Burning hours and the spread-day distribution trade off: fewer hours per day needs more days for the same fire size. C5 fits the days for the hours set here, so the hours are a modelling choice, not a fitted value. The Sierra pyromes settled on 2 hours for the forested P26 and 1 hour for the grass-dominated foothills (P29), where 2 hours could not make the many small and mid-size fires. P18 is mostly conifer forest, so it follows P26.
 
@@ -891,7 +1104,7 @@ Under **4 - Fire Growth (C2F-W)**, select **Fire Growth Options**.
 
 ![Fire Growth Options with Seed Run set to Yes.](figures/04-12-fire-growth-options.png)
 
-*Fire Growth Options: (1) the sheet under 4 - Fire Growth (C2F-W); (2) the growth settings; (3) Seed Run, the switch that makes this a calibration run.*
+**Figure 4.5-2.** *Fire Growth Options: (1) the sheet under 4 - Fire Growth (C2F-W); (2) the growth settings; (3) Seed Run, the switch that makes this a calibration run.*
 
 | Field | P18 value | What it does |
 | --- | --- | --- |
@@ -922,7 +1135,7 @@ Run the Calibrate scenario as in 3.5: select it, click **Run**, answer **Yes** t
 
 ![The Calibrate result in the Explorer and the Run Monitor.](figures/04-13-calibrate-result.png)
 
-*The finished Calibrate run: (1) result \[4\] in the scenario's Results folder; (2) the Run Monitor row, Status Done, with the Run Log link.*
+**Figure 4.7-1.** *The finished Calibrate run: (1) result \[4\] in the scenario's Results folder; (2) the Run Monitor row, Status Done, with the Run Log link.*
 
 | Stage | Log line (P18) | What it tells you |
 | --- | --- | --- |
@@ -964,7 +1177,7 @@ Every class is within a few points of the record. The model makes a few fires ov
 
 ![The fitted Spread-Day Distribution in the Calibrate result.](figures/04-14-spread-day-distribution.png)
 
-*The fitted curve: (1) result \[4\] opened in its own tab (double-click it in the Explorer); (2) Spread-Day Distribution under 3 - Burning Conditions; (3) the relative frequency of each spread-day value. The rows are greyed because a result's sheets are read-only.*
+**Figure 4.7-2.** *The fitted curve: (1) result \[4\] opened in its own tab (double-click it in the Explorer); (2) Spread-Day Distribution under 3 - Burning Conditions; (3) the relative frequency of each spread-day value. The rows are greyed because a result's sheets are read-only.*
 
 The fitted curve is written to this result's **Spread-Day Distribution** sheet. The Run scenario takes it from there by depending on this result (chapter 5).
 
@@ -988,7 +1201,7 @@ The Run scenario is the burn-probability model itself. It simulates thousands of
 
 ![The Run scenario with its two dependencies.](figures/05-01-run-dependencies.png)
 
-*The Run scenario: (1) the new scenario; (2) the Calibrate result, which supplies the fitted ignition count, season and cause shares, spread-day weather stream, spread-day distribution and burning hours; (3) the Prep result, which supplies the landscape maps, ignition surfaces, daily weather, severity target and wind table.*
+**Figure 5.1-1.** *The Run scenario: (1) the new scenario; (2) the Calibrate result, which supplies the fitted ignition count, season and cause shares, spread-day weather stream, spread-day distribution and burning hours; (3) the Prep result, which supplies the landscape maps, ignition surfaces, daily weather, severity target and wind table.*
 
 The two results hold mostly different sheets. Where both carry a sheet, the dependency listed first wins: the Inherit box on such a sheet names the Calibrate result. The sheets both carry (the pipeline, Run Control, Fire Growth Options) are the ones Run sets for itself in 5.2 to 5.4, so add Calibrate first and Prep second, as here.
 
@@ -998,7 +1211,7 @@ As in 4.3: on **General**, **Pipeline**, untick **Inherit values from '\[4\] ...
 
 ![The Run pipeline: stages 1 to 8, C6 and C7.](figures/05-02-run-pipeline.png)
 
-*The Run pipeline: (1) the ten stages in run order; (2) Inherit values unticked, naming the Calibrate result, the first dependency.*
+**Figure 5.2-1.** *The Run pipeline: (1) the ten stages in run order; (2) Inherit values unticked, naming the Calibrate result, the first dependency.*
 
 | Run order | Stage | Does |
 | --- | --- | --- |
@@ -1023,7 +1236,7 @@ Run inherits **Fire Growth Options** from the Calibrate result, Seed Run include
 
 ![Run's Fire Growth Options with Seed Run off.](figures/05-03-run-seed-off.png)
 
-*Fire Growth Options in Run: (1) the sheet; (2) Seed Run set to No; (3) Inherit values unticked.*
+**Figure 5.3-1.** *Fire Growth Options in Run: (1) the sheet; (2) Seed Run set to No; (3) Inherit values unticked.*
 
 > **No Data or Copy Data?** No Data starts the sheet empty; Copy Data copies what was inherited so you can change one value. Use No Data for lists you replace whole (the pipeline), Copy Data for option sheets you adjust.
 
@@ -1033,7 +1246,7 @@ Under **Run Control**, untick Inherit as above (Copy Data) and set **Fire Season
 
 ![Run Control: 2,500 fire seasons.](figures/05-04-run-control.png)
 
-*Run Control in Run: (1) the sheet; (2) 2,500 seasons and the seed; (3) Inherit values unticked.*
+**Figure 5.4-1.** *Run Control in Run: (1) the sheet; (2) 2,500 seasons and the seed; (3) Inherit values unticked.*
 
 The Run scenario estimates how often each cell burns, so it needs many more seasons than the seed run. Each 150 m cell burns only once in many decades; 2,500 seasons give enough burns per cell for a stable map. At P18's 3.4 large fires per season that is about 8,500 fires.
 
@@ -1090,7 +1303,7 @@ The same numbers are in the result's **Scores Against Fire Records** sheet (colu
 
 ![P18's check run against the 1992-2020 record, with the noise of a 29-year record.](figures/05-05-check-run-fire-sizes.png)
 
-*P18's check run (result 26): 37 of 39 tests within noise. The two misses are shrub-origin fires: 170 ha a year simulated against 2 recorded (check), and a mean size of 1,187 ha against 35 (poor). The 10,000-30,000 ha area bar looks short, but a 29-year record of that class varies from 0 to 2,480 ha a year under this model, so the record's 1,506 ha is well inside. For contrast, the seed run scored the same way gets 19 of its 25 size and cause tests poor.*
+**Figure 5.6-1.** *P18's check run (result 26): 37 of 39 tests within noise. The two misses are shrub-origin fires: 170 ha a year simulated against 2 recorded (check), and a mean size of 1,187 ha against 35 (poor). The 10,000-30,000 ha area bar looks short, but a 29-year record of that class varies from 0 to 2,480 ha a year under this model, so the record's 1,506 ha is well inside. For contrast, the seed run scored the same way gets 19 of its 25 size and cause tests poor.*
 
 **Reading the P18 example.** The calibration passes:
 
@@ -1151,17 +1364,19 @@ The Run result holds the zone's maps: burn probability and burn count (stage 5),
 
 ![Making a map: the Run result selected, the Maps tab and its New button.](figures/06-01-new-map.png)
 
-*Making a map: (1) the Run result, the only one ticked; (2) the Maps tab; (3) New.*
+**Figure 6.1-1.** *Making a map: (1) the Run result, the only one ticked; (2) the Maps tab; (3) New.*
 
 3. Name the map, for example `P18 burn probability`, and click **OK**.
 
 ![The New Map window.](figures/06-02-new-map-dialog.png)
 
+**Figure 6.1-2.** *The New Map window.*
+
 4. The map opens in its own tab. In the tree at its left, expand **LUCAS Fire (C2F-W)** and tick **Burn Probability**. The map draws, with its legend under the ticked layer.
 
 ![The P18 burn-probability map.](figures/06-03-bp-map.png)
 
-*A map in Studio: (1) the saved map in the Maps list, to reopen later; (2) Burn Probability ticked, with its legend; (3) the panel controls: iteration, identify, pan and zoom, and panel size; (4) the map panel, one per ticked result; (5) Options and Apply.*
+**Figure 6.1-3.** *A map in Studio: (1) the saved map in the Maps list, to reopen later; (2) Burn Probability ticked, with its legend; (3) the panel controls: iteration, identify, pan and zoom, and panel size; (4) the map panel, one per ticked result; (5) Options and Apply.*
 
 The legend is the annual probability that a cell burns. P18's ranges up to 0.0156, about 1.6% a year, or once in 64 years, in the hottest cells in the centre of the zone; most of the zone is under 0.3% a year (deep blue), once in more than 300 years. The map covers the zone and its 25 km buffer. Fires start only inside the pyrome (the ignition surfaces are zero outside it), so buffer cells burn only where those fires spread out; grey cells never burned in 2,500 seasons.
 
@@ -1173,7 +1388,7 @@ In the same map, untick **Burn Probability**, expand **Hazard and Risk** (or **F
 
 ![The annual risk to potential structures map for P18.](figures/06-04-rps-map.png)
 
-*Risk to potential structures, annual: (1) Hazard and Risk expanded; (2) the RPS layer ticked, with its legend in % loss per year; (3) the map.*
+**Figure 6.2-1.** *Risk to potential structures, annual: (1) Hazard and Risk expanded; (2) the RPS layer ticked, with its legend in % loss per year; (3) the map.*
 
 P18's annual risk reaches about 1.2% a year in the hottest cells. The map covers far less ground than the burn-probability map, and that is expected: the fire-effects maps, and the risk maps built on them, are drawn only where a cell burned at least **10 times** in the run (Effects Options, **Minimum Burns for Conditional Maps**). A flame-length probability or a conditional loss from two or three burns is mostly noise. In P18's 2,500 seasons a burned cell burned a median of 4 times, and only 13.5% of burned cells reached 10, so most of the zone has no conditional values.
 
@@ -1190,7 +1405,7 @@ The maps live in the library as GeoTIFFs. To use them elsewhere (GIS, R, a repor
 
 ![The Export tab with the three map exports.](figures/06-05-export-tab.png)
 
-*Exporting maps: (1) the Export tab; (2) the three map exports; (3) Open, which starts the export.*
+**Figure 6.3-1.** *Exporting maps: (1) the Export tab; (2) the three map exports; (3) Open, which starts the export.*
 
 Each export writes every map of that group to the folder as GeoTIFFs in the model's projection (EPSG:5070, 150 m cells). **System**, **Scenario Descriptions** exports the description text of the selected scenarios, a record of how each was set.
 
@@ -1202,31 +1417,31 @@ A finished model can take more runs without redoing Prep or Calibrate: copy the 
 
 ![Copying the Run scenario.](figures/06-06-copy-run.png)
 
-*(1) The Run scenario (the scenario, not its result); (2) Copy.*
+**Figure 6.4-1.** *(1) The Run scenario (the scenario, not its result); (2) Copy.*
 
 2. Right-click **My Fire Project** (or empty space in the Explorer) and choose **Paste**. The copy appears as **\[7\] P18 Southern Cascades - Run - Copy**.
 
 ![Pasting the copy.](figures/06-07-paste-run.png)
 
-*(1) Paste makes a full copy: settings, pipeline and dependencies, but not results; (2) Paste Special offers more choices, not needed here.*
+**Figure 6.4-2.** *(1) Paste makes a full copy: settings, pipeline and dependencies, but not results; (2) Paste Special offers more choices, not needed here.*
 
 3. Open the copy. On **General**, **Summary**, rename it `P18 Southern Cascades - Run 10,000` and update the description: the copy carries the original's, which still says 2,500 seasons.
 
 ![The copy renamed, its description still the original's.](figures/06-08-run10000-summary.png)
 
-*(1) The copy, \[7\], under the project; (2) the new name; (3) the description, to be edited: change RUN: 2,500 seasons to 10,000 seasons and say why (fills the conditional effects and risk maps).*
+**Figure 6.4-3.** *(1) The copy, \[7\], under the project; (2) the new name; (3) the description, to be edited: change RUN: 2,500 seasons to 10,000 seasons and say why (fills the conditional effects and risk maps).*
 
 4. On the **LUCAS Fire (C2F-W)** tab, **Run Control**, set **Fire Seasons** to **10000**. The copy kept the original's own Run Control (Inherit is still unticked), so only this value changes. Save.
 
 ![Run Control in the copy: 10,000 seasons.](figures/06-09-run10000-control.png)
 
-*(1) The copy; (2) Fire Seasons, 10,000; (3) Inherit unticked, and naming the Calibrate result: the copy kept both dependencies.*
+**Figure 6.4-4.** *(1) The copy; (2) Fire Seasons, 10,000; (3) Inherit unticked, and naming the Calibrate result: the copy kept both dependencies.*
 
 Expand the copy in the Explorer to confirm: its **Dependencies** folder lists the same Calibrate and Prep results as the original.
 
 ![The copy's dependencies.](figures/06-10-run10000-deps.png)
 
-*(1) The copy, Run 10,000; (2) its Dependencies, carried over from the original: the Calibrate result \[4\] first, the Prep result \[2\] second.*
+**Figure 6.4-5.** *(1) The copy, Run 10,000; (2) its Dependencies, carried over from the original: the Calibrate result \[4\] first, the Prep result \[2\] second.*
 
 5. Run the copy as in 3.5.
 
@@ -1291,7 +1506,7 @@ A figure whose stage did not run is left out.
 
 ![Stage R as the last stage of a Run pipeline.](figures/06-11-report-stage.png)
 
-*Stage R at run order 11, after C7. As always, click outside the grid to commit the row, then save.*
+**Figure 6.6-1.** *Stage R at run order 11, after C7. As always, click outside the grid to commit the row, then save.*
 
 **For a result that already exists**, there is no need to rerun it: create a scenario (for example `P18 Southern Cascades - Report`), make the Run result its only dependency, give it a pipeline of stage R alone (untick Inherit, No Data, add the stage) and run it. It reads everything from the Run result.
 
@@ -1305,21 +1520,31 @@ The 10,000-season run with stage R added took 55 minutes and gave these figures.
 
 ![Figure 1, model inputs.](figures/report/Fig1_inputs.png)
 
+**Figure 6.6-2.** *Report figure 1, model inputs.*
+
 ![Figure 2, burn probability against WRC.](figures/report/Fig2_burn_probability.png)
 
-*The P18 model's burn probability is lower than WRC's across most of the zone (zone mean 0.21 against 0.59 %/yr). The model is calibrated to the fires of 29.5 ha and more in the FPA-FOD record, 3,727 ha a year, and matches it (C6); WRC's FSim run was calibrated separately and burns more of this zone. Outlines: the six large fires of 2021-2024, mostly the Dixie Fire.*
+**Figure 6.6-3.** *The P18 model's burn probability is lower than WRC's across most of the zone (zone mean 0.21 against 0.59 %/yr). The model is calibrated to the fires of 29.5 ha and more in the FPA-FOD record, 3,727 ha a year, and matches it (C6); WRC's FSim run was calibrated separately and burns more of this zone. Outlines: the six large fires of 2021-2024, mostly the Dixie Fire.*
 
 ![Figure 3, fire intensity.](figures/report/Fig3_fire_intensity.png)
 
+**Figure 6.6-4.** *Report figure 3, fire intensity.*
+
 ![Figure 4, crown fire.](figures/report/Fig4_crown_fire.png)
+
+**Figure 6.6-5.** *Report figure 4, crown fire.*
 
 ![Figure 5, hazard and risk.](figures/report/Fig5_hazard_risk.png)
 
-*Compare with the 2,500-season risk map in 6.2: at 10,000 seasons most burned cells have the 10 burns needed for a conditional value.*
+**Figure 6.6-6.** *Compare with the 2,500-season risk map in 6.2: at 10,000 seasons most burned cells have the 10 burns needed for a conditional value.*
 
 ![Figure 6, fire sizes and calibration.](figures/report/Fig6_fire_sizes.png)
 
+**Figure 6.6-7.** *Report figure 6, fire sizes and calibration.*
+
 ![Figure 7, validation and fire effects by fuel group.](figures/report/Fig7_validation.png)
+
+**Figure 6.6-8.** *Report figure 7, validation and fire effects by fuel group.*
 
 ## 7. Improving a zone
 
@@ -1358,19 +1583,19 @@ Which years to calibrate to is a modelling choice, not a correction. A long reco
 
 ![Copying the Calibrate scenario.](figures/07-01-copy-calibrate.png)
 
-*(1) The Calibrate scenario; (2) Copy.*
+**Figure 7.2-1.** *(1) The Calibrate scenario; (2) Copy.*
 
 2. Open the copy. On **General**, **Summary**, name it `P18 Southern Cascades - Calibrate 2011-2020`, and add a line to the description that says what changed. Expand the copy in the Explorer: it kept its dependency on the Prep result.
 
 ![The copy renamed, described, and still depending on the Prep result.](figures/07-03-calibrate-2011-summary.png)
 
-*(1) The copy; (2) its dependency, the Prep result \[2\]; (3) the new name; (4) a line added to the copied description, saying what this scenario changes.*
+**Figure 7.2-2.** *(1) The copy; (2) its dependency, the Prep result \[2\]; (3) the new name; (4) a line added to the copied description, saying what this scenario changes.*
 
 3. On the **LUCAS Fire (C2F-W)** tab, under **Calibration**, select **Calibration Period** and set **Fire Record** and **Weather** first and last years to **2011** and **2020**. Leave the holdout at 2021-2024, the Fire Record Source and the Minimum Size Rule as they are. Save.
 
 ![Calibration Period of the copy: fire record and weather 2011-2020.](figures/07-02-calibration-period-2011.png)
 
-*(1) The copy; (2) Calibration Period; (3) the fire-record and weather years, now 2011-2020.*
+**Figure 7.2-3.** *(1) The copy; (2) Calibration Period; (3) the fire-record and weather years, now 2011-2020.*
 
 The weather years change with the fire years so the spread-day weather comes from the same decade as the fires it is fitted to. Everything else carries over from the copied scenario: one spread-day curve, 2 burning hours, 500 seed seasons.
 
@@ -1400,19 +1625,19 @@ The Run scenario takes the fitted spread days and ignition count from its Calibr
 
 ![The Run copy renamed and described.](figures/07-04-run-2011-summary.png)
 
-*(1) The copy; (2) its name; (3) the line saying what changed. The copied description still names the old Calibrate result \[4\]; edit that too, or let the added line make the change clear.*
+**Figure 7.3-1.** *(1) The copy; (2) its name; (3) the line saying what changed. The copied description still names the old Calibrate result \[4\]; edit that too, or let the added line make the change clear.*
 
 3. Expand the copy's **Dependencies**, right-click the old Calibrate result **\[4\]** and choose **Remove**.
 
 ![Removing the old Calibrate dependency.](figures/07-05-remove-dependency.png)
 
-*(1) The copy's dependency on the 1992-2020 Calibrate result; (2) Remove. Removing a dependency does not delete the result, only the link.*
+**Figure 7.3-2.** *(1) The copy's dependency on the 1992-2020 Calibrate result; (2) Remove. Removing a dependency does not delete the result, only the link.*
 
 4. Expand **\[15\] Calibrate 2011-2020**, then its **Results**, and drag the result **\[17\]** onto the copy.
 
 ![The copy depending on the new Calibrate result and on the Prep result.](figures/07-06-new-dependency.png)
 
-*(1) The 2011-2020 Calibrate result; (2) the copy's Dependencies, the new Calibrate result first and the Prep result second.*
+**Figure 7.3-3.** *(1) The 2011-2020 Calibrate result; (2) the copy's Dependencies, the new Calibrate result first and the Prep result second.*
 
 The newly added dependency goes to the top of the list, so the Calibrate result again comes first, as in 5.1. The copy's own sheets (pipeline, Run Control, Fire Growth Options) are not inherited and do not change.
 
@@ -1433,11 +1658,11 @@ The 2011-2020 run took 51 minutes. Its log and figures against the 1992-2020 run
 
 ![Burn probability of both calibrations and WRC.](figures/compare/Compare_burn_probability.png)
 
-*Burn probability from (a) the 1992-2020 calibration, (b) the 2011-2020 calibration and (c) WRC, on one colour scale. The two runs share everything but the fire record, so the pattern is the same and only the level changes: the hot centre and west of the zone in (a) deepen in (b), towards WRC's level.*
+**Figure 7.4-1.** *Burn probability from (a) the 1992-2020 calibration, (b) the 2011-2020 calibration and (c) WRC, on one colour scale. The two runs share everything but the fire record, so the pattern is the same and only the level changes: the hot centre and west of the zone in (a) deepen in (b), towards WRC's level.*
 
 ![Fire sizes and spread days of both calibrations against their records.](figures/compare/Compare_fire_sizes.png)
 
-*Each model against its own record. (a, b) The 2011-2020 record has fewer small fires and far more area in fires of 3,000-30,000 ha; its model follows, overshooting the 3,000-10,000 ha class and adding fires over 30,000 ha. (c) The 2011-2020 exceedance curve sits well above the 1992-2020 one beyond about 1,000 ha. (d) The fit gets there with longer spread days: weight moves from 1-3 days to 8 and 12 days (mean 3.74 days against 2.43).*
+**Figure 7.4-2.** *Each model against its own record. (a, b) The 2011-2020 record has fewer small fires and far more area in fires of 3,000-30,000 ha; its model follows, overshooting the 3,000-10,000 ha class and adding fires over 30,000 ha. (c) The 2011-2020 exceedance curve sits well above the 1992-2020 one beyond about 1,000 ha. (d) The fit gets there with longer spread days: weight moves from 1-3 days to 8 and 12 days (mean 3.74 days against 2.43).*
 
 The maps and chart above are not made by stage R, which draws one run at a time; they come from a short script in the package's development folder (`dev/report/compare_runs.R`) that reads two results of one library. For your own comparisons, the report figures of each run can be set side by side, or Studio's maps can show both results at once (below).
 
@@ -1487,13 +1712,13 @@ The source libraries must not be open in Studio while the merge runs. A source l
 
 ![The Merge scenario named and described.](figures/08-01-merge-summary.png)
 
-*(1) The new scenario; (2) its name; (3) a description that says which results are merged and how they were calibrated.*
+**Figure 8.3-1.** *(1) The new scenario; (2) its name; (3) a description that says which results are merged and how they were calibrated.*
 
 3. On **Pipeline**, add **M - Merge Zone Results**, **5 - Summarize Burn Probability**, **6 - Fire Effects**, **7 - Hazard and Risk**, **8 - Fire Detail (optional)**, **C7 - Validate Burn Probability** and **R - Report Figures (optional)**. There is no stage 1 to 4: no fire is grown.
 
 ![The Merge pipeline.](figures/08-02-merge-pipeline.png)
 
-*(1) The seven stages: M, then the stages that turn burns into maps, then validation and report figures. C6 is left out: it compares one zone with its own fire record.*
+**Figure 8.3-2.** *(1) The seven stages: M, then the stages that turn burns into maps, then validation and report figures. C6 is left out: it compares one zone with its own fire record.*
 
 4. On the **LUCAS Fire (C2F-W)** tab, under **Merge Zones**, open **Merge Sources** and add one row per zone result:
 
@@ -1505,7 +1730,7 @@ The source libraries must not be open in Studio while the merge runs. A source l
 
 ![Merge Sources: two results from another library and one from this one.](figures/08-03-merge-sources.png)
 
-*(1) Merge Sources, under Merge Zones; (2) the three zone results. A blank Library File means this library. The Result Scenario ID is the number in square brackets in the source library's Explorer.*
+**Figure 8.3-3.** *(1) Merge Sources, under Merge Zones; (2) the three zone results. A blank Library File means this library. The Result Scenario ID is the number in square brackets in the source library's Explorer.*
 
 The order in which stage M takes the sources matters in three small ways, and it is the order the log lists them in (`source 1: ...`), which need not be the order the rows show on screen. The first source's fires keep their numbers, the second's are offset by 1,000,000, the third's by 2,000,000 (or set **Fire ID Offset** yourself). Where zones overlap, the first source's landscape values are used. And where the Merge scenario's own effects, weather and risk options are empty, the package defaults apply.
 
@@ -1513,7 +1738,7 @@ The order in which stage M takes the sources matters in three small ways, and it
 
 ![Run Control of the Merge scenario.](figures/08-04-merge-run-control.png)
 
-*(1) Run Control; (2) 2,500 seasons, as every source ran. A blank Random Seed uses the package default (20260925).*
+**Figure 8.3-4.** *(1) Run Control; (2) 2,500 seasons, as every source ran. A blank Random Seed uses the package default (20260925).*
 
 6. Save, close the source library if it is open in Studio, and run the Merge scenario.
 
@@ -1538,17 +1763,17 @@ The merged report figures cover all three zones as one landscape:
 
 ![Merged burn probability against WRC.](figures/merge/report/Fig2_burn_probability.png)
 
-*Burn probability of the merged P18, P26 and P29 run beside WRC. Merged, the three zones average 0.82 % a year against WRC's 1.13. The pattern agrees broadly; WRC burns more across most of the landscape (7.4 shows how the calibration record moves that level).*
+**Figure 8.4-1.** *Burn probability of the merged P18, P26 and P29 run beside WRC. Merged, the three zones average 0.82 % a year against WRC's 1.13. The pattern agrees broadly; WRC burns more across most of the landscape (7.4 shows how the calibration record moves that level).*
 
 ![Merged hazard and risk.](figures/merge/report/Fig5_hazard_risk.png)
 
-*Hazard and risk for the merged landscape. The relative risk class (d) is now ranked over all three zones together, so P18's cells are compared with P26's and P29's rather than only with each other.*
+**Figure 8.4-2.** *Hazard and risk for the merged landscape. The relative risk class (d) is now ranked over all three zones together, so P18's cells are compared with P26's and P29's rather than only with each other.*
 
 ### 8.5 The boundaries before and after
 
 ![All three zones before and after the merge, and the percent increase.](figures/merge/Merge_full.png)
 
-*(a) Before: each zone's own run, kept inside its own pyrome and set side by side, which is what three single-zone runs give. (b) After: the merged run. (c) The increase, after over before, in percent. A merge only adds fire, so no cell goes down: the increase is a band along every shared boundary and zero in the zones' interiors. It is largest where a low-fire zone meets a high-fire one, such as P18's southern edge, where many cells more than double.*
+**Figure 8.5-1.** *(a) Before: each zone's own run, kept inside its own pyrome and set side by side, which is what three single-zone runs give. (b) After: the merged run. (c) The increase, after over before, in percent. A merge only adds fire, so no cell goes down: the increase is a band along every shared boundary and zero in the zones' interiors. It is largest where a low-fire zone meets a high-fire one, such as P18's southern edge, where many cells more than double.*
 
 | Pyrome | Before | After | After / before | Burnable cells up more than 10% | Up more than 100% |
 | --- | --- | --- | --- | --- | --- |
@@ -1563,7 +1788,7 @@ The figure and table come from `dev/report/merge_full.R`.
 
 ![Burn probability along P18's southern boundary, alone and merged.](figures/merge/Merge_boundary.png)
 
-*(a) P18's run alone: its fires spread a little way past its southern boundary, and fire is low just inside it. (b) The merge: fire from P26 and P29 now reaches across the boundary. (c) What the merge added: within P18, mostly in a band along the boundary; outside P18, the neighbours' own fire.*
+**Figure 8.5-2.** *(a) P18's run alone: its fires spread a little way past its southern boundary, and fire is low just inside it. (b) The merge: fire from P26 and P29 now reaches across the boundary. (c) What the merge added: within P18, mostly in a band along the boundary; outside P18, the neighbours' own fire.*
 
 Inside P18, the merge raises burn probability only near the boundary:
 
@@ -1630,7 +1855,7 @@ When a run fails, the Run Monitor row turns red and the scenario gets a result m
 
 A failed result cannot be used as a dependency: Studio will not let you drag it onto another scenario. Fix the problem in the scenario, run it again, and delete the failed result once the new one is done.
 
-Two warnings appear at the top of every log and are harmless: the package was "built for an undetermined version" of SyncroSim (a package installed from a folder), and conda is disabled (lucasFireC2F uses the R set in 1.7).
+One warning at the top of the log is harmless: the package was "built for an undetermined version" of SyncroSim (a package installed from a folder). lucasFireC2F uses the R set in 1.7.
 
 > **A transient read error.** Very occasionally SyncroSim fails to read a sheet, with "Object reference not set to an instance of an object". lucasFireC2F retries each read three times and logs "datasheet read failed (...); retrying". One such line followed by normal messages is harmless. If the stage still fails, run the scenario again.
 

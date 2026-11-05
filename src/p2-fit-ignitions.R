@@ -45,6 +45,8 @@ if (is.null(cf)) {                                                # anywhere in 
   b <- st_bbox(dom); g <- as.vector(ext(gf)); RES <- 150
   win <- ext(LATTICE_X0 + floor((min(b[["xmin"]], g[1]) - LATTICE_X0) / RES) * RES, LATTICE_X0 + ceiling((max(b[["xmax"]], g[2]) - LATTICE_X0) / RES) * RES,
              LATTICE_Y0 - ceiling((LATTICE_Y0 - min(b[["ymin"]], g[3])) / RES) * RES, LATTICE_Y0 - floor((LATTICE_Y0 - max(b[["ymax"]], g[4])) / RES) * RES)
+  home_coverage(terra::as.polygons(win + 32100, crs = CRS), c("RoadsFile", "NlcdLandCoverFile"), "the ignition covariates' reach (fit domain + zone grid + 32.1 km)")
+  home_coverage(terra::as.polygons(win + 1500, crs = CRS), what = "the ignition covariates' fit domain + zone grid")
   say("building the ignition covariates for %.0f x %.0f km (fit domain + zone grid)", (win[2] - win[1]) / 1000, (win[4] - win[3]) / 1000)
   cf <- build_ignition_covariates(win, list(dem = csrc$StatewideElevationFile, roads = csrc$RoadsFile, nlcd = csrc$NlcdLandCoverFile, wui = csrc$HousingDensityFile,
                                             prism = csrc$PrismPrecipFile, gridmet = csrc$GridMetFolder), file.path(tempdir(), "ignition_covariates"))
@@ -111,4 +113,5 @@ for (cz in names(F)) { m <- fits[[cz]]; n2 <- nd; n2$fgrp <- factor(as.character
   say("%s surface: %s nonzero cells", cz, format(sum(v > 0), big.mark = ",")) }
 write_ds(data.frame(Cause = names(out), FileName = unname(out)), "IgnitionGrid")
 write_ds(do.call(rbind, fitrow), "OutputIgnitionFit")
+record_data_sources()
 progressBar(); progressBar(type = "end")

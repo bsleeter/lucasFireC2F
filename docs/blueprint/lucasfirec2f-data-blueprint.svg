@@ -28,7 +28,7 @@ svg{--sans:'IBM Plex Sans',Arial,Helvetica,sans-serif;--mono:'IBM Plex Mono',Con
 <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs>
 <rect class="bg" width="1600" height="1000"/>
 <text x="24" y="44" class="h1">lucasFireC2F data blueprint</text>
-<text x="24" y="66" class="sub">The national datasets lucasFireC2F reads, the stages that read them, what for, and the option that switches each one · version 2.4.0</text>
+<text x="24" y="66" class="sub">The national datasets lucasFireC2F reads, the stages that read them, what for, and the option that switches each one · version 2.5.0</text>
 <rect class="lg f-prep" x="836.6" y="28" width="14" height="12" rx="2"/>
 <text x="858.6" y="38" class="lgt">Zone preparation</text>
 <rect class="lg f-cal" x="965.8" y="28" width="14" height="12" rx="2"/>
@@ -46,8 +46,8 @@ svg{--sans:'IBM Plex Sans',Arial,Helvetica,sans-serif;--mono:'IBM Plex Mono',Con
 <rect class="box" x="24" y="104" width="600" height="830" rx="7"/><text x="40" y="126" class="eyebrow">DATA SOURCES SHEET · PROJECT SCOPE</text><text x="40" y="146" class="sname">National datasets</text>
 <text x="312" y="146" class="ghead">VINTAGE · RESOLUTION</text>
 <text x="40" y="172" class="ghead">LANDSCAPE</text>
-<g class="ds" data-ds="LandfireFolder" tabindex="0" role="button" aria-label="LANDFIRE fuels and canopy"><rect class="dsbg" x="32" y="178" width="584" height="22" rx="3"/>
-<text x="40" y="193" class="dsn">LANDFIRE fuels and canopy</text>
+<g class="ds" data-ds="LandfireFolder" tabindex="0" role="button" aria-label="LANDFIRE fuels and canopy (zips by hand)"><rect class="dsbg" x="32" y="178" width="584" height="22" rx="3"/>
+<text x="40" y="193" class="dsn">LANDFIRE fuels and canopy (zips by hand)</text>
 <text x="312" y="193" class="dsv">LF 2020 (2.2.0) · FBFM40, CBD, CBH, CC, CH · 30 m</text>
 </g>
 <g class="ds" data-ds="StatewideElevationFile" tabindex="0" role="button" aria-label="LANDFIRE elevation"><rect class="dsbg" x="32" y="201" width="584" height="22" rx="3"/>
@@ -69,7 +69,7 @@ svg{--sans:'IBM Plex Sans',Arial,Helvetica,sans-serif;--mono:'IBM Plex Mono',Con
 </g>
 <g class="ds" data-ds="WeatherZoneBoundaryFile" tabindex="0" role="button" aria-label="NWS fire weather zones"><rect class="dsbg" x="32" y="326" width="584" height="22" rx="3"/>
 <text x="40" y="341" class="dsn">NWS fire weather zones</text>
-<text x="312" y="341" class="dsv">fz03mr26</text>
+<text x="312" y="341" class="dsv">the latest the NWS lists</text>
 </g>
 <g class="ds" data-ds="WeatherZoneGridFile" tabindex="0" role="button" aria-label="Weather-zone grid (prebuilt)"><rect class="dsbg" x="32" y="349" width="584" height="22" rx="3"/>
 <text x="40" y="364" class="dsn">Weather-zone grid (prebuilt)</text>
@@ -78,11 +78,11 @@ svg{--sans:'IBM Plex Sans',Arial,Helvetica,sans-serif;--mono:'IBM Plex Mono',Con
 <text x="40" y="399" class="ghead">FIRE RECORD</text>
 <g class="ds" data-ds="FpaFodFile" tabindex="0" role="button" aria-label="FPA-FOD fire occurrence"><rect class="dsbg" x="32" y="405" width="584" height="22" rx="3"/>
 <text x="40" y="420" class="dsn">FPA-FOD fire occurrence</text>
-<text x="312" y="420" class="dsv">6th edition · 1992-2020 · GeoPackage</text>
+<text x="312" y="420" class="dsv">7th edition · 1992-2020 · GeoPackage</text>
 </g>
 <g class="ds" data-ds="MtbsPerimeterFile" tabindex="0" role="button" aria-label="MTBS burned area boundaries"><rect class="dsbg" x="32" y="428" width="584" height="22" rx="3"/>
 <text x="40" y="443" class="dsn">MTBS burned area boundaries</text>
-<text x="312" y="443" class="dsv">August 2026 release · 1984-2026</text>
+<text x="312" y="443" class="dsv">latest release · 1984 on</text>
 </g>
 <g class="ds" data-ds="MtbsSeverityFolder" tabindex="0" role="button" aria-label="MTBS burn severity mosaics"><rect class="dsbg" x="32" y="451" width="584" height="22" rx="3"/>
 <text x="40" y="466" class="dsn">MTBS burn severity mosaics</text>
@@ -99,7 +99,7 @@ svg{--sans:'IBM Plex Sans',Arial,Helvetica,sans-serif;--mono:'IBM Plex Mono',Con
 <text x="40" y="547" class="ghead">WEATHER</text>
 <g class="ds" data-ds="GridMetFolder" tabindex="0" role="button" aria-label="gridMET daily meteorology"><rect class="dsbg" x="32" y="553" width="584" height="22" rx="3"/>
 <text x="40" y="568" class="dsn">gridMET daily meteorology</text>
-<text x="312" y="568" class="dsv">4 km · 1979-2024</text>
+<text x="312" y="568" class="dsv">4 km · 1979 to the last full year</text>
 </g>
 <g class="ds" data-ds="ZoneDailyWeatherFile" tabindex="0" role="button" aria-label="Zone-daily weather table (prebuilt)"><rect class="dsbg" x="32" y="576" width="584" height="22" rx="3"/>
 <text x="40" y="591" class="dsn">Zone-daily weather table (prebuilt)</text>
@@ -124,7 +124,7 @@ svg{--sans:'IBM Plex Sans',Arial,Helvetica,sans-serif;--mono:'IBM Plex Mono',Con
 </g>
 <g class="ds" data-ds="NlcdLandCoverFile" tabindex="0" role="button" aria-label="Annual NLCD land cover"><rect class="dsbg" x="32" y="724" width="584" height="22" rx="3"/>
 <text x="40" y="739" class="dsn">Annual NLCD land cover</text>
-<text x="312" y="739" class="dsv">Collection 1 · 2010 · 30 m</text>
+<text x="312" y="739" class="dsv">Collection 1.2 · 2010 · 30 m</text>
 </g>
 <g class="ds" data-ds="HousingDensityFile" tabindex="0" role="button" aria-label="SILVIS housing density"><rect class="dsbg" x="32" y="747" width="584" height="22" rx="3"/>
 <text x="40" y="762" class="dsn">SILVIS housing density</text>
@@ -137,7 +137,7 @@ svg{--sans:'IBM Plex Sans',Arial,Helvetica,sans-serif;--mono:'IBM Plex Mono',Con
 <text x="40" y="820" class="ghead">BENCHMARK</text>
 <g class="ds" data-ds="WrcBurnProbabilityFile" tabindex="0" role="button" aria-label="WRC burn probability"><rect class="dsbg" x="32" y="826" width="584" height="22" rx="3"/>
 <text x="40" y="841" class="dsn">WRC burn probability</text>
-<text x="312" y="841" class="dsv">2nd edition · RDS-2020-0016-2 · 270 m</text>
+<text x="312" y="841" class="dsv">2nd edition · RDS-2020-0016-2 · 30 m</text>
 </g>
 <path class="wire f-prep" data-ds="LandfireFolder" data-stage="P1" d="M616,189 C808,189 808,113.0 998,113.0"/>
 <path class="wire f-prep" data-ds="LandfireFolder" data-stage="P2" d="M616,189 C808,189 808,221.3 998,221.3"/>
@@ -293,7 +293,7 @@ svg{--sans:'IBM Plex Sans',Arial,Helvetica,sans-serif;--mono:'IBM Plex Mono',Con
 </g>
 <circle class="port f-eval" cx="1000" cy="883.0" r="2.4"/>
 <circle class="port f-eval" cx="1000" cy="913.0" r="2.4"/>
-<text x="24" y="962" class="foot">Wires run from a dataset to each stage that reads it, coloured by the stage. Vintages are those the user guide lists (section 2.1). Every dataset is national, so one project's rows serve any pyrome in CONUS.</text>
-<text x="24" y="978" class="foot">The other stages read only datasheets. Generated by docs/blueprint/build-data.R from package.xml (lucasFireC2F 2.4.0), 2026-10-30.</text>
+<text x="24" y="962" class="foot">Wires run from a dataset to each stage that reads it, coloured by the stage. A Data Download scenario (stage D) fetches every dataset into Data Sources Home, except the prebuilt shortcuts and the five LF 2020 zips, which are supplied by hand.</text>
+<text x="24" y="978" class="foot">Vintages are what a Data Download fetches (user guide 2.15). The other stages read only datasheets. Generated by docs/blueprint/build-data.R from package.xml (lucasFireC2F 2.5.0), 2026-11-04.</text>
 </svg>
 

@@ -1,7 +1,7 @@
 # Writes the output file paths and key tables of a lucasFireC2F result scenario to dev/paper/result_<id>.rds for the paper scripts
 suppressPackageStartupMessages({ library(rsyncrosim); library(data.table) })
 id <- as.integer(commandArgs(TRUE)[1]); OUT <- "F:/lucasFireC2F/dev/paper"
-L <- suppressWarnings(ssimLibrary("F:/lucas-master/Models/lucasFireC2F Dev/lucasFireC2F P26.ssim")); S <- rsyncrosim::scenario(L, id)
+L <- suppressWarnings(ssimLibrary("F:/lucasFireC2F/dev/libs/lucasFireC2F P26.ssim")); S <- rsyncrosim::scenario(L, id)
 P <- rsyncrosim::project(L, "P26 Northern Sierra Nevada")
 g <- function(n, x = S) as.data.table(datasheet(x, paste0("lucasFireC2F_", n), lookupsAsFactors = FALSE))
 code <- function(sheet, d) { m <- g(sheet, P); d[, Code := m$Code[match(Metric, m$Name)]]; d }

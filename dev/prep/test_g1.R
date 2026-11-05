@@ -2,7 +2,7 @@
 # actually used (158 zone folders; prep_zone_landscape.R outputs; the zone libraries' Daily Weather; the P29 severity csv and
 # the P26 package default target).
 suppressPackageStartupMessages({ library(rsyncrosim); library(data.table); library(terra) })
-D <- "F:/lucas-master/Models/lucasFireC2F Dev"; M <- "F:/lucas-master/Models/California 30m BurnP3"; SP <- file.path(M, "spatial")
+D <- "F:/lucasFireC2F/dev/libs"; M <- "F:/lucas-master/Models/California 30m BurnP3"; SP <- file.path(M, "spatial")
 L <- suppressWarnings(ssimLibrary(file.path(D, "lucasFireC2F prep test.ssim"), packages = "lucasFireC2F", overwrite = TRUE)); P <- rsyncrosim::project(L, "California")
 saveDatasheet(P, data.frame(LandfireFolder = "F:/lucas-master/Data Sources/FBFM", StatewideElevationFile = file.path(SP, "Elevation_CA_150m_LF2020.tif"),
   FireZoneGridFile = file.path(SP, "Pyrome_CA_150m_LF2020.tif"), FireZoneBoundaryFile = file.path(M, "data/zones/pyromes.gpkg"),

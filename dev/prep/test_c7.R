@@ -1,7 +1,7 @@
 # C7 acceptance: validate P26 result 12 from its own library (a scenario with only C7, result 12 as a dependency) and compare
 # with the paper's Table 5 (script 162: 2021-24 0.695 / WRC 0.593, hottest decile 22% / 5%; 1984-2010 0.735 / 0.540; ...).
 suppressPackageStartupMessages({ library(rsyncrosim); library(data.table) })
-D <- "F:/lucas-master/Models/lucasFireC2F Dev"
+D <- "F:/lucasFireC2F/dev/libs"
 L <- suppressWarnings(ssimLibrary(file.path(D, "lucasFireC2F P26.ssim"))); P <- rsyncrosim::project(L, 1)
 ds <- datasheet(P, "lucasFireC2F_DataSource", optional = TRUE); if (!nrow(ds)) ds <- data.frame(MtbsPerimeterFile = NA)
 ds$MtbsPerimeterFile <- "F:/lucas-master/Data Sources/MTBS/Fire Perimeter/mtbs_perimeter_data/mtbs_perims_DD.shp"

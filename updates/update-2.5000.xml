@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<update comment="2.5.0: Data Download (stage D): the Data Sources fetched into a Data Sources Home folder, read from there when a path is blank; Data Sources and Data Download pages.">
+  <action code="Exec" condition="TableExists" criteria="lucasFireC2F_DataSource">
+    <item>ALTER TABLE lucasFireC2F_DataSource ADD COLUMN DataSourcesHome TEXT</item>
+  </action>
+</update>

@@ -2,8 +2,8 @@
 # 2,500 seasons, the baseline's calibrated count / mix / curve), its IgnitionGrid swapped, stages 1-8 + C6 run.
 # Usage: Rscript run_p26_surface.R <tag>
 suppressPackageStartupMessages({ library(rsyncrosim); library(data.table) })
-TG <- commandArgs(TRUE)[1]; IN <- "F:/lucas-master/Models/lucasFireC2F Dev/P26/inputs"
-L <- suppressWarnings(ssimLibrary("F:/lucas-master/Models/lucasFireC2F Dev/lucasFireC2F P26.ssim")); P <- rsyncrosim::project(L, 1)
+TG <- commandArgs(TRUE)[1]; IN <- "F:/lucasFireC2F/dev/libs/P26/inputs"
+L <- suppressWarnings(ssimLibrary("F:/lucasFireC2F/dev/libs/lucasFireC2F P26.ssim")); P <- rsyncrosim::project(L, 1)
 S <- rsyncrosim::scenario(P, sprintf("P26 ignition surface %s", TG), sourceScenario = rsyncrosim::scenario(L, 7), overwrite = TRUE)
 saveDatasheet(S, data.frame(Cause = c("Human", "Lightning"), FileName = file.path(IN, sprintf("ign_%s%s.tif", c("human", "lightning"), TG))), "lucasFireC2F_IgnitionGrid")
 pl <- datasheet(S, "core_Pipeline"); st <- as.character(pl$StageNameId)

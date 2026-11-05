@@ -2,7 +2,7 @@
 # Reads result files only (no library access). Writes docs/user-guide/figures/merge/Merge_boundary.png and prints the band table.
 suppressPackageStartupMessages({ library(terra); library(sf); library(data.table) }); sf_use_s2(FALSE); terraOptions(progress = 0)
 source("F:/lucasFireC2F/src/report.R")
-D <- "F:/lucas-master/Models/lucasFireC2F Dev/lucasFireC2F-Demo.ssim.data"; OUT <- "F:/lucasFireC2F/docs/user-guide/figures/merge"; dir.create(OUT, FALSE, TRUE)
+D <- "F:/lucasFireC2F/dev/libs/lucasFireC2F-Demo.ssim.data"; OUT <- "F:/lucasFireC2F/docs/user-guide/figures/merge"; dir.create(OUT, FALSE, TRUE)
 args <- commandArgs(TRUE); MERGE <- if (length(args)) as.integer(args[1]) else 22L
 bpA <- rast(list.files(file.path(D, "Scenario-6/lucasFireC2F_OutputBurnProbability"), full.names = TRUE)[1])
 bpM <- rast(list.files(file.path(D, sprintf("Scenario-%d/lucasFireC2F_OutputBurnProbability", MERGE)), full.names = TRUE)[1])

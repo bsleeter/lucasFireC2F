@@ -12,7 +12,7 @@ suppressPackageStartupMessages({ library(terra); library(sf); library(data.table
 a <- commandArgs(TRUE); PY <- as.integer(a[1]); RID <- as.integer(a[2]); MINHA <- if (length(a) > 2) as.numeric(a[3]) else 405
 PNG <- if (length(a) > 3) a[4] else sprintf("F:/lucasFireC2F/dev/pyrome/Fig_P%02d_placement_spread_r%d.png", PY, RID)
 M <- "F:/lucas-master/Models/California 30m BurnP3"; ZD <- file.path(M, sprintf("spatial/pyromes_150m_LF2020/pyrome_%03d", PY))
-L <- suppressWarnings(ssimLibrary(sprintf("F:/lucas-master/Models/lucasFireC2F Dev/lucasFireC2F P%02d.ssim", PY))); R <- rsyncrosim::scenario(L, RID)
+L <- suppressWarnings(ssimLibrary(sprintf("F:/lucasFireC2F/dev/libs/lucasFireC2F P%02d.ssim", PY))); R <- rsyncrosim::scenario(L, RID)
 g <- function(n) as.data.table(datasheet(R, paste0("lucasFireC2F_", n), lookupsAsFactors = FALSE))
 fu <- rast(g("OutputEngineLandscape")$FuelFileName[1]); el <- rast(file.path(ZD, "Elevation.tif")); if (!compareGeom(el, fu, stopOnError = FALSE)) ext(el) <- ext(fu)
 zone <- st_transform(read_sf(file.path(ZD, "zone.gpkg")), crs(fu)); inz <- !is.na(values(rasterize(vect(zone), fu), mat = FALSE))

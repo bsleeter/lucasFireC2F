@@ -1,7 +1,7 @@
 # Stage 8 outputs of a result scenario: per-burn table aggregates to stage 6's maps; perimeters; severity fit; maps.
 suppressPackageStartupMessages({ library(rsyncrosim); library(data.table); library(terra); library(arrow); library(sf) })
 id <- as.integer(commandArgs(TRUE)[1])
-L <- suppressWarnings(ssimLibrary("F:/lucas-master/Models/lucasFireC2F Dev/lucasFireC2F P26.ssim")); R <- rsyncrosim::scenario(L, id)
+L <- suppressWarnings(ssimLibrary("F:/lucasFireC2F/dev/libs/lucasFireC2F P26.ssim")); R <- rsyncrosim::scenario(L, id)
 g <- function(n) as.data.table(datasheet(R, paste0("lucasFireC2F_", n), lookupsAsFactors = FALSE))
 be <- as.data.table(arrow::read_parquet(g("OutputBurnEffects")$FileName[1]))
 cat(sprintf("per-burn table: %s rows, %d columns; C2F-W ROS present on %.1f%% of rows\n", format(nrow(be), big.mark = ","), ncol(be), 100 * mean(!is.na(be$ROSC2FW))))

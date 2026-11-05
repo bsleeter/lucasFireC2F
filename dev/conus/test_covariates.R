@@ -4,7 +4,7 @@ suppressPackageStartupMessages({ library(terra); library(sf); library(data.table
 say <- function(...) cat(sprintf(...), "\n"); fail <- function(...) stop(sprintf(...)); LATTICE_X0 <- -2362425; LATTICE_Y0 <- 2585625
 source("F:/lucasFireC2F/src/covariates.R")
 DS <- "F:/lucas-master/Data Sources"
-gf <- rast("F:/lucas-master/Models/lucasFireC2F Dev/lucasFireC2F Sierra Nevada & Foothills.ssim.data/Scenario-32/lucasFireC2F_LandscapeRasters/fuel_type.tif")
+gf <- rast("F:/lucasFireC2F/dev/libs/lucasFireC2F Sierra Nevada & Foothills.ssim.data/Scenario-32/lucasFireC2F_LandscapeRasters/fuel_type.tif")
 z <- read_sf("F:/lucasFireC2F/Data/zones/pyromes.gpkg"); z <- st_transform(z[z$ID == 1026, ], crs(gf)); dom <- st_buffer(st_union(z), 20000)
 b <- st_bbox(dom); g <- as.vector(ext(gf)); RES <- 150
 win <- ext(LATTICE_X0 + floor((min(b[["xmin"]], g[1]) - LATTICE_X0) / RES) * RES, LATTICE_X0 + ceiling((max(b[["xmax"]], g[2]) - LATTICE_X0) / RES) * RES,

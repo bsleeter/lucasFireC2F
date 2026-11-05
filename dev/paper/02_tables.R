@@ -4,7 +4,7 @@ suppressPackageStartupMessages({ library(rsyncrosim); library(data.table); libra
 sf_use_s2(FALSE); id <- as.integer(commandArgs(TRUE)[1]); D <- "F:/lucasFireC2F/dev/paper"; TD <- file.path(D, "tables"); dir.create(TD, showWarnings = FALSE)
 X <- readRDS(file.path(D, sprintf("result_%d.rds", id)))
 M <- "F:/lucas-master/Models/California 30m BurnP3"; ZD <- file.path(M, "spatial/pyromes_150m_LF2020/pyrome_026")
-L <- suppressWarnings(ssimLibrary("F:/lucas-master/Models/lucasFireC2F Dev/lucasFireC2F P26.ssim"))
+L <- suppressWarnings(ssimLibrary("F:/lucasFireC2F/dev/libs/lucasFireC2F P26.ssim"))
 # the fire record lives on the baseline scenario (a result only carries sheets its stages use)
 H <- as.data.table(datasheet(rsyncrosim::scenario(L, 1), "lucasFireC2F_HistoricalFire", lookupsAsFactors = FALSE, optional = TRUE))
 if (!nrow(H)) stop("no historical fires on scenario 1")

@@ -2,7 +2,7 @@
 # while another scenario is running. The C6/C7/effects tables are typed in from result 6's run log.
 suppressPackageStartupMessages({ library(terra); library(sf); library(data.table) }); sf_use_s2(FALSE); terraOptions(progress = 0)
 source("F:/lucasFireC2F/src/report.R")
-D <- "F:/lucas-master/Models/lucasFireC2F Dev/lucasFireC2F-Demo.ssim.data"; S6 <- file.path(D, "Scenario-6"); DS <- "F:/lucas-master/Data Sources"
+D <- "F:/lucasFireC2F/dev/libs/lucasFireC2F-Demo.ssim.data"; S6 <- file.path(D, "Scenario-6"); DS <- "F:/lucas-master/Data Sources"
 f <- function(...) file.path(S6, ...)
 zone <- st_union(st_make_valid(read_sf(file.path(D, "Scenario-2/lucasFireC2F_OutputZoneBoundary/zone_boundary.gpkg")))) |> st_sf()
 el <- rast(f("lucasFireC2F_LandscapeRasters/elevation.tif"))
